@@ -206,7 +206,7 @@ export default function DigitalTwinPage() {
                   <div className="flex items-center gap-3">
                     <Progress 
                       value={sub.score} 
-                      color={sub.score >= 80 ? 'success' : sub.score >= 50 ? 'warning' : 'primary'} 
+                      color={sub.score >= 80 ? 'success' : sub.score >= 50 ? 'warning' : 'accent'} 
                       className="h-1.5 flex-1" 
                     />
                     <span className="text-xs font-mono font-bold w-9 text-right">{sub.score}%</span>

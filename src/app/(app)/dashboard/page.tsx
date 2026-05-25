@@ -231,7 +231,7 @@ export default function DashboardPage() {
               <span className="text-2xl font-bold font-mono">{profile.studyTimeToday}</span>
               <span className="text-xs text-text-secondary">/ {profile.dailyGoalMinutes}m</span>
             </div>
-            <Progress value={(profile.studyTimeToday / profile.dailyGoalMinutes) * 100} color="primary" className="mt-2 h-1" />
+            <Progress value={(profile.studyTimeToday / profile.dailyGoalMinutes) * 100} color="accent" className="mt-2 h-1" />
           </div>
         </Card>
 
@@ -353,7 +353,7 @@ export default function DashboardPage() {
                     </Badge>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Progress value={(quest.current / quest.target) * 100} color={quest.completed ? 'success' : 'primary'} className="h-1 flex-1" />
+                    <Progress value={(quest.current / quest.target) * 100} color={quest.completed ? 'success' : 'accent'} className="h-1 flex-1" />
                     <span className="text-[9px] font-mono text-text-secondary">
                       {quest.current}/{quest.target}
                     </span>

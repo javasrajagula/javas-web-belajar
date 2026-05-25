@@ -1,0 +1,191 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  student
+  teacher
+  parent
+  admin
+  school
+}
+
+enum SchoolType {
+  sma
+  smk
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+
+  // Custom Profile fields
+  role               UserRole    @default(student)
+  schoolType         SchoolType  @default(sma)
+  grade              Int         @default(10)
+  selectedPathway    String      @default("Umum")
+  xp                 Int         @default(0)
+  level              Int         @default(1)
+  streak             Int         @default(0)
+  dailyGoalMinutes   Int         @default(45)
+  dailyGoalXp        Int         @default(200)
+  goals              String[]    @default([])
+  studyTimeToday     Int         @default(0)
+  avatar             String?
+  skills             Json?       // Stores { focus: number, logic: number, creativity: number, discipline: number }
+  weeklyProgress     Json?       // Stores array of { day: string, minutes: number, xp: number }
+  weakTopics         Json?       // Stores array of { topic: string, mastery: number }
+  dailyQuests        Json?       // Stores array of DailyQuest
+  lastActive         DateTime    @default(now())
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  progress           Progress[]
+  internships        Internship[]
+  portfolioProjects  PortfolioProject[]
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model CurriculumVersion {
+  id            String   @id @default(uuid())
+  version       String   @unique
+  effectiveDate DateTime
+  status        String   @default("active")
+  createdAt     DateTime @default(now())
+}
+
+model Subject {
+  id             String     @id
+  title          String
+  phase          String     // "E" or "F"
+  schoolType     SchoolType
+  grade          Int
+  cpStatement    String
+  isDigitalSkill Boolean    @default(false)
+  modules        Module[]
+}
+
+model Module {
+  id        String   @id @default(uuid())
+  subjectId String
+  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  title     String
+  sortOrder Int      @default(0)
+  lessons   Lesson[]
+}
+
+model Lesson {
+  id            String      @id @default(uuid())
+  moduleId      String
+  module        Module      @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  title         String
+  explanation   String      @db.Text
+  visualExample String      @db.Text
+  summary       String      @db.Text
+  hotsQuestions Json        // Store array of hots questions
+  practiceBank  Json        // Store array of practice questions
+  sortOrder     Int         @default(0)
+  podcastScript Json?       // Store array of podcast lines { role, text }
+  quizzes       Quiz[]
+  flashcards    Flashcard[]
+  progress      Progress[]
+}
+
+model Quiz {
+  id                 String   @id @default(uuid())
+  lessonId           String
+  lesson             Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  question           String   @db.Text
+  options            String[]
+  correctOptionIndex Int
+  explanation        String   @db.Text
+}
+
+model Flashcard {
+  id       String @id @default(uuid())
+  lessonId String
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  front    String @db.Text
+  back     String @db.Text
+}
+
+model Progress {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId        String
+  lesson          Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  completed       Boolean   @default(false)
+  scorePercentage Int?
+  completedAt     DateTime?
+
+  @@unique([userId, lessonId])
+}
+
+model Internship {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName String
+  mentorName  String
+  startDate   DateTime
+  endDate     DateTime?
+  status      String    @default("ongoing")
+}
+
+model PortfolioProject {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String
+  description   String   @db.Text
+  projectUrl    String?
+  repositoryUrl String?
+  skillsUsed    String[] @default([])
+  gradeScore    Int?
+  createdAt     DateTime @default(now())
+}

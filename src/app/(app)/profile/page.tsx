@@ -110,7 +110,7 @@ export default function ProfilePage() {
               <span>Kemajuan Tingkat Berikutnya</span>
               <span>{profile.xp} / {profile.level * 500} XP</span>
             </div>
-            <Progress value={(profile.xp / (profile.level * 500)) * 100} color="primary" className="h-1.5" />
+            <Progress value={(profile.xp / (profile.level * 500)) * 100} color="accent" className="h-1.5" />
           </div>
 
           <div className="grid grid-cols-2 gap-4 w-full mt-6 pt-6 border-t border-border/40 text-center">
@@ -146,7 +146,7 @@ export default function ProfilePage() {
                   <span className="font-bold text-text-primary">{skill.label}</span>
                   <span className="font-mono text-primary font-bold">{skill.score}%</span>
                 </div>
-                <Progress value={skill.score} color="primary" className="h-1" />
+                <Progress value={skill.score} color="accent" className="h-1" />
                 <span className="text-[9px] text-text-secondary block font-mono">{skill.desc}</span>
               </div>
             ))}

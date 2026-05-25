@@ -191,3 +191,34 @@ export interface CurriculumVersion {
   status: 'active' | 'deprecated';
   createdAt: string;
 }
+
+// --- Second Brain / MindMap / Materials ---
+
+export interface MindMapNode {
+  id: string;
+  label: string;
+  position: { x: number; y: number };
+}
+
+export interface TimelineEvent {
+  id: string;
+  date: string;
+  title: string;
+  description: string;
+}
+
+export interface Material {
+  id: string;
+  title: string;
+  fileName: string;
+  fileType: string;
+  fileSize: string;
+  uploadedAt: string;
+  content: string;
+  summary: string;
+  quizzes: QuizQuestion[];
+  flashcards: Flashcard[];
+  mindmap: MindMapNode[];
+  timeline: TimelineEvent[];
+}
+

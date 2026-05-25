@@ -19,10 +19,12 @@ import {
   Zap,
   BookOpen,
   User,
-  Settings
+  Settings,
+  Users
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Badge } from '@/components/ui/badge';
+import { signOut } from 'next-auth/react';
 
 interface SidebarProps {
   className?: string;
@@ -35,6 +37,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
 
   const navItems = [
     { name: 'Dasbor', path: '/dashboard', icon: Home },
+    ...(profile.role === 'teacher' || profile.role === 'admin' 
+      ? [{ name: 'Panel Guru', path: '/teacher', icon: Users }] 
+      : []
+    ),
     { name: 'Mata Pelajaran', path: '/subjects', icon: BookOpen },
     { name: 'Otak Kedua', path: '/brain', icon: Brain },
     { name: 'Tutor AI', path: '/tutor', icon: MessageSquare },
@@ -140,10 +146,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
 
       {/* Bottom Actions */}
       <div className={clsx('p-3 border-t border-border flex flex-col gap-2', isCollapsed && 'items-center')}>
-        <Link
-          href="/login"
+        <button
+          onClick={() => signOut({ callbackUrl: '/login' })}
           className={clsx(
-            'flex items-center gap-3 px-3 h-10 rounded-md text-text-tertiary hover:text-danger hover:bg-danger-subtle/10 transition-all duration-200 group relative w-full',
+            'flex items-center gap-3 px-3 h-10 rounded-md text-text-tertiary hover:text-danger hover:bg-danger-subtle/10 transition-all duration-200 group relative w-full text-left cursor-pointer',
             isCollapsed && 'justify-center'
           )}
         >
@@ -154,7 +160,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
               Keluar Sistem
             </div>
           )}
-        </Link>
+        </button>
       </div>
     </aside>
   );

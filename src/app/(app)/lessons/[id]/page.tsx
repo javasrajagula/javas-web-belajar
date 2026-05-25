@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getLessonById } from '@/lib/curriculum-data';
+import { getDbLessonById } from '@/lib/actions/curriculum';
 import { useCurriculumStore } from '@/stores/curriculum-store';
 import { useUserStore } from '@/stores/user-store';
 import { Card } from '@/components/ui/card';
@@ -31,9 +32,33 @@ export default function LessonDetailPage({ params }: any) {
   const resolvedParams = use<{ id: string }>(params);
   const { id: lessonId } = resolvedParams;
 
-  const data = getLessonById(lessonId);
+  const [data, setData] = useState<{ lesson: any; subject: any; moduleTitle: string } | null>(null);
+  const [loading, setLoading] = useState(true);
+
   const { markLessonComplete, completedLessons, lessonScores } = useCurriculumStore();
   const { addXp, upgradeSkill } = useUserStore();
+
+  useEffect(() => {
+    const fetchLesson = async () => {
+      try {
+        const dbData = await getDbLessonById(lessonId);
+        if (dbData) {
+          setData(dbData);
+        } else {
+          const localData = getLessonById(lessonId);
+          setData(localData);
+        }
+      } catch (err) {
+        console.error('Failed to fetch from DB, falling back to local JSON:', err);
+        const localData = getLessonById(lessonId);
+        setData(localData);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLesson();
+  }, [lessonId]);
 
   const [activeTab, setActiveTab] = useState<'explanation' | 'visual' | 'quiz' | 'summary' | 'flashcards' | 'hots' | 'practice'>('explanation');
   
@@ -66,6 +91,15 @@ export default function LessonDetailPage({ params }: any) {
       stopPodcast();
     };
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 space-y-4">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-xs text-text-secondary">Memuat materi pembelajaran...</p>
+      </div>
+    );
+  }
 
   if (!data) {
     return (
@@ -271,9 +305,8 @@ export default function LessonDetailPage({ params }: any) {
                   {[2, 4, 3, 5, 2, 6, 3, 4, 2, 5, 4, 3, 2].map((h, i) => (
                     <div
                       key={i}
-                      style={{ animationDelay: `${i * 100}ms` }}
+                      style={{ animationDelay: `${i * 100}ms`, height: `${h * 4}px` }}
                       className="w-1 bg-secondary rounded-full animate-pulse"
-                      style={{ height: `${h * 4}px` }}
                     />
                   ))}
                 </div>
@@ -333,7 +366,7 @@ export default function LessonDetailPage({ params }: any) {
         {/* TABS 3: KUIS */}
         {activeTab === 'quiz' && (
           <div className="space-y-4 max-w-xl mx-auto">
-            {lesson.quizzes.map((q, idx) => {
+            {lesson.quizzes.map((q: any, idx: number) => {
               const selected = selectedAnswers[q.id];
               const submitted = submittedQuizzes[q.id];
               const isCorrect = selected === q.correctOptionIndex;
@@ -351,7 +384,7 @@ export default function LessonDetailPage({ params }: any) {
                   <p className="text-xs font-semibold text-text-primary">{q.question}</p>
 
                   <div className="space-y-2">
-                    {q.options.map((opt, optIdx) => {
+                    {q.options.map((opt: any, optIdx: number) => {
                       const isSelected = selected === optIdx;
                       let optionClass = 'border-border bg-bg-tertiary/40 hover:bg-bg-tertiary text-text-secondary hover:text-text-primary';
 
@@ -412,7 +445,7 @@ export default function LessonDetailPage({ params }: any) {
         {/* TABS 5: FLASHCARDS */}
         {activeTab === 'flashcards' && (
           <div className="max-w-md mx-auto space-y-4">
-            {lesson.flashcards.map((fc) => {
+            {lesson.flashcards.map((fc: any) => {
               const flipped = flippedCards[fc.id] || false;
               const mastered = masteredCards[fc.id] || false;
               return (
@@ -437,7 +470,7 @@ export default function LessonDetailPage({ params }: any) {
                   <div className="flex gap-2">
                     <Button
                       onClick={() => handleMarkMasteredCard(fc.id)}
-                      variant={mastered ? 'success' : 'outline'}
+                      variant={mastered ? 'primary' : 'outline'}
                       className="flex-grow h-8 text-[10px] flex items-center justify-center gap-1.5"
                     >
                       <CheckCircle2 size={12} /> {mastered ? 'Dikuasai +10 XP' : 'Tandai Selesai Dipelajari'}
@@ -452,7 +485,7 @@ export default function LessonDetailPage({ params }: any) {
         {/* TABS 6: SOAL HOTS */}
         {activeTab === 'hots' && (
           <div className="space-y-4 max-w-xl mx-auto">
-            {lesson.hotsQuestions.map((q) => {
+            {lesson.hotsQuestions.map((q: any) => {
               const selected = selectedHots[q.id];
               const submitted = submittedHots[q.id];
               const isCorrect = selected === q.correctOptionIndex;
@@ -472,7 +505,7 @@ export default function LessonDetailPage({ params }: any) {
                   <p className="text-xs font-semibold text-text-primary leading-relaxed">{q.question}</p>
 
                   <div className="space-y-2">
-                    {q.options.map((opt, optIdx) => {
+                    {q.options.map((opt: any, optIdx: number) => {
                       const isSelected = selected === optIdx;
                       let optionClass = 'border-border bg-bg-tertiary/40 hover:bg-bg-tertiary text-text-secondary hover:text-text-primary';
 
@@ -523,7 +556,7 @@ export default function LessonDetailPage({ params }: any) {
         {/* TABS 7: BANK SOAL */}
         {activeTab === 'practice' && (
           <div className="max-w-xl mx-auto space-y-4">
-            {lesson.practiceBank.map((pb, idx) => (
+            {lesson.practiceBank.map((pb: any, idx: number) => (
               <Card key={idx} className="p-4 space-y-3">
                 <span className="text-[10px] font-mono font-bold text-text-tertiary uppercase">LATIHAN {idx + 1}</span>
                 <p className="text-xs font-medium text-text-primary">{pb.question}</p>

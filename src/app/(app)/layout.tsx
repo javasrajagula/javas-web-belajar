@@ -5,12 +5,36 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { TopBar } from '@/components/layout/topbar';
 import { MobileNav } from '@/components/layout/mobile-nav';
 import { PageTransition } from '@/components/layout/page-transition';
+import { useUserStore } from '@/stores/user-store';
+import { useCurriculumStore } from '@/stores/curriculum-store';
 
 export default function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { loadFromDb: loadUser } = useUserStore();
+  const { loadFromDb: loadCurriculum, syncLocalToDb } = useCurriculumStore();
+  const email = useUserStore((state) => state.profile.email);
+
+  React.useEffect(() => {
+    if (!email) return;
+    
+    const initDb = async () => {
+      try {
+        // Sync any offline/unsynced local changes
+        await syncLocalToDb(email);
+        // Load latest state from PostgreSQL database
+        await loadUser(email);
+        await loadCurriculum(email);
+      } catch (err) {
+        console.error('Failed to sync/load data from database:', err);
+      }
+    };
+    
+    initDb();
+  }, [email, loadUser, loadCurriculum, syncLocalToDb]);
+
   return (
     <div className="flex min-h-screen bg-bg-primary text-text-primary overflow-hidden">
       {/* Sidebar - Desktop Only */}

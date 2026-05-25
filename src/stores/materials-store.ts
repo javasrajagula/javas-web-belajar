@@ -337,7 +337,7 @@ export const useMaterialsStore = create<MaterialsState>((set, get) => {
     updateFlashcardStatus: (materialId, flashcardId, mastered) => set((state) => {
       const updated = state.materials.map((m) => {
         if (m.id === materialId) {
-          const updatedFlashcards = m.flashcards.map((fc) => 
+          const updatedFlashcards = m.flashcards.map((fc: any) => 
             fc.id === flashcardId ? { ...fc, mastered } : fc
           );
           return { ...m, flashcards: updatedFlashcards };

@@ -25,7 +25,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     '/subjects',
     '/lessons',
     '/profile',
-    '/analytics'
+    '/analytics',
+    '/teacher'
   ],
   school: [
     '/dashboard',

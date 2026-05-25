@@ -173,7 +173,7 @@ export default function StudyRPGPage() {
                     </Badge>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Progress value={(quest.current / quest.target) * 100} color={quest.completed ? 'success' : 'primary'} className="h-1 flex-1" />
+                    <Progress value={(quest.current / quest.target) * 100} color={quest.completed ? 'success' : 'accent'} className="h-1 flex-1" />
                     <span className="text-[9px] font-mono text-text-secondary">{quest.current}/{quest.target}</span>
                   </div>
                 </div>
@@ -302,7 +302,7 @@ export default function StudyRPGPage() {
                       +{quest.xpReward} XP
                     </Badge>
                   </div>
-                  <Progress value={(quest.current / quest.target) * 100} color={quest.completed ? 'success' : 'primary'} className="h-1.5" />
+                  <Progress value={(quest.current / quest.target) * 100} color={quest.completed ? 'success' : 'accent'} className="h-1.5" />
                   {!quest.completed ? (
                     <Button onClick={() => completeQuest(quest.id)} size="sm" variant="secondary" className="w-full h-7 text-[10px]">
                       Tandai Selesai

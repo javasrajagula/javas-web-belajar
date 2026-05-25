@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useUserStore } from '@/stores/user-store';
-import { Search, Bell, Command, Settings, HelpCircle, Check, Book } from 'lucide-react';
+import { Search, Bell, Command, Settings, HelpCircle, Check, Book, Wifi, WifiOff } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { usePathname, useRouter } from 'next/navigation';
+import { Badge } from '@/components/ui/badge';
 
 export const TopBar: React.FC = () => {
   const router = useRouter();
@@ -14,6 +15,25 @@ export const TopBar: React.FC = () => {
   
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isOnline, setIsOnline] = useState(true);
+
+  // Track online/offline status
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsOnline(window.navigator.onLine);
+      
+      const handleOnline = () => setIsOnline(true);
+      const handleOffline = () => setIsOnline(false);
+
+      window.addEventListener('online', handleOnline);
+      window.addEventListener('offline', handleOffline);
+
+      return () => {
+        window.removeEventListener('online', handleOnline);
+        window.removeEventListener('offline', handleOffline);
+      };
+    }
+  }, []);
 
   // Listen to Cmd/Ctrl + K
   useEffect(() => {
@@ -88,6 +108,15 @@ export const TopBar: React.FC = () => {
             </div>
             <Progress value={(profile.xp / (profile.level * 500)) * 100} color="accent" className="h-1" />
           </div>
+
+          {/* Online/Offline Status Indicator */}
+          <Badge 
+            variant={isOnline ? 'success' : 'danger'} 
+            className="text-[9.5px] font-mono font-bold flex items-center gap-1"
+          >
+            {isOnline ? <Wifi size={10} className="text-success" /> : <WifiOff size={10} className="text-danger" />}
+            {isOnline ? 'ONLINE' : 'OFFLINE'}
+          </Badge>
 
           {/* Icons */}
           <div className="flex items-center gap-1.5">

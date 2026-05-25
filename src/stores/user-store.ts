@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { UserProfile, Achievement, DailyQuest } from '@/types';
 import { getStorageItem, setStorageItem } from '@/lib/storage';
+import { getUserProfile, updateUserProfile } from '@/lib/actions/user';
 
 const DEFAULT_PROFILE: UserProfile = {
   name: 'Alex Mercer',
@@ -55,6 +56,8 @@ const DEFAULT_PROFILE: UserProfile = {
 
 interface UserState {
   profile: UserProfile;
+  loadFromDb: (email: string) => Promise<void>;
+  syncLocalToDb: (email: string) => Promise<void>;
   addXp: (amount: number) => void;
   addStudyTime: (minutes: number) => void;
   completeQuest: (questId: string) => void;
@@ -62,197 +65,302 @@ interface UserState {
   unlockAchievement: (id: string) => void;
   upgradeSkill: (skill: 'focus' | 'logic' | 'creativity' | 'discipline', amount: number) => void;
   resetWeeklyProgress: () => void;
-  updateProfile: (profile: Partial<UserProfile>) => void;
+  updateProfile: (profile: Partial<UserProfile>) => Promise<void>;
 }
 
-export const useUserStore = create<UserState>((set) => {
+export const useUserStore = create<UserState>((set, get) => {
   const initialProfile = getStorageItem<UserProfile>('academy_os_user_profile', DEFAULT_PROFILE);
 
   return {
     profile: initialProfile,
 
-    addXp: (amount) => set((state) => {
-      let newXp = state.profile.xp + amount;
-      let newLevel = state.profile.level;
-      
-      const xpNeeded = newLevel * 500;
-      if (newXp >= xpNeeded) {
-        newXp -= xpNeeded;
-        newLevel += 1;
-      }
-
-      const dayIndex = new Date().getDay();
-      const idDays = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-      const todayName = idDays[dayIndex];
-
-      const updatedWeeklyProgress = state.profile.weeklyProgress.map(dayObj => {
-        if (dayObj.day === todayName) {
-          return { ...dayObj, xp: Math.max(0, dayObj.xp + amount) };
-        }
-        return dayObj;
-      });
-
-      const updated = {
-        ...state.profile,
-        xp: Math.max(0, newXp),
-        level: newLevel,
-        weeklyProgress: updatedWeeklyProgress
-      };
-      setStorageItem('academy_os_user_profile', updated);
-      return { profile: updated };
-    }),
-
-    addStudyTime: (minutes) => set((state) => {
-      const newStudyTime = state.profile.studyTimeToday + minutes;
-      
-      const dayIndex = new Date().getDay();
-      const idDays = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-      const todayName = idDays[dayIndex];
-
-      const updatedWeeklyProgress = state.profile.weeklyProgress.map(dayObj => {
-        if (dayObj.day === todayName) {
-          return { ...dayObj, minutes: dayObj.minutes + minutes };
-        }
-        return dayObj;
-      });
-
-      const updatedQuests = state.profile.dailyQuests.map(q => {
-        if (q.type === 'study') {
-          const nextVal = Math.min(q.target, q.current + minutes);
-          return {
-            ...q,
-            current: nextVal,
-            completed: nextVal >= q.target
+    loadFromDb: async (email) => {
+      try {
+        const dbProfile = await getUserProfile(email);
+        if (dbProfile) {
+          // Preserve local achievements if database doesn't manage them yet
+          const achievements = get().profile.achievements.length > 0 
+            ? get().profile.achievements 
+            : DEFAULT_PROFILE.achievements;
+          
+          const updatedProfile = {
+            ...dbProfile,
+            achievements
           };
+          set({ profile: updatedProfile });
+          setStorageItem('academy_os_user_profile', updatedProfile);
         }
-        return q;
-      });
-
-      let xpToAward = 0;
-      updatedQuests.forEach((q, idx) => {
-        const oldQ = state.profile.dailyQuests[idx];
-        if (q.completed && !oldQ.completed) {
-          xpToAward += q.xpReward;
-        }
-      });
-
-      const updated = {
-        ...state.profile,
-        studyTimeToday: newStudyTime,
-        weeklyProgress: updatedWeeklyProgress,
-        dailyQuests: updatedQuests
-      };
-
-      setStorageItem('academy_os_user_profile', updated);
-      
-      if (xpToAward > 0) {
-        setTimeout(() => state.addXp(xpToAward), 0);
+      } catch (error) {
+        console.error('Failed to load profile from DB:', error);
       }
+    },
 
-      return { profile: updated };
-    }),
+    syncLocalToDb: async (email) => {
+      try {
+        const localProfile = get().profile;
+        const { portfolio, pklLog, ...updates } = localProfile;
+        const dbProfile = await updateUserProfile(email, updates);
+        set({ 
+          profile: {
+            ...localProfile,
+            ...dbProfile,
+            portfolio: localProfile.portfolio,
+            pklLog: localProfile.pklLog
+          }
+        });
+      } catch (error) {
+        console.error('Failed to sync profile to DB:', error);
+      }
+    },
 
-    completeQuest: (questId) => set((state) => {
-      const quest = state.profile.dailyQuests.find(q => q.id === questId);
-      if (!quest || quest.completed) return {};
+    addXp: (amount) => {
+      set((state) => {
+        let newXp = state.profile.xp + amount;
+        let newLevel = state.profile.level;
+        
+        const xpNeeded = newLevel * 500;
+        if (newXp >= xpNeeded) {
+          newXp -= xpNeeded;
+          newLevel += 1;
+        }
 
-      const updatedQuests = state.profile.dailyQuests.map(q => 
-        q.id === questId ? { ...q, completed: true, current: q.target } : q
-      );
+        const dayIndex = new Date().getDay();
+        const idDays = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+        const todayName = idDays[dayIndex];
 
-      const updated = {
-        ...state.profile,
-        dailyQuests: updatedQuests
-      };
+        const updatedWeeklyProgress = state.profile.weeklyProgress.map(dayObj => {
+          if (dayObj.day === todayName) {
+            return { ...dayObj, xp: Math.max(0, dayObj.xp + amount) };
+          }
+          return dayObj;
+        });
 
-      setStorageItem('academy_os_user_profile', updated);
-      setTimeout(() => state.addXp(quest.xpReward), 0);
-      return { profile: updated };
-    }),
+        const updated = {
+          ...state.profile,
+          xp: Math.max(0, newXp),
+          level: newLevel,
+          weeklyProgress: updatedWeeklyProgress
+        };
+        
+        // Async background save to DB
+        updateUserProfile(state.profile.email, {
+          xp: Math.max(0, newXp),
+          level: newLevel,
+          weeklyProgress: updatedWeeklyProgress
+        }).catch(err => console.error('Failed to sync XP to DB:', err));
 
-    updateQuestProgress: (type, amount) => set((state) => {
-      let xpToAward = 0;
-      const updatedQuests = state.profile.dailyQuests.map(q => {
-        if (q.type === type && !q.completed) {
-          const nextVal = Math.min(q.target, q.current + amount);
-          const completedNow = nextVal >= q.target;
-          if (completedNow) {
+        setStorageItem('academy_os_user_profile', updated);
+        return { profile: updated };
+      });
+    },
+
+    addStudyTime: (minutes) => {
+      set((state) => {
+        const newStudyTime = state.profile.studyTimeToday + minutes;
+        
+        const dayIndex = new Date().getDay();
+        const idDays = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+        const todayName = idDays[dayIndex];
+
+        const updatedWeeklyProgress = state.profile.weeklyProgress.map(dayObj => {
+          if (dayObj.day === todayName) {
+            return { ...dayObj, minutes: dayObj.minutes + minutes };
+          }
+          return dayObj;
+        });
+
+        const updatedQuests = state.profile.dailyQuests.map(q => {
+          if (q.type === 'study') {
+            const nextVal = Math.min(q.target, q.current + minutes);
+            return {
+              ...q,
+              current: nextVal,
+              completed: nextVal >= q.target
+            };
+          }
+          return q;
+        });
+
+        let xpToAward = 0;
+        updatedQuests.forEach((q, idx) => {
+          const oldQ = state.profile.dailyQuests[idx];
+          if (q.completed && !oldQ.completed) {
             xpToAward += q.xpReward;
           }
-          return {
-            ...q,
-            current: nextVal,
-            completed: completedNow
-          };
+        });
+
+        const updated = {
+          ...state.profile,
+          studyTimeToday: newStudyTime,
+          weeklyProgress: updatedWeeklyProgress,
+          dailyQuests: updatedQuests
+        };
+
+        // Async background save to DB
+        updateUserProfile(state.profile.email, {
+          studyTimeToday: newStudyTime,
+          weeklyProgress: updatedWeeklyProgress,
+          dailyQuests: updatedQuests
+        }).catch(err => console.error('Failed to sync study time to DB:', err));
+
+        setStorageItem('academy_os_user_profile', updated);
+        
+        if (xpToAward > 0) {
+          setTimeout(() => state.addXp(xpToAward), 0);
         }
-        return q;
+
+        return { profile: updated };
+      });
+    },
+
+    completeQuest: (questId) => {
+      set((state) => {
+        const quest = state.profile.dailyQuests.find(q => q.id === questId);
+        if (!quest || quest.completed) return {};
+
+        const updatedQuests = state.profile.dailyQuests.map(q => 
+          q.id === questId ? { ...q, completed: true, current: q.target } : q
+        );
+
+        const updated = {
+          ...state.profile,
+          dailyQuests: updatedQuests
+        };
+
+        // Async background save to DB
+        updateUserProfile(state.profile.email, {
+          dailyQuests: updatedQuests
+        }).catch(err => console.error('Failed to sync completed quest to DB:', err));
+
+        setStorageItem('academy_os_user_profile', updated);
+        setTimeout(() => state.addXp(quest.xpReward), 0);
+        return { profile: updated };
+      });
+    },
+
+    updateQuestProgress: (type, amount) => {
+      set((state) => {
+        let xpToAward = 0;
+        const updatedQuests = state.profile.dailyQuests.map(q => {
+          if (q.type === type && !q.completed) {
+            const nextVal = Math.min(q.target, q.current + amount);
+            const completedNow = nextVal >= q.target;
+            if (completedNow) {
+              xpToAward += q.xpReward;
+            }
+            return {
+              ...q,
+              current: nextVal,
+              completed: completedNow
+            };
+          }
+          return q;
+        });
+
+        const updated = {
+          ...state.profile,
+          dailyQuests: updatedQuests
+        };
+
+        // Async background save to DB
+        updateUserProfile(state.profile.email, {
+          dailyQuests: updatedQuests
+        }).catch(err => console.error('Failed to sync quest progress to DB:', err));
+
+        setStorageItem('academy_os_user_profile', updated);
+
+        if (xpToAward > 0) {
+          setTimeout(() => state.addXp(xpToAward), 0);
+        }
+
+        return { profile: updated };
+      });
+    },
+
+    unlockAchievement: (id) => {
+      set((state) => {
+        const updatedAchievements = state.profile.achievements.map(a => 
+          a.id === id ? { ...a, unlockedAt: new Date().toISOString() } : a
+        );
+        const updated = {
+          ...state.profile,
+          achievements: updatedAchievements
+        };
+        setStorageItem('academy_os_user_profile', updated);
+        return { profile: updated };
+      });
+    },
+
+    upgradeSkill: (skill, amount) => {
+      set((state) => {
+        const currentVal = state.profile.skills[skill] || 0;
+        const updatedSkills = {
+          ...state.profile.skills,
+          [skill]: Math.min(100, currentVal + amount)
+        };
+        const updated = {
+          ...state.profile,
+          skills: updatedSkills
+        };
+
+        // Async background save to DB
+        updateUserProfile(state.profile.email, {
+          skills: updatedSkills
+        }).catch(err => console.error('Failed to sync skills to DB:', err));
+
+        setStorageItem('academy_os_user_profile', updated);
+        return { profile: updated };
+      });
+    },
+
+    resetWeeklyProgress: () => {
+      set((state) => {
+        const cleanProgress = [
+          { day: 'Sen', minutes: 0, xp: 0 },
+          { day: 'Sel', minutes: 0, xp: 0 },
+          { day: 'Rab', minutes: 0, xp: 0 },
+          { day: 'Kam', minutes: 0, xp: 0 },
+          { day: 'Jum', minutes: 0, xp: 0 },
+          { day: 'Sab', minutes: 0, xp: 0 },
+          { day: 'Min', minutes: 0, xp: 0 }
+        ];
+        const updated = {
+          ...state.profile,
+          studyTimeToday: 0,
+          weeklyProgress: cleanProgress
+        };
+
+        // Async background save to DB
+        updateUserProfile(state.profile.email, {
+          studyTimeToday: 0,
+          weeklyProgress: cleanProgress
+        }).catch(err => console.error('Failed to sync reset progress to DB:', err));
+
+        setStorageItem('academy_os_user_profile', updated);
+        return { profile: updated };
+      });
+    },
+
+    updateProfile: async (profileUpdates) => {
+      set((state) => {
+        const updated = {
+          ...state.profile,
+          ...profileUpdates
+        };
+        setStorageItem('academy_os_user_profile', updated);
+        return { profile: updated };
       });
 
-      const updated = {
-        ...state.profile,
-        dailyQuests: updatedQuests
-      };
-      setStorageItem('academy_os_user_profile', updated);
-
-      if (xpToAward > 0) {
-        setTimeout(() => state.addXp(xpToAward), 0);
+      // Sync to PostgreSQL
+      try {
+        const email = get().profile.email;
+        const { portfolio, pklLog, ...updates } = profileUpdates;
+        if (Object.keys(updates).length > 0) {
+          await updateUserProfile(email, updates);
+        }
+      } catch (err) {
+        console.error('Failed to update user profile in DB:', err);
       }
-
-      return { profile: updated };
-    }),
-
-    unlockAchievement: (id) => set((state) => {
-      const updatedAchievements = state.profile.achievements.map(a => 
-        a.id === id ? { ...a, unlockedAt: new Date().toISOString() } : a
-      );
-      const updated = {
-        ...state.profile,
-        achievements: updatedAchievements
-      };
-      setStorageItem('academy_os_user_profile', updated);
-      return { profile: updated };
-    }),
-
-    upgradeSkill: (skill, amount) => set((state) => {
-      const currentVal = state.profile.skills[skill] || 0;
-      const updatedSkills = {
-        ...state.profile.skills,
-        [skill]: Math.min(100, currentVal + amount)
-      };
-      const updated = {
-        ...state.profile,
-        skills: updatedSkills
-      };
-      setStorageItem('academy_os_user_profile', updated);
-      return { profile: updated };
-    }),
-
-    resetWeeklyProgress: () => set((state) => {
-      const cleanProgress = [
-        { day: 'Sen', minutes: 0, xp: 0 },
-        { day: 'Sel', minutes: 0, xp: 0 },
-        { day: 'Rab', minutes: 0, xp: 0 },
-        { day: 'Kam', minutes: 0, xp: 0 },
-        { day: 'Jum', minutes: 0, xp: 0 },
-        { day: 'Sab', minutes: 0, xp: 0 },
-        { day: 'Min', minutes: 0, xp: 0 }
-      ];
-      const updated = {
-        ...state.profile,
-        studyTimeToday: 0,
-        weeklyProgress: cleanProgress
-      };
-      setStorageItem('academy_os_user_profile', updated);
-      return { profile: updated };
-    }),
-
-    updateProfile: (profileUpdates) => set((state) => {
-      const updated = {
-        ...state.profile,
-        ...profileUpdates
-      };
-      setStorageItem('academy_os_user_profile', updated);
-      return { profile: updated };
-    })
+    }
   };
 });

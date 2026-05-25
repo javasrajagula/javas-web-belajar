@@ -101,7 +101,7 @@ export default function SubjectsPage() {
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="flex-1 max-w-[150px]">
-                          <Progress value={progress} color="secondary" className="h-1" />
+                          <Progress value={progress} color="accent" className="h-1" />
                         </div>
                         <span className="text-[10px] font-mono text-text-secondary">{progress}% penguasaan</span>
                       </div>

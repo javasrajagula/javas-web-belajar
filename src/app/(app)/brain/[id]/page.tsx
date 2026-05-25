@@ -127,7 +127,7 @@ export default function BrainDetailPage({ params }: any) {
         {activeTab === 'kuis' && (
           <div className="max-w-xl mx-auto space-y-4">
             {material.quizzes.length > 0 ? (
-              material.quizzes.map((q, idx) => {
+              material.quizzes.map((q: any, idx: number) => {
                 const selected = selectedAnswers[q.id];
                 const submitted = submittedQuizzes[q.id];
                 const isCorrect = selected === q.correctOptionIndex;
@@ -145,7 +145,7 @@ export default function BrainDetailPage({ params }: any) {
                     <p className="text-xs font-semibold text-text-primary">{q.question}</p>
 
                     <div className="space-y-2">
-                      {q.options.map((opt, optIdx) => {
+                      {q.options.map((opt: any, optIdx: number) => {
                         const isSelected = selected === optIdx;
                         let optionClass = 'border-border bg-bg-tertiary/40 hover:bg-bg-tertiary text-text-secondary hover:text-text-primary';
 
@@ -202,7 +202,7 @@ export default function BrainDetailPage({ params }: any) {
         {activeTab === 'kartu' && (
           <div className="max-w-md mx-auto space-y-6">
             {material.flashcards.length > 0 ? (
-              material.flashcards.map((fc) => {
+              material.flashcards.map((fc: any) => {
                 const flipped = flippedCards[fc.id] || false;
                 return (
                   <Card key={fc.id} className="space-y-4">
@@ -226,7 +226,7 @@ export default function BrainDetailPage({ params }: any) {
                     <div className="flex gap-2">
                       <Button
                         onClick={() => handleMarkMastered(fc.id, fc.mastered)}
-                        variant={fc.mastered ? 'success' : 'outline'}
+                        variant={fc.mastered ? 'primary' : 'outline'}
                         className="flex-1 h-8 text-[11px] flex items-center justify-center gap-1.5"
                       >
                         <CheckCircle2 size={12} /> {fc.mastered ? 'Dikuasai +15 XP' : 'Tandai Selesai Dipelajari'}
@@ -247,7 +247,7 @@ export default function BrainDetailPage({ params }: any) {
         {activeTab === 'linimasa' && (
           <div className="max-w-xl mx-auto space-y-6">
             <div className="relative border-l border-border pl-6 ml-4 space-y-8">
-              {material.timeline.map((event) => (
+              {material.timeline.map((event: any) => (
                 <div key={event.id} className="relative">
                   <span className="absolute -left-[30px] top-1 bg-accent border-4 border-bg-primary w-4.5 h-4.5 rounded-full" />
                   

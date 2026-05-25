@@ -54,12 +54,19 @@ export default function AITutorPage() {
     const currentText = input;
     setInput('');
 
-    // Prepend subject context if selected
-    const finalText = selectedSubject
-      ? `[Konteks: ${selectedSubject} — ${profile.schoolType.toUpperCase()} Kelas ${profile.grade}]\n\n${currentText}`
-      : currentText;
+    // Construct context object for AI route
+    const activeSub = curriculumSubjects.find(s => s.title === selectedSubject);
+    const context = {
+      studentName: profile.name,
+      grade: profile.grade,
+      schoolType: profile.schoolType,
+      selectedPathway: profile.selectedPathway,
+      lessonTitle: activeSub ? activeSub.modules[0]?.lessons[0]?.title : undefined,
+      subjectTitle: selectedSubject || undefined,
+      cpStatement: activeSub?.cpStatement || undefined
+    };
 
-    await sendMessage(finalText);
+    await sendMessage(currentText, context);
     updateQuestProgress('chat', 1);
   };
 
