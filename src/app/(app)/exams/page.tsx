@@ -18,45 +18,65 @@ import {
 import { QuizQuestion, ExamSession } from '@/types';
 
 const MOCK_DB_QUESTIONS: Record<string, QuizQuestion[]> = {
-  'Keadaan Kuantum': [
+  'Eksponen dan Logaritma': [
     {
-      id: 'ex-q1',
-      question: 'Persamaan mana yang menggambarkan evolusi waktu dari suatu sistem mekanika kuantum?',
-      options: ['Persamaan gelombang Schrödinger', 'Persamaan elektromagnetik Maxwell', 'Persamaan Euler-Lagrange', 'Persamaan Navier-Stokes'],
-      correctOptionIndex: 0,
-      explanation: 'Persamaan Schrödinger menyediakan hukum dasar perambatan waktu untuk fungsi gelombang kuantum.'
+      id: 'ex-mat10-q1',
+      question: 'Berapakah nilai x dari persamaan eksponen 3^(2x - 1) = 27?',
+      options: ['x = 1', 'x = 2', 'x = 3', 'x = 4'],
+      correctOptionIndex: 1,
+      explanation: '3^(2x - 1) = 27 -> 3^(2x - 1) = 3^3 -> 2x - 1 = 3 -> 2x = 4 -> x = 2.'
     },
     {
-      id: 'ex-q2',
-      question: 'Dalam notasi bra-ket Dirac, apa yang direpresentasikan oleh "ket" |ψ⟩?',
-      options: ['Vektor baris konjugat kompleks', 'Vektor keadaan dalam ruang Hilbert', 'Nilai eigen kerapatan partikel terlokalisasi', 'Tensor distribusi probabilitas'],
-      correctOptionIndex: 1,
-      explanation: 'Vektor ket |ψ⟩ merepresentasikan vektor keadaan kolom dalam ruang Hilbert, sedangkan bra ⟨ψ| mewakili transpos konjugasinya.'
+      id: 'ex-mat10-q2',
+      question: 'Jika ${^3}\\log(x) = 4, berapakah nilai x?',
+      options: ['x = 12', 'x = 64', 'x = 81', 'x = 243'],
+      correctOptionIndex: 2,
+      explanation: 'Berdasarkan definisi logaritma, ${^3}\\log(x) = 4 setara dengan x = 3^4 = 81.'
     }
   ],
-  'Integrasi Kalkulus': [
+  'Kimia Hijau': [
     {
-      id: 'ex-q3',
-      question: 'Berapakah integral dari 1/x terhadap x?',
-      options: ['x^2 / 2', 'ln|x| + C', 'e^x', '-1/x^2'],
-      correctOptionIndex: 1,
-      explanation: 'Karena turunan dari ln|x| adalah 1/x, maka integral tak tentu dari 1/x adalah ln|x| + C.'
-    },
-    {
-      id: 'ex-q4',
-      question: 'Teknik integrasi mana yang konsepnya diturunkan langsung dari aturan perkalian (product rule) pada diferensiasi?',
-      options: ['Aturan substitusi variabel', 'Integrasi parsial (integration by parts)', 'Dekomposisi pecahan parsial', 'Optimasi trigonometri'],
-      correctOptionIndex: 1,
-      explanation: 'Integrasi parsial diturunkan langsung dari aturan diferensial perkalian: d(uv) = u dv + v du.'
+      id: 'ex-kim10-q1',
+      question: 'Manakah di bawah ini yang bukan merupakan salah satu dari 12 prinsip Kimia Hijau?',
+      options: ['Mencegah terbentuknya limbah', 'Memaksimalkan efisiensi ekonomi atom', 'Menggunakan bahan baku kimia tak terbarukan', 'Merancang sintesis kimia yang kurang berbahaya'],
+      correctOptionIndex: 2,
+      explanation: 'Kimia Hijau mendorong penggunaan bahan baku terbarukan, bukan bahan baku tak terbarukan.'
     }
   ],
-  'Kata Kerja Prancis': [
+  'Fungsi Komposisi & Invers': [
     {
-      id: 'ex-q5',
-      question: 'Terjemahkan kata kerja "menjadi (to be)" ke dalam bahasa Prancis dalam kala kini (present tense) orang ketiga jamak.',
-      options: ['Ils sont', 'Ils ont', 'Ils vont', 'Ils font'],
+      id: 'ex-mat11-q1',
+      question: 'Diketahui f(x) = x^2 dan g(x) = x - 2. Berapakah rumus fungsi komposisi (f o g)(x)?',
+      options: ['x^2 - 2', 'x^2 - 4x + 4', 'x^2 - 4', 'x^2 + 4x - 4'],
+      correctOptionIndex: 1,
+      explanation: '(f o g)(x) = f(g(x)) = (x - 2)^2 = x^2 - 4x + 4.'
+    }
+  ],
+  'Object-Oriented Programming': [
+    {
+      id: 'ex-smk-q1',
+      question: 'Pewarisan properti dan metode dari suatu Class induk ke Class anak dalam pemrograman OOP disebut dengan istilah...',
+      options: ['Encapsulation', 'Polymorphism', 'Abstraction', 'Inheritance'],
+      correctOptionIndex: 3,
+      explanation: 'Inheritance (Pewarisan) memungkinkan suatu kelas anak menyalin atribut dan metode milik kelas induk.'
+    }
+  ],
+  'Turunan Fungsi Aljabar': [
+    {
+      id: 'ex-mat12-q1',
+      question: 'Berapakah turunan pertama dari fungsi f(x) = 4x^3 - 2x^2 + 7x?',
+      options: ['f\'(x) = 12x^2 - 4x + 7', 'f\'(x) = 12x^2 - 4x', 'f\'(x) = 4x^2 - 2x + 7', 'f\'(x) = 12x^3 - 4x^2 + 7'],
       correctOptionIndex: 0,
-      explanation: 'Kala kini dari kata kerja "être" (menjadi/to be) untuk orang ketiga jamak (mereka) adalah "ils sont". "Ils ont" adalah kala kini dari "avoir" (memiliki/to have).'
+      explanation: 'd/dx(4x^3) = 12x^2, d/dx(-2x^2) = -4x, d/dx(7x) = 7. Maka f\'(x) = 12x^2 - 4x + 7.'
+    }
+  ],
+  'Sel Volta & Elektrokimia': [
+    {
+      id: 'ex-kim12-q1',
+      question: 'Logam Cu (E0 = +0,34 V) dan logam Zn (E0 = -0,76 V) dirangkai dalam Sel Volta. Berapakah nilai potensial sel standar (E0 sel) yang dihasilkan?',
+      options: ['+0,42 V', '-0,42 V', '+1,10 V', '-1,10 V'],
+      correctOptionIndex: 2,
+      explanation: 'E0 sel = E0 katode (reduksi) - E0 anode (oksidasi) = (+0,34) - (-0,76) = +1,10 V.'
     }
   ]
 };
@@ -64,12 +84,10 @@ const MOCK_DB_QUESTIONS: Record<string, QuizQuestion[]> = {
 export default function ExamEnginePage() {
   const { addXp, upgradeSkill } = useUserStore();
 
-  // Settings configuration
-  const [selectedTopics, setSelectedTopics] = useState<string[]>(['Keadaan Kuantum']);
+  const [selectedTopics, setSelectedTopics] = useState<string[]>(['Eksponen dan Logaritma']);
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard' | 'adaptive'>('medium');
   const [questionCount, setQuestionCount] = useState(3);
 
-  // Active Exam status
   const [activeSession, setActiveSession] = useState<ExamSession | null>(null);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [timeLeft, setTimeLeft] = useState(120);
@@ -115,11 +133,10 @@ export default function ExamEnginePage() {
 
     setActiveSession(session);
     setCurrentIdx(0);
-    setTimeLeft(finalQuestions.length * 60); // 60s per question
+    setTimeLeft(finalQuestions.length * 60);
     setShowResults(false);
   };
 
-  // Timer tick
   useEffect(() => {
     if (activeSession && !showResults && timeLeft > 0) {
       timerRef.current = setTimeout(() => {
@@ -186,20 +203,19 @@ export default function ExamEnginePage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      {/* Config setup view */}
       {!activeSession && (
         <Card className="space-y-6">
           <div className="space-y-1">
             <h3 className="text-sm font-bold text-text-primary flex items-center gap-1.5">
-              <FileText size={16} className="text-accent" /> Konfigurasi Mesin Ujian
+              <FileText size={16} className="text-accent" /> Evaluasi Kompetensi Nasional
             </h3>
-            <p className="text-[11px] text-text-secondary">Uji pemahaman Anda dengan simulasi ujian mandiri adaptif.</p>
+            <p className="text-[11px] text-text-secondary">Uji pemahaman Anda terhadap silabus SMA & SMK Kurikulum Merdeka terbaru.</p>
           </div>
 
           <div className="space-y-4">
             {/* Topic Select */}
             <div className="space-y-2">
-              <label className="text-[10px] font-semibold text-text-secondary uppercase">Pilih Subjek Ujian</label>
+              <label className="text-[10px] font-semibold text-text-secondary uppercase">Pilih Subjek Evaluasi</label>
               <div className="flex flex-wrap gap-2">
                 {Object.keys(MOCK_DB_QUESTIONS).map((topic) => {
                   const active = selectedTopics.includes(topic);
@@ -230,23 +246,23 @@ export default function ExamEnginePage() {
                   onChange={(e) => setQuestionCount(Number(e.target.value))}
                   className="w-full h-9 px-2 bg-bg-tertiary border border-border rounded text-xs text-text-primary focus:outline-none focus:border-accent"
                 >
+                  <option value="1">1 Pertanyaan</option>
                   <option value="2">2 Pertanyaan</option>
                   <option value="3">3 Pertanyaan</option>
-                  <option value="5">5 Pertanyaan</option>
                 </select>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-semibold text-text-secondary uppercase">Tingkat Kesulitan</label>
+                <label className="text-[10px] font-semibold text-text-secondary uppercase">Kesulitan Kurikulum</label>
                 <select
                   value={difficulty}
                   onChange={(e) => setDifficulty(e.target.value as any)}
                   className="w-full h-9 px-2 bg-bg-tertiary border border-border rounded text-xs text-text-primary focus:outline-none focus:border-accent"
                 >
-                  <option value="easy">Mudah (Pengenalan Konseptual)</option>
-                  <option value="medium">Sedang (Analisis & Penerapan)</option>
-                  <option value="hard">Sulit (Evaluasi & Sintesis Rumus)</option>
-                  <option value="adaptive">Adaptif AI (Skala Otomatis)</option>
+                  <option value="easy">Kelas 10 (Fase E - Dasar)</option>
+                  <option value="medium">Kelas 11 (Fase F - Menengah)</option>
+                  <option value="hard">Kelas 12 (Fase F - Lanjut)</option>
+                  <option value="adaptive">Evaluasi Mandiri Adaptif</option>
                 </select>
               </div>
             </div>
@@ -263,7 +279,7 @@ export default function ExamEnginePage() {
         <Card className="space-y-6">
           <div className="flex justify-between items-center border-b border-border/40 pb-3">
             <div className="space-y-0.5">
-              <span className="text-[10px] font-mono text-text-tertiary uppercase">UJIAN DIAGNOSTIK ADAPTIF</span>
+              <span className="text-[10px] font-mono text-text-tertiary uppercase">UJIAN DIAGNOSTIK NASIONAL</span>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-bold text-text-primary">
                   Soal {currentIdx + 1} dari {activeSession.totalQuestions}
@@ -381,14 +397,14 @@ export default function ExamEnginePage() {
 
             <div className="flex justify-center pt-2">
               <Button onClick={handleReset} className="flex items-center gap-1 h-9 text-xs">
-                <RotateCcw size={13} /> Reset Mesin Ujian
+                <RotateCcw size={13} /> Reset Ujian
               </Button>
             </div>
           </Card>
 
           {/* Detailed corrections reviews */}
           <div className="space-y-4">
-            <span className="text-[10px] font-mono font-bold text-text-secondary uppercase tracking-widest pl-1">Tinjauan Pertanyaan</span>
+            <span className="text-[10px] font-mono font-bold text-text-secondary uppercase tracking-widest pl-1">Tinjauan Soal</span>
             
             {activeSession.questions.map((q, idx) => {
               const chosen = activeSession.answers[q.id];
