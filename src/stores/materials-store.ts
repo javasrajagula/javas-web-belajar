@@ -20,7 +20,7 @@ Bab ini membahas sifat-sifat eksponen (bilangan berpangkat) dan logaritma sebaga
 ## Konsep Utama
 1. **Sifat-Sifat Eksponen**: Perkalian pangkat ($a^m \\times a^n = a^{m+n}$), pembagian pangkat ($a^m / a^n = a^{m-n}$), dan pangkat negatif ($a^{-n} = 1/a^n$).
 2. **Persamaan Eksponen**: Menyelesaikan nilai variabel pada pangkat dengan menyamakan basis kiri dan kanan.
-3. **Konsep Logaritma**: Operasi invers dari eksponen. Menyelesaikan persamaan ${^a}\\log(b) = c$ yang setara dengan $a^c = b$.
+3. **Konsep Logaritma**: Operasi invers dari eksponen. Menyelesaikan persamaan \${^a}\\log(b) = c$ yang setara dengan $a^c = b$.
 
 ## Aplikasi Praktis
 - Menghitung pertumbuhan bakteri (eksponensial).
@@ -151,13 +151,13 @@ Pembahasan mendalam tentang operasi aljabar fungsi gabungan dan kebalikan fungsi
 Materi produktif Rekayasa Perangkat Lunak yang membahas teknik pembuatan kode modular menggunakan objek.
 
 ## 4 Pilar Utama OOP
-1. **Encapsulation (Pembungkusan)**: Membatasi akses langsung ke data dengan membuat properti `private` dan menyediakan metode `getter` dan `setter`.
+1. **Encapsulation (Pembungkusan)**: Membatasi akses langsung ke data dengan membuat properti \`private\` dan menyediakan metode \`getter\` dan \`setter\`.
 2. **Inheritance (Pewarisan)**: Mewariskan atribut dan metode dari kelas induk (Parent Class) ke kelas anak (Child Class) untuk mencegah duplikasi kode.
 3. **Polymorphism (Banyak Bentuk)**: Kemampuan objek memiliki metode dengan nama yang sama tetapi perilaku berbeda (melalui Overriding atau Overloading).
 4. **Abstraction (Abstraksi)**: Menyembunyikan detail implementasi internal dan hanya menampilkan fungsi penting kepada pengguna.
 
 ## Contoh Kode (Java/C#)
-```java
+\`\`\`java
 // Contoh pewarisan class
 class Hewan {
     void bersuara() { System.out.println("Hewan bersuara"); }
@@ -166,7 +166,7 @@ class Kucing extends Hewan {
     @Override
     void bersuara() { System.out.println("Meow!"); }
 }
-````,
+\`\`\``,
     mindmap: [
       { id: '1', label: 'Paradigma OOP', position: { x: 250, y: 50 } },
       { id: '2', label: 'Class & Object', position: { x: 100, y: 150 } },

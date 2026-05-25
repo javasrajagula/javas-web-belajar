@@ -16,7 +16,10 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  Zap
+  Zap,
+  BookOpen,
+  User,
+  Settings
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Badge } from '@/components/ui/badge';
@@ -32,13 +35,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
 
   const navItems = [
     { name: 'Dasbor', path: '/dashboard', icon: Home },
+    { name: 'Mata Pelajaran', path: '/subjects', icon: BookOpen },
     { name: 'Otak Kedua', path: '/brain', icon: Brain },
     { name: 'Tutor AI', path: '/tutor', icon: MessageSquare },
     { name: 'RPG Belajar', path: '/rpg', icon: Sword },
-    { name: 'Kembaran Digital', path: '/twin', icon: Activity },
+    { name: 'Analisis Belajar', path: '/analytics', icon: Activity },
     { name: 'Galaksi Pengetahuan', path: '/galaxy', icon: Globe },
     { name: 'Perencana Pintar', path: '/planner', icon: Calendar },
     { name: 'Mesin Ujian', path: '/exams', icon: FileText },
+    { name: 'Profil & Portofolio', path: '/profile', icon: User },
+    { name: 'Pengaturan', path: '/settings', icon: Settings },
   ];
 
   return (

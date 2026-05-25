@@ -1,9 +1,16 @@
-// Academy OS Ω TypeScript Types
+// Academy OS Ω TypeScript Type Definitions
+
+export type UserRole = 'student' | 'teacher' | 'parent' | 'admin' | 'school';
+export type SchoolType = 'sma' | 'smk';
 
 export interface UserProfile {
   name: string;
   email: string;
   avatar: string;
+  role: UserRole;
+  schoolType: SchoolType;
+  grade: number; // 10, 11, 12
+  selectedPathway: string; // e.g. 'IPA', 'IPS', 'RPL', 'TKJ', 'DKV'
   streak: number;
   lastActive: string; // ISO String
   xp: number;
@@ -21,6 +28,9 @@ export interface UserProfile {
   };
   achievements: Achievement[];
   dailyQuests: DailyQuest[];
+  goals: string[];
+  portfolio: PortfolioProject[];
+  pklLog: PKLJournalEntry[];
 }
 
 export interface Achievement {
@@ -42,34 +52,58 @@ export interface DailyQuest {
   type: 'study' | 'quiz' | 'chat' | 'planner';
 }
 
-export interface Material {
+// --- CURRICULUM ARCHITECTURE (JSON-first) ---
+
+export interface CapaianPembelajaran {
+  id: string;
+  code: string;
+  statement: string;
+}
+
+export interface TujuanPembelajaran {
+  id: string;
+  code: string;
+  description: string;
+}
+
+export interface Subject {
   id: string;
   title: string;
-  fileName: string;
-  fileType: 'pdf' | 'docx' | 'image' | 'text';
-  fileSize: string;
-  uploadedAt: string; // ISO String
-  content: string; // Raw extracted text
-  summary: string; // Generated summary
-  mindmap: MindMapNode[];
-  timeline: TimelineEvent[];
+  phase: 'E' | 'F';
+  schoolType: SchoolType;
+  grade: number;
+  cpStatement: string;
+  isDigitalSkill?: boolean;
+  modules: Module[];
+}
+
+export interface Module {
+  id: string;
+  title: string;
+  lessons: Lesson[];
+}
+
+export interface Lesson {
+  id: string;
+  title: string;
+  explanation: string; // Markdown text
+  visualExample: string; // Tables, code snippets, visual representations
+  summary: string;
   quizzes: QuizQuestion[];
   flashcards: Flashcard[];
+  hotsQuestions: QuizQuestion[];
+  practiceBank: PracticeBankItem[];
+  podcastScript?: PodcastScriptLine[];
 }
 
-export interface MindMapNode {
-  id: string;
-  label: string;
-  type?: string;
-  data?: any;
-  position: { x: number; y: number };
+export interface PracticeBankItem {
+  question: string;
+  answer: string;
 }
 
-export interface TimelineEvent {
-  id: string;
-  date: string;
-  title: string;
-  description: string;
+export interface PodcastScriptLine {
+  role: 'budi' | 'siska';
+  text: string;
 }
 
 export interface QuizQuestion {
@@ -84,7 +118,7 @@ export interface Flashcard {
   id: string;
   front: string;
   back: string;
-  mastered: boolean;
+  mastered?: boolean;
 }
 
 export interface ChatMessage {
@@ -123,4 +157,37 @@ export interface ExamSession {
   durationSeconds: number;
   speedSecsPerQuestion: number;
   accuracy: number;
+}
+
+// --- SMK specific fields ---
+
+export interface PKLJournalEntry {
+  id: string;
+  date: string;
+  companyName: string;
+  mentorName: string;
+  activityDescription: string;
+  hoursWorked: number;
+  approved: boolean;
+}
+
+export interface PortfolioProject {
+  id: string;
+  title: string;
+  description: string;
+  projectUrl?: string;
+  repositoryUrl?: string;
+  skillsUsed: string[];
+  gradeScore?: number;
+  createdAt: string;
+}
+
+// --- Curriculum Versioning ---
+
+export interface CurriculumVersion {
+  id: string;
+  version: string;
+  effectiveDate: string;
+  status: 'active' | 'deprecated';
+  createdAt: string;
 }

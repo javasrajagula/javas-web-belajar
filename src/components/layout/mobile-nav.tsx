@@ -7,11 +7,8 @@ import {
   Home, 
   Brain, 
   MessageSquare, 
-  Sword, 
-  Activity, 
-  Globe, 
-  Calendar, 
-  FileText 
+  BookOpen,
+  User
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -20,13 +17,10 @@ export const MobileNav: React.FC = () => {
 
   const navItems = [
     { name: 'Beranda', path: '/dashboard', icon: Home },
+    { name: 'Subjek', path: '/subjects', icon: BookOpen },
     { name: 'Otak', path: '/brain', icon: Brain },
     { name: 'Tutor', path: '/tutor', icon: MessageSquare },
-    { name: 'RPG', path: '/rpg', icon: Sword },
-    { name: 'Kembaran', path: '/twin', icon: Activity },
-    { name: 'Peta', path: '/galaxy', icon: Globe },
-    { name: 'Jadwal', path: '/planner', icon: Calendar },
-    { name: 'Ujian', path: '/exams', icon: FileText },
+    { name: 'Profil', path: '/profile', icon: User },
   ];
 
   return (

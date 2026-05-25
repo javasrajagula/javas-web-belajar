@@ -18,11 +18,20 @@
   --color-text-tertiary: #71717a;
   --color-text-muted: #52525b;
 
-  --color-accent: #6366f1;
-  --color-accent-hover: #818cf8;
+  --color-primary: #4F46E5;
+  --color-primary-hover: #6366F1;
+  --color-primary-subtle: rgba(79, 70, 229, 0.12);
+  --color-primary-glow: rgba(79, 70, 229, 0.25);
+
+  --color-secondary: #06B6D4;
+  --color-secondary-hover: #22D3EE;
+  --color-secondary-subtle: rgba(6, 182, 212, 0.12);
+
+  --color-accent: #4F46E5;
+  --color-accent-hover: #6366F1;
   --color-accent-muted: #4f46e5;
-  --color-accent-subtle: rgba(99, 102, 241, 0.12);
-  --color-accent-glow: rgba(99, 102, 241, 0.25);
+  --color-accent-subtle: rgba(79, 70, 229, 0.12);
+  --color-accent-glow: rgba(79, 70, 229, 0.25);
 
   --color-success: #22c55e;
   --color-success-subtle: rgba(34, 197, 94, 0.12);
@@ -30,8 +39,8 @@
   --color-warning-subtle: rgba(245, 158, 11, 0.12);
   --color-danger: #ef4444;
   --color-danger-subtle: rgba(239, 68, 68, 0.12);
-  --color-info: #3b82f6;
-  --color-info-subtle: rgba(59, 130, 246, 0.12);
+  --color-info: #06B6D4;
+  --color-info-subtle: rgba(6, 182, 212, 0.12);
 
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: "Geist Mono", "JetBrains Mono", ui-monospace, monospace;
@@ -238,3 +247,36 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+/* ---- Scrollbar None ---- */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---- Landing Page Extra ---- */
+.h-13 {
+  height: 3.25rem;
+}
+
+/* ---- Prose override for AI chat ---- */
+.prose-xs p, .prose-xs li {
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+.prose-xs h3 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+.prose-xs code {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.08);
+}
+

@@ -19,11 +19,21 @@ module.exports = {
         'text-secondary': '#a1a1aa',
         'text-tertiary': '#71717a',
         'text-muted': '#52525b',
-        'accent': '#6366f1',
-        'accent-hover': '#818cf8',
-        'accent-muted': '#4f46e5',
-        'accent-subtle': 'rgba(99, 102, 241, 0.12)',
-        'accent-glow': 'rgba(99, 102, 241, 0.25)',
+        
+        // Pembaruan Palet Warna Premium
+        'primary': '#4F46E5',         // Indigo 600
+        'primary-hover': '#6366F1',   // Indigo 500
+        'primary-subtle': 'rgba(79, 70, 229, 0.12)',
+        'primary-glow': 'rgba(79, 70, 229, 0.25)',
+        
+        'secondary': '#06B6D4',       // Cyan 500
+        'secondary-hover': '#22D3EE', // Cyan 400
+        'secondary-subtle': 'rgba(6, 182, 212, 0.12)',
+        
+        'accent': '#F59E0B',          // Amber 500
+        'accent-hover': '#FBBF24',    // Amber 400
+        'accent-subtle': 'rgba(245, 158, 11, 0.12)',
+        
         'success': '#22c55e',
         'success-subtle': 'rgba(34, 197, 94, 0.12)',
         'warning': '#f59e0b',

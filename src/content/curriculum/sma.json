@@ -1,0 +1,435 @@
+[
+  {
+    "id": "sma-mat-10",
+    "title": "Matematika Fase E (Kelas X)",
+    "phase": "E",
+    "schoolType": "sma",
+    "grade": 10,
+    "cpStatement": "Di akhir Fase E, peserta didik dapat menggeneralisasi sifat-sifat operasi bilangan berpangkat (eksponen) dan logaritma, serta menyelesaikan masalah yang berkaitan dengan sistem persamaan linear, vektor, dan transformasi geometri.",
+    "isDigitalSkill": false,
+    "modules": [
+      {
+        "id": "sma-mat-10-mod1",
+        "title": "Eksponen dan Logaritma",
+        "lessons": [
+          {
+            "id": "sma-mat-10-mod1-les1",
+            "title": "Persamaan Eksponen dan Logaritma",
+            "explanation": "### Persamaan Eksponen\n\nPersamaan eksponen adalah persamaan yang pangkatnya mengandung variabel. Bentuk umum:\n\n$$a^{f(x)} = a^{g(x)}$$\n\nJika $a > 0$ dan $a \\neq 1$, maka penyelesaiannya adalah $f(x) = g(x)$.\n\n### Persamaan Logaritma\n\nLogaritma merupakan invers dari eksponensial. Bentuk logaritma ${^a}\\log(b) = c$ memiliki makna yang setara dengan $a^c = b$.",
+            "visualExample": "#### Tabel Sifat Eksponen\n\n| Rumus Sifat | Contoh Terapan |\n| :--- | :--- |\n| $a^m \\times a^n = a^{m+n}$ | $2^3 \\times 2^2 = 2^5 = 32$ |\n| $(a^m)^n = a^{m \\times n}$ | $(3^2)^3 = 3^6 = 729$ |\n| $a^{-n} = \\frac{1}{a^n}$ | $5^{-2} = \\frac{1}{25}$ |",
+            "summary": "1. Eksponen adalah perkalian berulang suatu bilangan.\n2. Sifat dasar eksponen mempermudah perhitungan aljabar.\n3. Logaritma adalah invers dari fungsi eksponen, ${^a}\\log(b) = c \\iff a^c = b$.",
+            "quizzes": [
+              {
+                "id": "q-mat10-1",
+                "question": "Berapakah nilai x yang memenuhi persamaan $2^{3x-2} = 16$?",
+                "options": ["x = 1", "x = 2", "x = 3", "x = 4"],
+                "correctOptionIndex": 1,
+                "explanation": "Ubah basis kanan: $2^{3x-2} = 2^4$. Maka $3x-2 = 4 \\iff 3x = 6 \\iff x = 2$."
+              }
+            ],
+            "flashcards": [
+              {
+                "id": "fc-mat10-1",
+                "front": "Apakah syarat basis (a) pada logaritma ${^a}\\log(b)$?",
+                "back": "Basis a harus bernilai positif (a > 0) dan tidak boleh sama dengan 1 (a ≠ 1)."
+              }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-mat10-1",
+                "question": "Seorang ilmuwan mengamati bahwa koloni bakteri membelah diri menjadi dua setiap 15 menit. Jika awalnya terdapat 100 bakteri, setelah berapa jam koloni bakteri tersebut mencapai 6.400 bakteri?",
+                "options": ["1 jam", "1.5 jam", "2 jam", "2.5 jam"],
+                "correctOptionIndex": 1,
+                "explanation": "Gunakan rumus pertumbuhan eksponensial: $N(t) = N_0 \\times 2^k$. Di mana $6400 = 100 \\times 2^k \\iff 64 = 2^k \\iff k = 6$. Karena membelah setiap 15 menit, maka total waktu = 6 × 15 menit = 90 menit = 1.5 jam."
+              }
+            ],
+            "practiceBank": [
+              { "question": "Tentukan nilai dari $^2\\log(8) + ^3\\log(27) - ^5\\log(25)$.", "answer": "3 + 3 - 2 = 4" }
+            ],
+            "podcastScript": [
+              { "role": "budi", "text": "Selamat datang di Podcast Obrolan Kurikulum! Hari ini kita bahas eksponen dan logaritma." },
+              { "role": "siska", "text": "Logaritma itu kunci di dunia nyata! Skala Richter gempa bumi dan pH asam-basa — semua pakai logaritma!" }
+            ]
+          },
+          {
+            "id": "sma-mat-10-mod1-les2",
+            "title": "Fungsi Eksponen dan Grafik",
+            "explanation": "### Fungsi Eksponen\n\nFungsi eksponen berbentuk $f(x) = a^x$ di mana $a > 0$ dan $a \\neq 1$.\n\n**Jika $a > 1$**: Fungsi naik (growing exponential)\n**Jika $0 < a < 1$**: Fungsi turun (decaying exponential)\n\n### Aplikasi Nyata\n- Pertumbuhan populasi: $P(t) = P_0 \\cdot e^{rt}$\n- Peluruhan radioaktif: $N(t) = N_0 \\cdot (\\frac{1}{2})^{t/T}$",
+            "visualExample": "#### Perbandingan Pertumbuhan\n\n| Tahun | Linear (+100/tahun) | Eksponen (×2/tahun) |\n| :--- | :--- | :--- |\n| 0 | 100 | 100 |\n| 5 | 600 | 3.200 |\n| 10 | 1.100 | 102.400 |",
+            "summary": "1. Fungsi eksponen tumbuh atau menyusut berdasarkan nilai basis a.\n2. Grafik selalu melewati titik (0,1).\n3. Digunakan dalam model pertumbuhan populasi, investasi bunga, dan peluruhan.",
+            "quizzes": [
+              {
+                "id": "q-mat10-2",
+                "question": "Grafik fungsi $f(x) = 3^x$ melewati titik...",
+                "options": ["(0,0)", "(0,1)", "(1,0)", "(0,3)"],
+                "correctOptionIndex": 1,
+                "explanation": "Karena $3^0 = 1$, maka titik (0,1) selalu dilalui oleh semua fungsi eksponen $a^x$."
+              }
+            ],
+            "flashcards": [
+              { "id": "fc-mat10-2", "front": "Apa nilai $a^0$ untuk sembarang $a \\neq 0$?", "back": "Selalu bernilai 1. Inilah mengapa semua grafik fungsi eksponen melewati titik (0, 1)." }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-mat10-2",
+                "question": "Sebuah investasi tumbuh 8% per tahun. Dengan modal awal Rp10 juta, model mana yang tepat untuk nilai investasi setelah n tahun?",
+                "options": ["V(n) = 10.000.000 + 800.000n", "V(n) = 10.000.000 × (1.08)^n", "V(n) = 10.000.000 × 0.08^n", "V(n) = 10.000.000 × (0.92)^n"],
+                "correctOptionIndex": 1,
+                "explanation": "Pertumbuhan majemuk menggunakan formula $V = V_0 \\times (1+r)^n$ = $10.000.000 \\times (1.08)^n$."
+              }
+            ],
+            "practiceBank": [
+              { "question": "Tentukan domain dan range dari $f(x) = 2^x - 3$.", "answer": "Domain: semua bilangan real. Range: $f(x) > -3$, yaitu $(-3, \\infty)$." }
+            ],
+            "podcastScript": [
+              { "role": "budi", "text": "Kali ini kita lihat bagaimana grafik eksponen bisa naik sangat cepat!" },
+              { "role": "siska", "text": "Inilah yang bikin virus bisa menyebar sangat cepat dalam hitungan hari — itu kekuatan pertumbuhan eksponensial." }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sma-mat-10-mod2",
+        "title": "Sistem Persamaan Linear dan Kuadrat",
+        "lessons": [
+          {
+            "id": "sma-mat-10-mod2-les1",
+            "title": "Sistem Persamaan Linear Dua Variabel (SPLDV)",
+            "explanation": "### SPLDV\n\nSistem persamaan linear dua variabel adalah himpunan dua persamaan linear dengan dua variabel yang harus diselesaikan bersama.\n\n**Metode penyelesaian:**\n1. **Substitusi**: Nyatakan satu variabel dalam variabel lain\n2. **Eliminasi**: Kurangi/tambahkan dua persamaan untuk menghilangkan satu variabel\n3. **Grafik**: Titik potong dua garis lurus\n4. **Matriks/Cramer**: Menggunakan determinan",
+            "visualExample": "#### Contoh Penyelesaian Eliminasi\n\nSistem: $\\begin{cases} 2x + 3y = 12 \\\\ 4x - y = 2 \\end{cases}$\n\n**Langkah**: Kalikan persamaan kedua ×3:\n$4x - y = 2 \\rightarrow 12x - 3y = 6$\n\nTambahkan: $2x + 12x + 3y - 3y = 12 + 6$\n$14x = 18 \\rightarrow x = \\frac{9}{7}$",
+            "summary": "1. SPLDV memiliki tepat satu solusi (titik potong), tak hingga solusi (garis sama), atau tidak ada solusi (sejajar).\n2. Metode eliminasi efisien untuk koefisien bulat.\n3. Metode substitusi lebih mudah jika salah satu variabel sudah tersendiri.",
+            "quizzes": [
+              {
+                "id": "q-mat10-spldv-1",
+                "question": "Jika $x + y = 10$ dan $x - y = 4$, berapa nilai $x$?",
+                "options": ["3", "5", "7", "9"],
+                "correctOptionIndex": 2,
+                "explanation": "Tambahkan kedua persamaan: $2x = 14 \\rightarrow x = 7$. Kemudian $y = 10 - 7 = 3$."
+              }
+            ],
+            "flashcards": [
+              { "id": "fc-spldv-1", "front": "Kapan SPLDV tidak memiliki solusi?", "back": "Ketika dua persamaan mewakili dua garis yang sejajar — tidak pernah berpotongan sehingga tidak ada titik (x,y) yang memenuhi keduanya." }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-spldv-1",
+                "question": "Pedagang membeli 3 kg apel dan 2 kg jeruk seharga Rp85.000. Untuk 1 kg apel dan 4 kg jeruk harganya Rp75.000. Berapa harga 1 kg apel dan 1 kg jeruk masing-masing?",
+                "options": ["Apel Rp15.000, Jeruk Rp20.000", "Apel Rp20.000, Jeruk Rp12.500", "Apel Rp25.000, Jeruk Rp5.000", "Apel Rp15.000, Jeruk Rp22.500"],
+                "correctOptionIndex": 1,
+                "explanation": "SPLDV: 3a + 2j = 85000 dan a + 4j = 75000. Setelah eliminasi: a = Rp20.000, j = Rp12.500."
+              }
+            ],
+            "practiceBank": [
+              { "question": "Selesaikan SPLDV: $5x - 2y = 1$ dan $3x + 4y = 23$.", "answer": "x = 1, y = 5" }
+            ],
+            "podcastScript": [
+              { "role": "budi", "text": "SPLDV itu ada di mana-mana! Dari hitung-hitungan belanja sampai perencanaan bisnis." },
+              { "role": "siska", "text": "Betul! Toko kue menentukan harga cokelat dan vanila pakai sistem persamaan ini." }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sma-fis-10",
+    "title": "Fisika/IPA Terpadu Fase E (Kelas X)",
+    "phase": "E",
+    "schoolType": "sma",
+    "grade": 10,
+    "cpStatement": "Peserta didik mampu memahami pentingnya Kimia Hijau dalam pembangunan berkelanjutan dan menganalisis gejala alam dalam cakupan keterampilan proses ilmiah.",
+    "isDigitalSkill": false,
+    "modules": [
+      {
+        "id": "sma-fis-10-mod1",
+        "title": "Kimia Hijau & SDGs",
+        "lessons": [
+          {
+            "id": "sma-fis-10-mod1-les1",
+            "title": "Prinsip Kimia Hijau",
+            "explanation": "### Konsep Kimia Hijau\n\nKimia Hijau (Green Chemistry) adalah pendekatan untuk merancang produk dan proses kimia yang mengurangi atau menghilangkan penggunaan dan pembuatan zat berbahaya.\n\n### Relevansi dengan SDGs\nKimia Hijau berkaitan langsung dengan SDG 12 (Produksi & Konsumsi Bertanggung Jawab) dan SDG 13 (Penanganan Perubahan Iklim).",
+            "visualExample": "#### 12 Prinsip Kimia Hijau (Paul Anastas, 1998)\n\n1. Mencegah limbah sejak awal\n2. Efisiensi ekonomi atom\n3. Sintesis kimia yang aman\n4. Bahan kimia yang aman\n5. Pelarut & katalis yang aman\n6. Desain hemat energi\n7. Bahan baku terbarukan\n8. Kurangi derivat kimia\n9. Katalis (tidak stoikiometri)\n10. Produk dapat terurai\n11. Monitoring real-time\n12. Minimalkan potensi kecelakaan",
+            "summary": "Prinsip Kimia Hijau bertujuan menciptakan industri dan proses kimia ramah lingkungan untuk mendukung pembangunan berkelanjutan PBB (SDGs).",
+            "quizzes": [
+              {
+                "id": "q-fis10-1",
+                "question": "Manakah di bawah ini yang paling mencerminkan prinsip ekonomi atom dalam Kimia Hijau?",
+                "options": ["Membuang limbah ke sungai setelah dinetralisir", "Membuat kemasan plastik sekali pakai", "Memaksimalkan atom bahan baku masuk ke produk akhir", "Menggunakan katalis beracun"],
+                "correctOptionIndex": 2,
+                "explanation": "Ekonomi atom menekankan efisiensi konversi bahan baku agar tidak terbuang sia-sia sebagai limbah sampingan."
+              }
+            ],
+            "flashcards": [
+              { "id": "fc-fis10-1", "front": "Sebutkan prinsip pertama Kimia Hijau.", "back": "Mencegah limbah sejak awal daripada mengolah limbah setelah diproduksi." }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-fis10-1",
+                "question": "Mengapa penggantian pelarut organik dengan cairan superkritis (seperti CO2 cair) dianggap sebagai terobosan besar Kimia Hijau?",
+                "options": ["Karena CO2 lebih mudah terbakar", "Karena mengurangi ketergantungan pada pelarut berbasis minyak bumi yang beracun", "Karena CO2 meningkatkan panas bumi", "Karena murah diproduksi di semua daerah"],
+                "correctOptionIndex": 1,
+                "explanation": "CO2 superkritis bersifat tidak beracun, aman, dan tidak meninggalkan residu berbahaya bagi lingkungan."
+              }
+            ],
+            "practiceBank": [
+              { "question": "Berikan 2 contoh penerapan kimia hijau dalam kehidupan sehari-hari.", "answer": "1. Penggunaan kantong plastik singkong biodegradable. 2. Sabun cuci piring ramah lingkungan." }
+            ],
+            "podcastScript": [
+              { "role": "budi", "text": "Kimia Hijau bukan hanya soal ramah lingkungan, tapi juga soal bisnis yang lebih efisien!" },
+              { "role": "siska", "text": "Betul. Limbah kimia itu biaya tersembunyi. Kimia hijau justru menghemat uang." }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sma-fis-10-mod2",
+        "title": "Fisika Mekanika Dasar",
+        "lessons": [
+          {
+            "id": "sma-fis-10-mod2-les1",
+            "title": "Hukum Newton dan Gerak Lurus",
+            "explanation": "### Hukum Newton\n\n**Hukum I (Inersia)**: Benda diam tetap diam dan benda bergerak tetap bergerak lurus beraturan jika tidak ada gaya luar yang bekerja padanya.\n\n**Hukum II**: $F = m \\times a$ (Gaya = Massa × Percepatan)\n\n**Hukum III (Aksi-Reaksi)**: Setiap gaya aksi menghasilkan gaya reaksi yang sama besar namun berlawanan arah.",
+            "visualExample": "#### Contoh Aplikasi Hukum II\n\nMobil bermassa 1000 kg didorong dengan gaya 5000 N. Berapa percepatan?\n\n$a = F/m = 5000/1000 = 5 \\text{ m/s}^2$",
+            "summary": "1. Hukum I: Benda mempertahankan keadaannya jika tidak ada gaya net.\n2. Hukum II: F = ma menghubungkan gaya, massa, dan percepatan.\n3. Hukum III: Gaya selalu berpasangan, aksi = -reaksi.",
+            "quizzes": [
+              {
+                "id": "q-fis10-newton-1",
+                "question": "Sebuah balok 5 kg dikenai gaya 20 N. Berapa percepatannya?",
+                "options": ["2 m/s²", "4 m/s²", "100 m/s²", "0.25 m/s²"],
+                "correctOptionIndex": 1,
+                "explanation": "F = ma, maka a = F/m = 20/5 = 4 m/s²."
+              }
+            ],
+            "flashcards": [
+              { "id": "fc-newton-1", "front": "Apa yang dimaksud dengan inersia?", "back": "Kecenderungan benda untuk mempertahankan keadaan gerak atau diamnya. Makin besar massa, makin besar inersia." }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-newton-1",
+                "question": "Mengapa atlet lompat jauh berlari terlebih dahulu sebelum melompat, bukan langsung melompat dari posisi diam?",
+                "options": ["Karena meningkatkan gaya gravitasi", "Karena kecepatan awal berkontribusi pada jarak lompatan berdasarkan prinsip momentum", "Karena lebih aerodinamis", "Karena aturan pertandingan"],
+                "correctOptionIndex": 1,
+                "explanation": "Momentum awal dari lari memberikan kecepatan horizontal yang besar, sehingga saat melompat, resultan kecepatan lebih besar menghasilkan jarak lompatan yang lebih jauh."
+              }
+            ],
+            "practiceBank": [
+              { "question": "Gaya 60 N bekerja pada benda, menghasilkan percepatan 3 m/s². Berapa massa benda?", "answer": "m = F/a = 60/3 = 20 kg" }
+            ],
+            "podcastScript": [
+              { "role": "budi", "text": "Saat kamu ngerem mendadak di bus, tubuh kamu terus ke depan. Itu Hukum I Newton!" },
+              { "role": "siska", "text": "Inersia! Tubuh kita 'ingin' terus bergerak dengan kecepatan aslinya." }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sma-ind-10",
+    "title": "Bahasa Indonesia Fase E (Kelas X)",
+    "phase": "E",
+    "schoolType": "sma",
+    "grade": 10,
+    "cpStatement": "Peserta didik mampu membaca kritis dan analitis berbagai jenis teks, menyimak informasi tersurat dan tersirat, serta memproduksi teks lisan dan tulis dengan memperhatikan struktur dan kebahasaan.",
+    "isDigitalSkill": false,
+    "modules": [
+      {
+        "id": "sma-ind-10-mod1",
+        "title": "Teks Laporan Hasil Observasi",
+        "lessons": [
+          {
+            "id": "sma-ind-10-mod1-les1",
+            "title": "Struktur dan Kaidah Teks LHO",
+            "explanation": "### Teks Laporan Hasil Observasi (LHO)\n\nTeks LHO adalah laporan yang berisi hasil pengamatan langsung terhadap suatu objek, makhluk hidup, atau fenomena.\n\n**Struktur LHO:**\n1. **Pernyataan Umum**: Mendefinisikan objek secara menyeluruh\n2. **Deskripsi Bagian**: Menjelaskan bagian-bagian objek secara rinci\n3. **Deskripsi Manfaat**: Menjelaskan kegunaan atau fungsi objek\n\n**Ciri Kebahasaan:**\n- Kata kerja definitif (adalah, merupakan, ialah)\n- Kalimat fakta, bukan opini\n- Konjungsi: dan, tetapi, sedangkan\n- Istilah teknis/ilmiah",
+            "visualExample": "#### Contoh Struktur LHO: Komodo\n\n**Pernyataan Umum**: Komodo (Varanus komodoensis) adalah kadal terbesar di dunia.\n\n**Deskripsi Bagian**: Komodo memiliki tubuh berwarna abu-abu dengan lidah bercabang berwarna kuning...\n\n**Deskripsi Manfaat**: Komodo berperan penting dalam keseimbangan ekosistem sebagai predator puncak.",
+            "summary": "1. LHO berdasarkan observasi langsung, bukan fiksi.\n2. Struktur: Pernyataan Umum → Deskripsi Bagian → Deskripsi Manfaat.\n3. Menggunakan kalimat fakta dan istilah ilmiah yang tepat.",
+            "quizzes": [
+              {
+                "id": "q-ind10-lho-1",
+                "question": "Bagian teks LHO yang berfungsi mendefinisikan objek secara umum adalah...",
+                "options": ["Deskripsi Bagian", "Penutup", "Pernyataan Umum", "Analisis Data"],
+                "correctOptionIndex": 2,
+                "explanation": "Pernyataan Umum adalah bagian pembuka yang memberikan definisi dan gambaran umum tentang objek yang diamati."
+              }
+            ],
+            "flashcards": [
+              { "id": "fc-ind10-1", "front": "Apa perbedaan kalimat fakta dan opini dalam teks LHO?", "back": "Fakta: pernyataan yang dapat dibuktikan dan diverifikasi. Opini: pernyataan berdasarkan sudut pandang pribadi yang tidak bisa dibuktikan secara objektif." }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-ind10-1",
+                "question": "Sebuah teks membahas 'keindahan Pantai Raja Ampat yang memukau' dan 'ekosistem terumbu karang di Raja Ampat yang mencakup 75% spesies karang di dunia'. Manakah yang merupakan kalimat fakta?",
+                "options": ["Kedua kalimat adalah fakta", "Hanya kalimat pertama fakta", "Hanya kalimat kedua fakta (data ilmiah terverifikasi)", "Keduanya opini"],
+                "correctOptionIndex": 2,
+                "explanation": "Kalimat kedua mengandung data terverifikasi (75% spesies karang = fakta ilmiah). Kalimat pertama menggunakan 'memukau' yang merupakan penilaian subjektif/opini."
+              }
+            ],
+            "practiceBank": [
+              { "question": "Buatlah pernyataan umum untuk teks LHO tentang Hutan Mangrove!", "answer": "Hutan mangrove adalah ekosistem hutan khas daerah tropis yang tumbuh di kawasan pesisir dengan tanah berlumpur dan terpengaruh pasang surut air laut." }
+            ],
+            "podcastScript": [
+              { "role": "budi", "text": "LHO itu beda sama karangan biasa. Ini tentang pengamatan yang kamu lakukan sendiri!" },
+              { "role": "siska", "text": "Kalau kamu amati semut di halaman, itu bisa jadi dasar LHO yang luar biasa untuk sains!" }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sma-inf-10",
+    "title": "Informatika Fase E (Kelas X)",
+    "phase": "E",
+    "schoolType": "sma",
+    "grade": 10,
+    "cpStatement": "Peserta didik mampu menerapkan berpikir komputasional dalam penyelesaian masalah, memahami jaringan komputer, dan menggunakan teknologi digital secara etis dan aman.",
+    "isDigitalSkill": true,
+    "modules": [
+      {
+        "id": "sma-inf-10-mod1",
+        "title": "Berpikir Komputasional",
+        "lessons": [
+          {
+            "id": "sma-inf-10-mod1-les1",
+            "title": "4 Pilar Berpikir Komputasional",
+            "explanation": "### Berpikir Komputasional\n\nBerpikir komputasional adalah kemampuan memecahkan masalah kompleks dengan cara yang bisa dilaksanakan oleh komputer.\n\n**4 Pilar Utama:**\n\n1. **Dekomposisi**: Memecah masalah besar menjadi bagian-bagian kecil yang lebih mudah diselesaikan.\n\n2. **Pengenalan Pola**: Mengidentifikasi persamaan, tren, atau keteraturan dalam data.\n\n3. **Abstraksi**: Fokus pada informasi penting, abaikan detail yang tidak relevan.\n\n4. **Algoritma**: Menyusun langkah-langkah sistematis untuk menyelesaikan masalah.",
+            "visualExample": "#### Contoh: Membuat Resep Nasi Goreng dengan Berpikir Komputasional\n\n**Dekomposisi**: Pisahkan menjadi: bahan, bumbu, proses memasak, penyajian\n\n**Algoritma**:\n1. Panaskan minyak\n2. Tumis bawang sampai harum\n3. Masukkan nasi, aduk rata\n4. Tambahkan kecap dan garam\n5. Sajikan",
+            "summary": "1. Dekomposisi: pecah masalah.\n2. Pengenalan pola: temukan keteraturan.\n3. Abstraksi: sederhanakan.\n4. Algoritma: susun langkah-langkah jelas.",
+            "quizzes": [
+              {
+                "id": "q-inf10-ct-1",
+                "question": "Seorang programmer memecah tugas membuat website menjadi: desain, coding, database, dan testing. Pilar berpikir komputasional mana yang digunakan?",
+                "options": ["Pengenalan Pola", "Abstraksi", "Algoritma", "Dekomposisi"],
+                "correctOptionIndex": 3,
+                "explanation": "Dekomposisi adalah proses memecah masalah besar (membuat website) menjadi bagian-bagian yang lebih kecil dan terkelola."
+              }
+            ],
+            "flashcards": [
+              { "id": "fc-inf10-1", "front": "Apa yang dimaksud dengan abstraksi dalam berpikir komputasional?", "back": "Proses memfokuskan perhatian hanya pada informasi yang penting dan relevan, sambil mengabaikan detail yang tidak diperlukan untuk menyelesaikan masalah." }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-inf10-1",
+                "question": "Seorang siswa ingin membuat aplikasi pengingat jadwal pelajaran. Urutan langkah berpikir komputasional yang tepat adalah...",
+                "options": ["Algoritma → Dekomposisi → Abstraksi → Pola", "Dekomposisi → Pengenalan Pola → Abstraksi → Algoritma", "Abstraksi → Algoritma → Dekomposisi → Pola", "Pola → Algoritma → Abstraksi → Dekomposisi"],
+                "correctOptionIndex": 1,
+                "explanation": "Proses yang tepat: pertama pecah masalah (dekomposisi), kenali fitur yang berulang (pola), sederhanakan (abstraksi), baru susun langkah penyelesaian (algoritma)."
+              }
+            ],
+            "practiceBank": [
+              { "question": "Gunakan dekomposisi untuk memecah tugas 'mengerjakan PR Matematika halaman 45-50'.", "answer": "1. Baca soal 2. Identifikasi jenis soal 3. Ingat rumus terkait 4. Kerjakan per soal 5. Cek jawaban" }
+            ],
+            "podcastScript": [
+              { "role": "budi", "text": "Berpikir komputasional bukan hanya untuk programmer. Ini cara berpikir untuk semua orang!" },
+              { "role": "siska", "text": "Ketika kamu merencanakan liburan — dekomposisi transportasi, hotel, destinasi — itu sudah berpikir komputasional!" }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sma-mat-11",
+    "title": "Matematika Fase F (Kelas XI)",
+    "phase": "F",
+    "schoolType": "sma",
+    "grade": 11,
+    "cpStatement": "Di akhir Fase F, peserta didik dapat menyelesaikan masalah yang berkaitan dengan fungsi komposisi dan invers, barisan dan deret aritmetika-geometri, serta trigonometri dasar.",
+    "isDigitalSkill": false,
+    "modules": [
+      {
+        "id": "sma-mat-11-mod1",
+        "title": "Fungsi Komposisi dan Invers",
+        "lessons": [
+          {
+            "id": "sma-mat-11-mod1-les1",
+            "title": "Fungsi Komposisi (fog)",
+            "explanation": "### Fungsi Komposisi\n\nFungsi komposisi $(f \\circ g)(x)$ berarti menerapkan $g$ terlebih dahulu, kemudian $f$ terhadap hasilnya.\n\n$$(f \\circ g)(x) = f(g(x))$$\n\n**Sifat-sifat:**\n- $(f \\circ g)(x) \\neq (g \\circ f)(x)$ (tidak komutatif)\n- $((f \\circ g) \\circ h)(x) = (f \\circ (g \\circ h))(x)$ (asosiatif)\n- $(f \\circ I)(x) = (I \\circ f)(x) = f(x)$ (identitas)",
+            "visualExample": "#### Contoh: $f(x) = x^2 + 1$ dan $g(x) = 2x - 3$\n\n$(f \\circ g)(x) = f(g(x)) = f(2x-3) = (2x-3)^2 + 1 = 4x^2 - 12x + 9 + 1 = 4x^2 - 12x + 10$\n\n$(g \\circ f)(x) = g(f(x)) = g(x^2+1) = 2(x^2+1) - 3 = 2x^2 - 1$",
+            "summary": "1. Fungsi komposisi adalah penerapan fungsi berantai.\n2. Urutan sangat penting: fog ≠ gof.\n3. Dapat digunakan untuk menyederhanakan perhitungan bertingkat.",
+            "quizzes": [
+              {
+                "id": "q-mat11-fog-1",
+                "question": "Jika $f(x) = x + 2$ dan $g(x) = 3x$, berapa $(f \\circ g)(4)$?",
+                "options": ["14", "18", "12", "10"],
+                "correctOptionIndex": 0,
+                "explanation": "$(f \\circ g)(4) = f(g(4)) = f(12) = 12 + 2 = 14$."
+              }
+            ],
+            "flashcards": [
+              { "id": "fc-mat11-1", "front": "Apa yang dimaksud $(f \\circ g)(x) = f(g(x))$?", "back": "Ini berarti substitusikan g(x) ke dalam f(x). Baca: 'f komposisi g dari x'." }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-mat11-1",
+                "question": "Diketahui $(f \\circ g)(x) = 6x^2 + 1$ dan $g(x) = 3x^2$. Tentukan $f(x)$!",
+                "options": ["f(x) = 2x - 1", "f(x) = 2x + 1", "f(x) = x + 1", "f(x) = x/2 + 1"],
+                "correctOptionIndex": 1,
+                "explanation": "$(f \\circ g)(x) = f(3x^2) = 6x^2 + 1$. Jika kita misalkan $u = 3x^2$, maka $f(u) = 2u + 1$. Dengan demikian $f(x) = 2x + 1$."
+              }
+            ],
+            "practiceBank": [
+              { "question": "Jika f(x) = √x dan g(x) = x² - 4, tentukan domain dari (f∘g)(x).", "answer": "g(x) ≥ 0 ⟹ x² ≥ 4 ⟹ x ≤ -2 atau x ≥ 2" }
+            ],
+            "podcastScript": [
+              { "role": "budi", "text": "Fungsi komposisi itu seperti mesin dalam pabrik yang bekerja berurutan." },
+              { "role": "siska", "text": "Mesin pertama (g) mengubah bahan baku, lalu mesin kedua (f) memprosesnya lebih lanjut." }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sma-mat-12",
+    "title": "Matematika Fase F (Kelas XII)",
+    "phase": "F",
+    "schoolType": "sma",
+    "grade": 12,
+    "cpStatement": "Di akhir Fase F, peserta didik dapat menyelesaikan masalah kalkulus diferensial dan integral, serta menggunakan statistika inferensial untuk menarik kesimpulan dari data.",
+    "isDigitalSkill": false,
+    "modules": [
+      {
+        "id": "sma-mat-12-mod1",
+        "title": "Turunan Fungsi Aljabar",
+        "lessons": [
+          {
+            "id": "sma-mat-12-mod1-les1",
+            "title": "Konsep Turunan dan Aturan Dasar",
+            "explanation": "### Turunan (Diferensial)\n\nTurunan fungsi $f$ di titik $x$ didefinisikan sebagai:\n\n$$f'(x) = \\lim_{h \\to 0} \\frac{f(x+h) - f(x)}{h}$$\n\n**Aturan Turunan Dasar:**\n- Konstanta: $\\frac{d}{dx}[c] = 0$\n- Pangkat: $\\frac{d}{dx}[x^n] = nx^{n-1}$\n- Penjumlahan: $[f + g]' = f' + g'$\n- Perkalian: $[fg]' = f'g + fg'$\n- Pembagian: $[f/g]' = \\frac{f'g - fg'}{g^2}$",
+            "visualExample": "#### Contoh Perhitungan Turunan\n\n$f(x) = 4x^3 - 2x^2 + 7x - 5$\n\n$f'(x) = 12x^2 - 4x + 7$\n\n**Penerapan**: Nilai $f'(2) = 12(4) - 4(2) + 7 = 48 - 8 + 7 = 47$",
+            "summary": "1. Turunan mengukur laju perubahan fungsi.\n2. Aturan pangkat: turunkan pangkat dan kurangi eksponen sebesar 1.\n3. Turunan digunakan untuk menentukan nilai optimum (max/min).",
+            "quizzes": [
+              {
+                "id": "q-mat12-turunan-1",
+                "question": "Turunan pertama dari $f(x) = 5x^4 - 3x^2 + 8x$ adalah...",
+                "options": ["20x³ - 6x + 8", "20x³ - 3x + 8", "5x³ - 6x + 8", "20x⁴ - 6x² + 8"],
+                "correctOptionIndex": 0,
+                "explanation": "$f'(x) = 4(5)x^3 - 2(3)x + 8 = 20x^3 - 6x + 8$"
+              }
+            ],
+            "flashcards": [
+              { "id": "fc-mat12-1", "front": "Apa interpretasi geometris dari turunan f'(a)?", "back": "f'(a) adalah kemiringan (gradien) garis singgung kurva f(x) di titik x = a." }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-mat12-1",
+                "question": "Sebuah perusahaan memiliki fungsi biaya $C(x) = x^3 - 6x^2 + 15x + 10$ (dalam juta rupiah) dengan x adalah unit produksi. Tentukan tingkat produksi yang meminimalkan biaya marginal!",
+                "options": ["x = 1", "x = 2", "x = 3", "x = 4"],
+                "correctOptionIndex": 1,
+                "explanation": "Biaya marginal MC = C'(x) = 3x² - 12x + 15. Untuk minimum: MC'(x) = 6x - 12 = 0 ⟹ x = 2."
+              }
+            ],
+            "practiceBank": [
+              { "question": "Tentukan titik kritis dari f(x) = x³ - 3x² - 9x + 5.", "answer": "f'(x) = 3x² - 6x - 9 = 3(x-3)(x+1) = 0. Titik kritis: x = 3 dan x = -1." }
+            ],
+            "podcastScript": [
+              { "role": "budi", "text": "Turunan itu bicara tentang 'seberapa cepat sesuatu berubah'. Kecepatan motor itu turunan dari posisi!" },
+              { "role": "siska", "text": "Dan percepatan itu turunan dari kecepatan. Kita gunakan kalkulus setiap hari tanpa sadar." }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

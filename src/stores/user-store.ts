@@ -6,6 +6,11 @@ const DEFAULT_PROFILE: UserProfile = {
   name: 'Alex Mercer',
   email: 'alex@academy.os',
   avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+  role: 'student',
+  schoolType: 'sma',
+  grade: 10,
+  selectedPathway: 'Umum',
+  goals: ['Kuasai kalkulus sebelum semester baru', 'Menyelesaikan 3 kuis berturut-turut', 'Konsisten Pomodoro harian'],
   streak: 5,
   lastActive: new Date().toISOString(),
   xp: 1250,
@@ -23,9 +28,9 @@ const DEFAULT_PROFILE: UserProfile = {
     { day: 'Min', minutes: 0, xp: 0 }
   ],
   weakTopics: [
-    { topic: 'Keadaan Kuantum', mastery: 42 },
-    { topic: 'Integrasi Kalkulus', mastery: 58 },
-    { topic: 'Kata Kerja Prancis', mastery: 65 }
+    { topic: 'Persamaan Eksponen', mastery: 42 },
+    { topic: 'Pilar Enkapsulasi', mastery: 58 },
+    { topic: 'Routing Statis', mastery: 65 }
   ],
   skills: {
     focus: 64,
@@ -43,7 +48,9 @@ const DEFAULT_PROFILE: UserProfile = {
     { id: 'q1', title: 'Belajar 45 Menit Hari Ini', xpReward: 100, completed: false, target: 45, current: 35, type: 'study' },
     { id: 'q2', title: 'Selesaikan Satu Kuis AI', xpReward: 50, completed: false, target: 1, current: 0, type: 'quiz' },
     { id: 'q3', title: 'Bertanya Pada Tutor AI', xpReward: 50, completed: false, target: 3, current: 1, type: 'chat' }
-  ]
+  ],
+  portfolio: [],
+  pklLog: []
 };
 
 interface UserState {
@@ -74,7 +81,6 @@ export const useUserStore = create<UserState>((set) => {
         newLevel += 1;
       }
 
-      // Gunakan hari Indonesia untuk kecocokan weeklyProgress
       const dayIndex = new Date().getDay();
       const idDays = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
       const todayName = idDays[dayIndex];
