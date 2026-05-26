@@ -27,10 +27,10 @@ import {
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
-export default function LessonDetailPage({ params }: any) {
+export default function LessonDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
-  const resolvedParams = use<{ id: string }>(params);
-  const { id: lessonId } = resolvedParams;
+  const resolvedParams = use(params);
+  const lessonId = resolvedParams?.id;
 
   const [data, setData] = useState<{ lesson: any; subject: any; moduleTitle: string } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -101,7 +101,7 @@ export default function LessonDetailPage({ params }: any) {
     );
   }
 
-  if (!data) {
+  if (!lessonId || !data) {
     return (
       <div className="text-center py-20">
         <h2 className="text-sm font-bold text-danger">Pelajaran Tidak Ditemukan</h2>

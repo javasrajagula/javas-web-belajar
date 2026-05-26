@@ -308,6 +308,7 @@ export default function DashboardPage() {
 
             <div className="divide-y divide-border">
               {recommendedLessons.map((les) => {
+                if (!les.id) return null;
                 const isCompleted = completedLessons[les.id];
                 return (
                   <div key={les.id} className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between group">

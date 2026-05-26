@@ -1,7 +1,12 @@
 import { NextRequest } from "next/server";
+import { streamText } from "ai";
+import { google } from "@ai-sdk/google";
 import { auth } from "@/auth";
 import { ratelimiter } from "@/lib/ratelimit";
 import { searchSimilarChunks } from "@/lib/actions/rag";
+
+// Check if Gemini API key is configured
+const hasGeminiKey = !!process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,86 +16,155 @@ export async function POST(req: NextRequest) {
 
     // Authenticate user
     const session = await auth();
-    const userId = session?.user?.id || req.headers.get("x-forwarded-for") || "anonymous";
+    const userId =
+      session?.user?.id ||
+      req.headers.get("x-forwarded-for") ||
+      "anonymous";
 
     // Rate Limit Check (max 15 requests per minute)
-    const { success, limit, remaining, reset } = await ratelimiter.limit(userId);
+    // Wrapped in try-catch: if Redis/ratelimiter fails, bypass and allow request
+    try {
+      const { success, limit, remaining, reset } =
+        await ratelimiter.limit(userId);
 
-    if (!success) {
-      return new Response(
-        JSON.stringify({
-          error: "Terlalu banyak permintaan.",
-          message: "Batas laju terlampaui. Anda hanya diperbolehkan mengirim maksimal 15 pertanyaan per menit.",
-          limit,
-          remaining,
-          reset
-        }),
-        {
-          status: 429,
-          headers: {
-            "Content-Type": "application/json",
-            "X-RateLimit-Limit": limit.toString(),
-            "X-RateLimit-Remaining": remaining.toString(),
-            "X-RateLimit-Reset": reset.toString(),
-          },
-        }
-      );
+      if (!success) {
+        return new Response(
+          JSON.stringify({
+            error: "Terlalu banyak permintaan.",
+            message:
+              "Batas laju terlampaui. Anda hanya diperbolehkan mengirim maksimal 15 pertanyaan per menit.",
+            limit,
+            remaining,
+            reset,
+          }),
+          {
+            status: 429,
+            headers: {
+              "Content-Type": "application/json",
+              "X-RateLimit-Limit": limit.toString(),
+              "X-RateLimit-Remaining": remaining.toString(),
+              "X-RateLimit-Reset": reset.toString(),
+            },
+          }
+        );
+      }
+    } catch (rateLimitError) {
+      console.warn("Rate limiter failed, bypassing:", rateLimitError);
+      // Continue processing the request without rate limiting
     }
 
     // RAG Search for school documents
-    const matchedChunks = await searchSimilarChunks(lastMessage, 2);
+    const matchedChunks = await searchSimilarChunks(lastMessage, 3);
     let ragContext = "";
     if (matchedChunks.length > 0) {
-      ragContext = "\n\n**Referensi Materi Sekolah (Unggahan Guru):**\n" + matchedChunks.map(c => `* [Dari Dokumen: ${c.documentTitle}] "${c.content}"`).join("\n");
+      ragContext =
+        "\n\n## Referensi Materi Sekolah (Unggahan Guru):\n" +
+        matchedChunks
+          .map(
+            (c) =>
+              `- [Dokumen: ${c.documentTitle}] "${c.content}"`
+          )
+          .join("\n");
     }
 
     // Extract context details
-    const studentName = context?.studentName || "Alex Mercer";
+    const studentName = context?.studentName || "Siswa";
     const grade = context?.grade || 10;
     const schoolType = context?.schoolType || "sma";
     const selectedPathway = context?.selectedPathway || "Umum";
-    const lessonTitle = context?.lessonTitle || "Persamaan Eksponen";
-    const subjectTitle = context?.subjectTitle || "Matematika";
+    const lessonTitle = context?.lessonTitle || "";
+    const subjectTitle = context?.subjectTitle || "";
     const cpStatement = context?.cpStatement || "";
     const mode = context?.mode || "teacher";
 
-    // Generate pedagogical response based on context & mode
+    // Build pedagogical system prompt
+    const modeInstructions: Record<string, string> = {
+      simple: `Gunakan bahasa yang sangat sederhana, analogis, dan ramah. Jelaskan konsep seolah-olah siswa baru pertama kali belajar. Gunakan emoji untuk membuat penjelasan lebih hidup.`,
+      professor: `Berikan penjelasan mendalam tingkat akademis. Gunakan terminologi formal, kutip teori/prinsip yang relevan, dan dorong siswa berpikir kritis.`,
+      exam: `Buat soal latihan dan evaluasi pemahaman siswa. Berikan soal bertahap dari mudah ke sulit. Setelah siswa menjawab, berikan koreksi dan penjelasan rinci.`,
+      debate: `Ajak siswa berdiskusi dan berdebat tentang topik. Tantang asumsi mereka, berikan perspektif alternatif, dan dorong argumentasi logis.`,
+      teacher: `Bersikaplah seperti guru favorit yang sabar dan inspiratif. Jelaskan dengan jelas, berikan contoh konkret, dan motivasi siswa untuk terus belajar.`,
+    };
+
+    const systemPrompt = `Kamu adalah **Tutor AI Academy OS Ω**, asisten belajar pintar untuk siswa ${schoolType.toUpperCase()} Kelas ${grade} Indonesia dengan konsentrasi **${selectedPathway}**.
+
+## Identitas & Peran
+- Nama siswa yang sedang kamu bantu: **${studentName}**
+- Kurikulum: Kurikulum Merdeka (Fase ${grade <= 10 ? "E" : "F"})
+${subjectTitle ? `- Mata pelajaran aktif: **${subjectTitle}**` : ""}
+${lessonTitle ? `- Topik/materi aktif: **${lessonTitle}**` : ""}
+${cpStatement ? `- Capaian Pembelajaran (CP): "${cpStatement}"` : ""}
+
+## Mode Mengajar Aktif: ${mode.toUpperCase()}
+${modeInstructions[mode] || modeInstructions.teacher}
+
+## Aturan Penting
+1. **Selalu jawab dalam Bahasa Indonesia** yang baik dan benar.
+2. Gunakan format **Markdown** untuk struktur (heading, bold, list, kode).
+3. Untuk rumus matematika, gunakan format LaTeX: $inline$ atau $$block$$.
+4. Sesuaikan tingkat kesulitan dengan kelas ${grade} ${schoolType.toUpperCase()}.
+5. Jika siswa bertanya di luar topik aktif, tetap jawab dengan baik namun arahkan kembali ke materi.
+6. Berikan motivasi dan pujian saat siswa menunjukkan kemajuan.
+7. Jika topik berkaitan dengan kejuruan (SMK), hubungkan dengan aplikasi praktis di industri.
+
+## Fitur Generative UI
+Kamu bisa menyisipkan komponen interaktif dalam jawabanmu:
+
+### Kuis Interaktif
+Gunakan format token berikut untuk membuat kuis pilihan ganda:
+[QUIZ: pertanyaan | opsi_salah | opsi_salah | opsi_salah | jawaban_benar | index_jawaban_benar(0-based) | penjelasan]
+Contoh: [QUIZ: Berapakah $2^5$? | 10 | 16 | 64 | 32 | 3 | $2^5 = 2×2×2×2×2 = 32$]
+
+### Flashcard
+Gunakan format token berikut untuk membuat kartu hafalan:
+[FLASHCARD: pertanyaan_depan | jawaban_belakang]
+Contoh: [FLASHCARD: Apa itu variabel dalam pemrograman? | Variabel adalah tempat penyimpanan data sementara di memori yang memiliki nama dan tipe data.]
+
+Sisipkan kuis/flashcard secara natural saat relevan, terutama ketika siswa meminta latihan, kuis, tes, ujian, kartu hafalan, atau flashcard.
+${ragContext}`;
+
+    // ─── Gemini AI Streaming ───
+    if (hasGeminiKey) {
+      const result = streamText({
+        model: google("gemini-2.0-flash"),
+        system: systemPrompt,
+        messages: messages.map((m: { role: string; content: string }) => ({
+          role: m.role as "user" | "assistant",
+          content: m.content,
+        })),
+        temperature: 0.7,
+      });
+
+      return result.toTextStreamResponse();
+    }
+
+    // ─── Fallback: Mock Streaming (jika tidak ada API key) ───
     let responseText = "";
 
     if (mode === "simple") {
-      responseText = `Halo ${studentName}! Mari kita sederhanakan topik **${lessonTitle}** dari kelas **${subjectTitle}** ini. Bayangkan eksponen seperti sebuah mesin pengganda cepat. Jika kita punya basis 2 dan eksponen 3 ($2^3$), itu artinya mesin menduplikasi angka 2 sebanyak 3 kali: $2 \\times 2 \\times 2 = 8$. Logaritma adalah cara kita bertanya balik: 'Mesin harus menduplikasi 2 berapa kali agar jadi 8?' Jawabannya adalah 3! Apakah penjelasan sederhana ini membantumu?`;
+      responseText = `Halo ${studentName}! 👋 Mari kita sederhanakan topik **${lessonTitle || "ini"}**. Bayangkan eksponen seperti mesin pengganda cepat. Jika kita punya basis 2 dan eksponen 3 ($2^3$), itu artinya: $2 \\times 2 \\times 2 = 8$. Mudah kan? 😊`;
     } else if (mode === "professor") {
-      responseText = `Selamat belajar, ${studentName}. Mari kita analisis topik **${lessonTitle}** secara mendalam. Dalam domain kurikulum Fase ${grade === 10 ? 'E' : 'F'} ${schoolType.toUpperCase()} untuk mata pelajaran **${subjectTitle}**, materi ini dirancang untuk mewujudkan Capaian Pembelajaran: *"${cpStatement}"*. \n\nSecara teoritis, kita sedang mengeksplorasi sifat pemetaan transendental $f(x) = a^x$. Mari kita bedah pembuktian sifat-sifat eksponensial di bawah syarat basis $a > 0$ dan $a \\neq 1$. Bagian pembuktian mana yang paling menarik perhatian akademismu?`;
+      responseText = `Selamat belajar, ${studentName}. Mari kita analisis topik **${lessonTitle || "ini"}** secara mendalam dalam konteks kurikulum Fase ${grade === 10 ? "E" : "F"} ${schoolType.toUpperCase()} untuk **${subjectTitle || "mata pelajaran ini"}**.`;
     } else if (mode === "exam") {
-      responseText = `Halo ${studentName}, saatnya menguji pemahamanmu untuk topik **${lessonTitle}**! Coba pecahkan persoalan kognitif berikut:\n\n**Soal:** \nJika diketahui persamaan eksponen $5^{2x - 4} = 125$, berapakah nilai $x$ yang memenuhi persamaan tersebut?\n\nKetik jawabanmu beserta langkah penyelesaiannya di sini, dan saya akan mengevaluasi logika berfikirmu!`;
+      responseText = `Halo ${studentName}! 📝 Saatnya menguji pemahamanmu! Coba kerjakan soal berikut:\n\n**Soal:** Jika $5^{2x - 4} = 125$, berapakah nilai $x$?\n\nKetik jawabanmu beserta langkah penyelesaiannya!`;
     } else if (mode === "debate") {
-      responseText = `Menarik sekali kamu ingin mendiskusikan **${lessonTitle}**, ${studentName}. Banyak siswa langsung menerima rumus ini secara mentah-mentah. Namun, mari kita bersikap skeptis: apakah menurutmu logaritma dan eksponen memiliki relevansi nyata pada konsentrasi studi kejuruanmu di **${selectedPathway}**, ataukah ini hanya sekadar prasyarat kurikuler formalitas? Bagaimana sudut pandangmu?`;
+      responseText = `Menarik, ${studentName}! 🤔 Mari kita diskusikan — apakah menurutmu **${lessonTitle || "materi ini"}** memiliki relevansi nyata untuk konsentrasi **${selectedPathway}**, atau hanya formalitas kurikulum?`;
     } else {
-      // Default: teacher
-      responseText = `Halo ${studentName}! Sebagai gurumu untuk mata pelajaran **${subjectTitle}** Kelas **${grade} ${schoolType.toUpperCase()}**, mari kita bahas topik **${lessonTitle}**. Berdasarkan Capaian Pembelajaran (CP) kita, tujuan pembelajaran hari ini adalah agar kamu mahir memecahkan studi kasus terkait topik ini.\n\nApakah ada bagian dari ringkasan, rumus, atau kuis mandiri di modul ini yang terasa membingungkan bagi kamu?`;
+      responseText = `Halo ${studentName}! 👋 Sebagai tutormu untuk **${subjectTitle || "pelajaran ini"}** Kelas ${grade} ${schoolType.toUpperCase()}, mari kita bahas **${lessonTitle || "materi hari ini"}**.\n\nApa yang ingin kamu pelajari atau yang masih membingungkan?`;
     }
 
-    // Append context-aware response details based on search text
     const query = lastMessage.toLowerCase();
-    if (query.includes("contoh") || query.includes("soal") || query.includes("latihan")) {
-      responseText += `\n\n**Contoh Tambahan:**\nJika kita memiliki persamaan eksponensial $3^{x} = 81$, karena basisnya adalah 3, kita ubah 81 menjadi basis yang sama: $81 = 3^4$. Dengan demikian, kita peroleh $x = 4$.`;
-    } else if (query.includes("pkl") || query.includes("magang") || query.includes("industri")) {
-      responseText += `\n\n*Catatan Kejuruan:* Topik ini juga sangat berguna untuk menganalisis pertumbuhan data di server atau memetakan performa database saat kamu melakukan PKL nanti!`;
+    if (query.includes("kuis") || query.includes("tes") || query.includes("uji")) {
+      responseText += `\n\n[QUIZ: Berapakah nilai dari $3^4$? | 12 | 27 | 64 | 81 | 3 | $3^4 = 3 \\times 3 \\times 3 \\times 3 = 81$]`;
+    } else if (query.includes("flashcard") || query.includes("kartu")) {
+      responseText += `\n\n[FLASHCARD: Apa pilar utama Object-Oriented Programming (OOP)? | Enkapsulasi, Pewarisan (Inheritance), Polimorfisme, dan Abstraksi.]`;
     }
 
-    // Append RAG references
     if (ragContext) {
       responseText += ragContext;
     }
 
-    // Generative UI triggers
-    if (query.includes("kuis") || query.includes("tes") || query.includes("uji")) {
-      responseText += `\n\nCoba uji pemahamanmu dengan kuis interaktif ini:\n\n[QUIZ: Berapakah nilai dari eksponen $3^4$? | 12 | 27 | 64 | 81 | 3 | Eksponen $3^4$ berarti perkalian berulang angka 3 sebanyak 4 kali: $3 \\times 3 \\times 3 \\times 3 = 81$.]`;
-    } else if (query.includes("flashcard") || query.includes("kartu")) {
-      responseText += `\n\nBerikut adalah kartu hafalan cepat untuk membantumu mengingat:\n\n[FLASHCARD: Apa pilar utama Object-Oriented Programming (OOP)? | Enkapsulasi, Pewarisan (Inheritance), Polimorfisme, dan Abstraksi.]`;
-    }
-
-    // Convert responseText to a ReadableStream to stream word-by-word
+    // Stream mock response word-by-word
     const encoder = new TextEncoder();
     const words = responseText.split(" ");
 
@@ -98,8 +172,7 @@ export async function POST(req: NextRequest) {
       async start(controller) {
         for (const word of words) {
           controller.enqueue(encoder.encode(word + " "));
-          // Simulate latency
-          await new Promise((resolve) => setTimeout(resolve, 60));
+          await new Promise((resolve) => setTimeout(resolve, 50));
         }
         controller.close();
       },

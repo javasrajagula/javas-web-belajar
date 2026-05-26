@@ -16,10 +16,10 @@ import {
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
-export default function BrainDetailPage({ params }: any) {
+export default function BrainDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
-  const resolvedParams = use<{ id: string }>(params);
-  const { id } = resolvedParams;
+  const resolvedParams = use(params);
+  const id = resolvedParams?.id;
   const { materials, updateFlashcardStatus } = useMaterialsStore();
   const { addXp, upgradeSkill, updateQuestProgress } = useUserStore();
 

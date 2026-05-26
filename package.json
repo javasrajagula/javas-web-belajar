@@ -17,6 +17,7 @@
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
+    "@ai-sdk/google": "^3.0.79",
     "@auth/prisma-adapter": "^2.11.2",
     "@hookform/resolvers": "^3.9.1",
     "@prisma/client": "^6.2.1",
