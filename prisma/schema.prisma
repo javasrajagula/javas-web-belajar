@@ -57,6 +57,9 @@ model User {
   // Guild relations
   guildId            String?
   guild              Guild?      @relation(fields: [guildId], references: [id])
+  userJurusan        UserJurusan[]
+  hasilUjian         HasilUjian[]
+  materiProgress     MateriProgress[]
 }
 
 model Account {
@@ -217,5 +220,113 @@ model DocumentChunk {
   document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
   content    String   @db.Text
   embedding  Json?    // Array of floats
+}
+
+model Jurusan {
+  id              String          @id @default(cuid())
+  kode            String          @unique
+  nama            String
+  bidang          String
+  deskripsi       String
+  icon            String
+  warna           String
+  popular         Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  mataPelajaran   MataPelajaran[]
+  userJurusan     UserJurusan[]
+}
+
+model MataPelajaran {
+  id          String    @id @default(cuid())
+  jurusanId   String
+  jurusan     Jurusan   @relation(fields: [jurusanId], references: [id], onDelete: Cascade)
+  kode        String
+  nama        String
+  kelas       Int
+  semester    Int
+  deskripsi   String
+  createdAt   DateTime  @default(now())
+  bab         Bab[]
+  bankSoal    BankSoal[]
+}
+
+model Bab {
+  id              String        @id @default(cuid())
+  mataPelajaranId String
+  mataPelajaran   MataPelajaran @relation(fields: [mataPelajaranId], references: [id], onDelete: Cascade)
+  nomor           Int
+  judul           String
+  deskripsi       String
+  estimasiMenit   Int
+  createdAt       DateTime      @default(now())
+  materi          Materi[]
+}
+
+model Materi {
+  id             String           @id @default(cuid())
+  babId          String
+  bab            Bab              @relation(fields: [babId], references: [id], onDelete: Cascade)
+  judul          String
+  tipe           String
+  konten         String           @db.Text
+  urutan         Int
+  createdAt      DateTime         @default(now())
+  materiProgress MateriProgress[]
+}
+
+model BankSoal {
+  id              String        @id @default(cuid())
+  mataPelajaranId String
+  mataPelajaran   MataPelajaran @relation(fields: [mataPelajaranId], references: [id], onDelete: Cascade)
+  pertanyaan      String        @db.Text
+  tipe            String
+  pilihan         Json?
+  jawabanBenar    String        @db.Text
+  pembahasan      String        @db.Text
+  tingkat         String
+  kelas           Int
+  tahunAjaran     String?
+  sumber          String?
+  tags            String[]
+  createdAt       DateTime      @default(now())
+}
+
+model UserJurusan {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jurusanId String
+  jurusan   Jurusan  @relation(fields: [jurusanId], references: [id])
+  kelas     Int
+  aktif     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  @@unique([userId, jurusanId])
+}
+
+model HasilUjian {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mataPelajaranId String
+  judul           String
+  tipe            String
+  totalSoal       Int
+  benar           Int
+  salah           Int
+  nilaiAkhir      Float
+  durasiDetik     Int
+  jawabanDetail   Json
+  createdAt       DateTime @default(now())
+}
+
+model MateriProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  materiId    String
+  materi      Materi   @relation(fields: [materiId], references: [id], onDelete: Cascade)
+  completed   Boolean  @default(true)
+  completedAt DateTime @default(now())
+  @@unique([userId, materiId])
 }
 
