@@ -17,13 +17,35 @@ import {
   Zap,
   FolderKanban,
   FileCheck,
-  Star
+  Star,
+  FileText,
+  Plus,
+  Trash2
 } from 'lucide-react';
 import { 
   getStudentsList, 
   gradePortfolioProject, 
   approveInternshipEntry 
 } from '@/lib/actions/teacher';
+import { 
+  getDocumentsList, 
+  uploadDocument, 
+  deleteDocument, 
+  searchSimilarChunks 
+} from '@/lib/actions/rag';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Legend,
+  PieChart,
+  Pie,
+  Cell
+} from 'recharts';
 
 export default function TeacherPortal() {
   const [students, setStudents] = useState<any[]>([]);
@@ -35,6 +57,21 @@ export default function TeacherPortal() {
   // Grading & Approval states
   const [gradeInput, setGradeInput] = useState<Record<string, number>>({});
   const [submittingIds, setSubmittingIds] = useState<Record<string, boolean>>({});
+
+  // Tab State
+  const [activeTab, setActiveTab] = useState<'students' | 'analytics' | 'rag'>('students');
+
+  // Recharts Mount State
+  const [isMounted, setIsMounted] = useState(false);
+
+  // RAG management states
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [docTitle, setDocTitle] = useState('');
+  const [docContent, setDocContent] = useState('');
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [ragQuery, setRagQuery] = useState('');
+  const [ragResults, setRagResults] = useState<any[]>([]);
+  const [searchingRag, setSearchingRag] = useState(false);
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -48,9 +85,90 @@ export default function TeacherPortal() {
     }
   };
 
+  const fetchDocuments = async () => {
+    try {
+      const list = await getDocumentsList();
+      setDocuments(list);
+    } catch (err) {
+      console.error('Failed to fetch documents:', err);
+    }
+  };
+
   useEffect(() => {
+    setIsMounted(true);
     fetchStudents();
+    fetchDocuments();
   }, []);
+
+  const handleUploadDoc = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!docTitle.trim() || !docContent.trim()) return;
+    setUploadingDoc(true);
+    try {
+      await uploadDocument(docTitle, docContent);
+      setDocTitle('');
+      setDocContent('');
+      await fetchDocuments();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setUploadingDoc(false);
+    }
+  };
+
+  const handleDeleteDoc = async (id: string) => {
+    if (!confirm('Apakah Anda yakin ingin menghapus materi ini?')) return;
+    try {
+      await deleteDocument(id);
+      await fetchDocuments();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSearchRag = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!ragQuery.trim()) return;
+    setSearchingRag(true);
+    try {
+      const results = await searchSimilarChunks(ragQuery, 3);
+      setRagResults(results);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSearchingRag(false);
+    }
+  };
+
+  // Recharts Data Calculations
+  const levelCounts: Record<number, number> = {};
+  students.forEach(s => {
+    levelCounts[s.level] = (levelCounts[s.level] || 0) + 1;
+  });
+  const levelData = Object.keys(levelCounts).map(lvl => ({
+    level: `Lvl ${lvl}`,
+    'Jumlah Siswa': levelCounts[Number(lvl)]
+  })).sort((a, b) => a.level.localeCompare(b.level));
+
+  const smaProgress = students.filter(s => s.schoolType === 'sma');
+  const smkProgress = students.filter(s => s.schoolType === 'smk');
+  const avgSma = smaProgress.length > 0 ? smaProgress.reduce((sum, s) => sum + s.progress.length, 0) / smaProgress.length : 0;
+  const avgSmk = smkProgress.length > 0 ? smkProgress.reduce((sum, s) => sum + s.progress.length, 0) / smkProgress.length : 0;
+  const progressData = [
+    { name: 'SMA', 'Rerata Pelajaran': Number(avgSma.toFixed(1)) },
+    { name: 'SMK Kejuruan', 'Rerata Pelajaran': Number(avgSmk.toFixed(1)) }
+  ];
+
+  const pathwayCounts: Record<string, number> = {};
+  students.forEach(s => {
+    const p = s.selectedPathway || 'Umum';
+    pathwayCounts[p] = (pathwayCounts[p] || 0) + 1;
+  });
+  const pathwayData = Object.keys(pathwayCounts).map(name => ({
+    name,
+    value: pathwayCounts[name]
+  }));
+  const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00c49f', '#0088fe'];
 
   const handleGradeProject = async (projectId: string) => {
     const score = gradeInput[projectId];
@@ -167,119 +285,348 @@ export default function TeacherPortal() {
         ))}
       </div>
 
-      {/* Filters & Table */}
-      <Card className="p-6 border border-border bg-bg-secondary flex-1 flex flex-col space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          
-          {/* Search bar */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-3 text-text-tertiary" size={16} />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari siswa berdasarkan nama atau email..."
-              className="w-full h-10 pl-10 pr-4 bg-bg-tertiary border border-border rounded text-xs text-text-primary focus:outline-none focus:border-primary transition-colors"
-            />
+      {/* Tab Navigation */}
+      <div className="flex gap-1.5 p-1 rounded-lg bg-bg-secondary border border-border w-fit">
+        {[
+          { id: 'students', label: 'Daftar Siswa', icon: UsersIcon },
+          { id: 'analytics', label: 'Analisis Statistik', icon: Award },
+          { id: 'rag', label: 'Materi & RAG', icon: FileText }
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded text-xs font-semibold transition-colors cursor-pointer ${
+              activeTab === tab.id
+                ? 'bg-primary text-white'
+                : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary'
+            }`}
+          >
+            <tab.icon size={12} />
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Contents */}
+      {activeTab === 'students' && (
+        <Card className="p-6 border border-border bg-bg-secondary flex-1 flex flex-col space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            
+            {/* Search bar */}
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-3 text-text-tertiary" size={16} />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Cari siswa berdasarkan nama atau email..."
+                className="w-full h-10 pl-10 pr-4 bg-bg-tertiary border border-border rounded text-xs text-text-primary focus:outline-none focus:border-primary transition-colors"
+              />
+            </div>
+
+            {/* School type filter */}
+            <div className="flex gap-1.5 bg-bg-tertiary/60 p-1 rounded border border-border self-start">
+              {[
+                { id: 'all', label: 'Semua Jalur' },
+                { id: 'sma', label: 'SMA' },
+                { id: 'smk', label: 'SMK Kejuruan' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setSelectedSchoolType(tab.id as any)}
+                  className={`px-3 py-1.5 text-[10px] font-semibold rounded cursor-pointer transition-all duration-150 ${
+                    selectedSchoolType === tab.id
+                      ? 'bg-primary text-white'
+                      : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* School type filter */}
-          <div className="flex gap-1.5 bg-bg-tertiary/60 p-1 rounded border border-border self-start">
-            {[
-              { id: 'all', label: 'Semua Jalur' },
-              { id: 'sma', label: 'SMA' },
-              { id: 'smk', label: 'SMK Kejuruan' }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setSelectedSchoolType(tab.id as any)}
-                className={`px-3 py-1.5 text-[10px] font-semibold rounded cursor-pointer transition-all duration-150 ${
-                  selectedSchoolType === tab.id
-                    ? 'bg-primary text-white'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Students Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left">
-            <thead>
-              <tr className="border-b border-border text-[10px] font-mono text-text-tertiary uppercase">
-                <th className="pb-3 font-bold">Nama Siswa</th>
-                <th className="pb-3 font-bold">Tingkat / Jalur</th>
-                <th className="pb-3 font-bold">Level / XP</th>
-                <th className="pb-3 font-bold">Modul Selesai</th>
-                <th className="pb-3 font-bold">Karya & PKL</th>
-                <th className="pb-3 font-bold text-right">Aksi Evaluasi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/60 text-xs">
-              {filteredStudents.length > 0 ? (
-                filteredStudents.map((student) => (
-                  <tr key={student.id} className="hover:bg-bg-tertiary/20 transition-colors">
-                    <td className="py-3 flex items-center gap-3">
-                      <img 
-                        src={student.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'} 
-                        alt={student.name}
-                        className="w-8 h-8 rounded-full border border-border"
-                      />
-                      <div>
-                        <p className="font-semibold text-text-primary">{student.name}</p>
-                        <p className="text-[10px] text-text-tertiary font-mono">{student.email}</p>
-                      </div>
-                    </td>
-                    <td className="py-3">
-                      <Badge variant={student.schoolType === 'sma' ? 'secondary' : 'primary'}>
-                        {student.schoolType.toUpperCase()} Kelas {student.grade}
-                      </Badge>
-                      <p className="text-[10px] text-text-secondary mt-0.5">{student.selectedPathway}</p>
-                    </td>
-                    <td className="py-3 font-mono">
-                      <p className="font-semibold text-text-primary">Lvl {student.level}</p>
-                      <p className="text-[10px] text-accent font-bold flex items-center gap-0.5"><Zap size={10} /> {student.xp} XP</p>
-                    </td>
-                    <td className="py-3">
-                      <span className="font-mono font-bold text-text-primary">{student.progress.length}</span> Pelajaran
-                    </td>
-                    <td className="py-3">
-                      <div className="flex gap-2">
-                        <Badge variant="secondary" className="text-[9.5px]">
-                          {student.portfolios.length} Portofolio
+          {/* Students Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left">
+              <thead>
+                <tr className="border-b border-border text-[10px] font-mono text-text-tertiary uppercase">
+                  <th className="pb-3 font-bold">Nama Siswa</th>
+                  <th className="pb-3 font-bold">Tingkat / Jalur</th>
+                  <th className="pb-3 font-bold">Level / XP</th>
+                  <th className="pb-3 font-bold">Modul Selesai</th>
+                  <th className="pb-3 font-bold">Karya & PKL</th>
+                  <th className="pb-3 font-bold text-right">Aksi Evaluasi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/60 text-xs">
+                {filteredStudents.length > 0 ? (
+                  filteredStudents.map((student) => (
+                    <tr key={student.id} className="hover:bg-bg-tertiary/20 transition-colors">
+                      <td className="py-3 flex items-center gap-3">
+                        <img 
+                          src={student.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'} 
+                          alt={student.name}
+                          className="w-8 h-8 rounded-full border border-border"
+                        />
+                        <div>
+                          <p className="font-semibold text-text-primary">{student.name}</p>
+                          <p className="text-[10px] text-text-tertiary font-mono">{student.email}</p>
+                        </div>
+                      </td>
+                      <td className="py-3">
+                        <Badge variant={student.schoolType === 'sma' ? 'secondary' : 'primary'}>
+                          {student.schoolType.toUpperCase()} Kelas {student.grade}
                         </Badge>
-                        {student.schoolType === 'smk' && (
-                          <Badge variant={student.pklLog.some((i: any) => !i.approved) ? 'warning' : 'success'} className="text-[9.5px]">
-                            {student.pklLog.length} Jurnal PKL
+                        <p className="text-[10px] text-text-secondary mt-0.5">{student.selectedPathway}</p>
+                      </td>
+                      <td className="py-3 font-mono">
+                        <p className="font-semibold text-text-primary">Lvl {student.level}</p>
+                        <p className="text-[10px] text-accent font-bold flex items-center gap-0.5"><Zap size={10} /> {student.xp} XP</p>
+                      </td>
+                      <td className="py-3">
+                        <span className="font-mono font-bold text-text-primary">{student.progress.length}</span> Pelajaran
+                      </td>
+                      <td className="py-3">
+                        <div className="flex gap-2">
+                          <Badge variant="secondary" className="text-[9.5px]">
+                            {student.portfolios.length} Portofolio
                           </Badge>
-                        )}
-                      </div>
-                    </td>
-                    <td className="py-3 text-right">
-                      <Button 
-                        onClick={() => setSelectedStudent(student)} 
-                        size="sm" 
-                        variant="secondary"
-                      >
-                        Detail Evaluasi
-                      </Button>
+                          {student.schoolType === 'smk' && (
+                            <Badge variant={student.pklLog.some((i: any) => !i.approved) ? 'warning' : 'success'} className="text-[9.5px]">
+                              {student.pklLog.length} Jurnal PKL
+                            </Badge>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-3 text-right">
+                        <Button 
+                          onClick={() => setSelectedStudent(student)} 
+                          size="sm" 
+                          variant="secondary"
+                        >
+                          Detail Evaluasi
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="text-center py-10 text-text-secondary text-xs">
+                      Tidak ada data siswa ditemukan.
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="text-center py-10 text-text-secondary text-xs">
-                    Tidak ada data siswa ditemukan.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+
+      {activeTab === 'analytics' && (
+        <div className="space-y-6">
+          {!isMounted ? (
+            <div className="py-20 text-center text-xs text-text-secondary">Memuat grafik analitik...</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Level Distribution */}
+              <Card className="p-5 border border-border bg-bg-secondary space-y-4">
+                <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider font-mono">Distribusi Level Siswa</h3>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={levelData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#2D3748" />
+                      <XAxis dataKey="level" stroke="#A0AEC0" fontSize={10} />
+                      <YAxis stroke="#A0AEC0" fontSize={10} allowDecimals={false} />
+                      <Tooltip contentStyle={{ backgroundColor: '#1A202C', borderColor: '#2D3748', fontSize: 11 }} />
+                      <Bar dataKey="Jumlah Siswa" fill="#3182ce" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </Card>
+
+              {/* Average Progress */}
+              <Card className="p-5 border border-border bg-bg-secondary space-y-4">
+                <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider font-mono">Kemajuan Modul (SMA vs SMK)</h3>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={progressData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#2D3748" />
+                      <XAxis dataKey="name" stroke="#A0AEC0" fontSize={10} />
+                      <YAxis stroke="#A0AEC0" fontSize={10} />
+                      <Tooltip contentStyle={{ backgroundColor: '#1A202C', borderColor: '#2D3748', fontSize: 11 }} />
+                      <Bar dataKey="Rerata Pelajaran" fill="#38a169" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </Card>
+
+              {/* Pathway Pie Chart */}
+              <Card className="p-5 border border-border bg-bg-secondary space-y-4 md:col-span-2">
+                <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider font-mono">Penyebaran Jalur Konsentrasi</h3>
+                <div className="flex flex-col sm:flex-row items-center justify-around gap-6">
+                  <div className="h-56 w-56 flex-shrink-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={pathwayData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={80}
+                          paddingAngle={5}
+                          dataKey="value"
+                        >
+                          {pathwayData.map((entry: any, index: number) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip contentStyle={{ backgroundColor: '#1A202C', borderColor: '#2D3748', fontSize: 11 }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    {pathwayData.map((item: any, idx: number) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
+                        <span className="text-text-secondary">{item.name}:</span>
+                        <span className="font-bold text-text-primary">{item.value} siswa</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+            </div>
+          )}
         </div>
-      </Card>
+      )}
+
+      {activeTab === 'rag' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Panel: Form & Search */}
+          <div className="lg:col-span-1 space-y-6">
+            <Card className="p-5 border border-border bg-bg-secondary space-y-4">
+              <div className="space-y-1">
+                <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider font-mono flex items-center gap-1.5">
+                  <Plus size={14} className="text-primary" /> Tambah Materi Ajar
+                </h3>
+                <p className="text-[10px] text-text-secondary">Unggah dokumen baru untuk diindeks dan dijadikan context RAG oleh AI Tutor.</p>
+              </div>
+              <form onSubmit={handleUploadDoc} className="space-y-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-mono text-text-tertiary uppercase block">Judul Dokumen</label>
+                  <input
+                    type="text"
+                    required
+                    value={docTitle}
+                    onChange={(e) => setDocTitle(e.target.value)}
+                    placeholder="Contoh: Modul PKL Jaringan SMK"
+                    className="w-full h-9 px-3 bg-bg-tertiary border border-border rounded text-xs text-text-primary focus:outline-none focus:border-primary transition-colors"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-mono text-text-tertiary uppercase block">Isi Konten Materi</label>
+                  <textarea
+                    required
+                    rows={6}
+                    value={docContent}
+                    onChange={(e) => setDocContent(e.target.value)}
+                    placeholder="Tulis atau paste teks materi pelajaran di sini..."
+                    className="w-full p-3 bg-bg-tertiary border border-border rounded text-xs text-text-primary focus:outline-none focus:border-primary transition-colors resize-none"
+                  />
+                </div>
+                <Button type="submit" disabled={uploadingDoc} className="w-full h-9 text-xs">
+                  {uploadingDoc ? 'Memproses Index...' : 'Unggah & Indeks'}
+                </Button>
+              </form>
+            </Card>
+
+            <Card className="p-5 border border-border bg-bg-secondary space-y-4">
+              <div className="space-y-1">
+                <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider font-mono flex items-center gap-1.5">
+                  <Search size={14} className="text-accent" /> Tes Pencarian Semantik
+                </h3>
+                <p className="text-[10px] text-text-secondary">Uji kemiripan kosinus embedding RAG lokal dari teks kueri.</p>
+              </div>
+              <form onSubmit={handleSearchRag} className="space-y-3">
+                <input
+                  type="text"
+                  required
+                  value={ragQuery}
+                  onChange={(e) => setRagQuery(e.target.value)}
+                  placeholder="Ketik kueri..."
+                  className="w-full h-9 px-3 bg-bg-tertiary border border-border rounded text-xs text-text-primary focus:outline-none focus:border-primary transition-colors"
+                />
+                <Button type="submit" disabled={searchingRag} variant="secondary" className="w-full h-9 text-xs">
+                  {searchingRag ? 'Mencari...' : 'Uji Kemiripan'}
+                </Button>
+              </form>
+
+              {ragResults.length > 0 && (
+                <div className="space-y-2 pt-2 border-t border-border/40">
+                  <span className="text-[9px] font-mono text-text-tertiary uppercase block">Hasil Pencarian Terdekat:</span>
+                  <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                    {ragResults.map((res, idx) => (
+                      <div key={idx} className="p-2 rounded bg-bg-tertiary/60 border border-border/40 text-[10px]">
+                        <div className="flex justify-between font-bold text-text-primary">
+                          <span className="truncate">{res.documentTitle}</span>
+                          <span className="text-accent">{(res.similarity * 100).toFixed(1)}% match</span>
+                        </div>
+                        <p className="text-text-secondary mt-1 leading-normal italic">&ldquo;{res.content}&rdquo;</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </Card>
+          </div>
+
+          {/* Right Panel: List */}
+          <div className="lg:col-span-2">
+            <Card className="p-5 border border-border bg-bg-secondary space-y-4">
+              <div className="space-y-1">
+                <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider font-mono">Daftar Dokumen RAG Terunggah</h3>
+                <p className="text-[10px] text-text-secondary">Kumpulan modul dan referensi sekolah yang dibaca oleh AI Tutor.</p>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-border text-[9px] font-mono text-text-tertiary uppercase pb-2">
+                      <th className="pb-2">Judul Dokumen</th>
+                      <th className="pb-2">Jumlah Chunk</th>
+                      <th className="pb-2">Tanggal Unggah</th>
+                      <th className="pb-2 text-right">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/60">
+                    {documents.length > 0 ? (
+                      documents.map((doc) => (
+                        <tr key={doc.id} className="hover:bg-bg-tertiary/20">
+                          <td className="py-2.5 font-semibold text-text-primary">{doc.title}</td>
+                          <td className="py-2.5 font-mono text-text-secondary">{doc._count.chunks} chunks</td>
+                          <td className="py-2.5 text-text-tertiary">{new Date(doc.createdAt).toLocaleDateString()}</td>
+                          <td className="py-2.5 text-right">
+                            <button
+                              onClick={() => handleDeleteDoc(doc.id)}
+                              className="p-1.5 text-danger hover:bg-danger/10 rounded transition-colors"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={4} className="text-center py-8 text-text-secondary">Belum ada dokumen terunggah.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </div>
+        </div>
+      )}
 
       {/* Selected Student Evaluation Panel (Side Drawer / Modal Overlay) */}
       {selectedStudent && (

@@ -31,6 +31,7 @@ export interface UserProfile {
   goals: string[];
   portfolio: PortfolioProject[];
   pklLog: PKLJournalEntry[];
+  guildId?: string | null;
 }
 
 export interface Achievement {

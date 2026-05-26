@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUserStore } from '@/stores/user-store';
 import { useCurriculumStore } from '@/stores/curriculum-store';
 import { Card } from '@/components/ui/card';
@@ -10,8 +10,10 @@ import { Progress } from '@/components/ui/progress';
 import { 
   Flame, Award, Sparkles, Clock, Brain, Compass,
   ArrowUp, Lock, CheckCircle, Star, Zap, Trophy,
-  Shield, Target, Crown, TrendingUp, BookOpen
+  Shield, Target, Crown, TrendingUp, BookOpen,
+  Users, Plus, LogOut
 } from 'lucide-react';
+import { createGuild, joinGuild, leaveGuild, getGuildsList, getGlobalLeaderboard } from '@/lib/actions/guild';
 
 const ACHIEVEMENT_LIST = [
   { id: 'first_lesson', title: 'Bintang Pertama', desc: 'Selesaikan pelajaran pertama Anda.', icon: Star, xpReward: 100, condition: (completed: number, streak: number, xp: number) => completed >= 1 },
@@ -44,11 +46,75 @@ const getLevelTitle = (lvl: number) => {
 const XP_PER_LEVEL = (lvl: number) => lvl * 500;
 
 export default function StudyRPGPage() {
-  const { profile, upgradeSkill, completeQuest, addXp } = useUserStore();
+  const { profile, upgradeSkill, completeQuest, addXp, updateProfile } = useUserStore();
   const { completedLessons } = useCurriculumStore();
-  const [activeTab, setActiveTab] = useState<'character' | 'skills' | 'quests' | 'achievements'>('character');
+  const [activeTab, setActiveTab] = useState<'character' | 'skills' | 'quests' | 'achievements' | 'guild'>('character');
 
   const completedCount = Object.keys(completedLessons).length;
+
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [guilds, setGuilds] = useState<any[]>([]);
+  const [loadingGuildData, setLoadingGuildData] = useState(false);
+  const [newGuildName, setNewGuildName] = useState('');
+  const [newGuildDesc, setNewGuildDesc] = useState('');
+  const [creatingGuild, setCreatingGuild] = useState(false);
+
+  const fetchGuildData = async () => {
+    setLoadingGuildData(true);
+    try {
+      const [board, list] = await Promise.all([
+        getGlobalLeaderboard(),
+        getGuildsList()
+      ]);
+      setLeaderboard(board);
+      setGuilds(list);
+    } catch (err) {
+      console.error("Failed to load Guilds/Leaderboard:", err);
+    } finally {
+      setLoadingGuildData(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGuildData();
+  }, []);
+
+  const handleCreateGuild = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newGuildName.trim()) return;
+    setCreatingGuild(true);
+    try {
+      const created = await createGuild(newGuildName, newGuildDesc);
+      updateProfile({ guildId: created.id });
+      setNewGuildName('');
+      setNewGuildDesc('');
+      await fetchGuildData();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setCreatingGuild(false);
+    }
+  };
+
+  const handleJoinGuild = async (id: string) => {
+    try {
+      await joinGuild(id);
+      updateProfile({ guildId: id });
+      await fetchGuildData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleLeaveGuild = async () => {
+    try {
+      await leaveGuild();
+      updateProfile({ guildId: null });
+      await fetchGuildData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const skillItems = [
     { key: 'focus' as const, label: 'Fokus Kognitif', desc: 'Meningkat dari sesi Pomodoro dan belajar tanpa gangguan.', icon: Clock, color: 'text-info bg-info/10 border-info/20', gradient: 'from-blue-500' },
@@ -77,6 +143,7 @@ export default function StudyRPGPage() {
 
   const tabs = [
     { id: 'character', label: 'Karakter', icon: Star },
+    { id: 'guild', label: 'Guild & Leaderboard', icon: Users },
     { id: 'skills', label: 'Pohon Skill', icon: TrendingUp },
     { id: 'quests', label: 'Misi', icon: Target },
     { id: 'achievements', label: 'Prestasi', icon: Award },
@@ -209,6 +276,170 @@ export default function StudyRPGPage() {
                 })}
               </div>
             </Card>
+          </div>
+        </div>
+      )}
+
+      {/* GUILD TAB */}
+      {activeTab === 'guild' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
+          
+          {/* Global Leaderboard */}
+          <Card className="p-5 border border-border bg-bg-secondary space-y-4">
+            <div className="space-y-1">
+              <h3 className="text-sm font-bold text-text-primary flex items-center gap-1.5">
+                <Trophy size={14} className="text-warning" /> Papan Peringkat Global (Top 10)
+              </h3>
+              <p className="text-[10px] text-text-secondary">Peringkat siswa dengan XP tertinggi secara real-time.</p>
+            </div>
+
+            {loadingGuildData ? (
+              <div className="py-10 text-center text-xs text-text-secondary">Memuat leaderboard...</div>
+            ) : (
+              <div className="space-y-2">
+                {leaderboard.map((user, idx) => {
+                  const isCurrentUser = user.name === profile.name || user.email === profile.email;
+                  return (
+                    <div
+                      key={idx}
+                      className={`flex items-center justify-between p-3 rounded-lg border text-xs ${
+                        isCurrentUser
+                          ? 'border-accent bg-accent/5'
+                          : 'border-border bg-bg-tertiary/20'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={`w-5 font-mono font-bold text-center ${
+                          idx === 0 ? 'text-yellow-400' :
+                          idx === 1 ? 'text-gray-400' :
+                          idx === 2 ? 'text-amber-600' :
+                          'text-text-tertiary'
+                        }`}>
+                          #{idx + 1}
+                        </span>
+                        <span className={`font-semibold ${isCurrentUser ? 'text-accent' : 'text-text-primary'}`}>
+                          {user.name}
+                        </span>
+                      </div>
+                      <span className="font-mono font-bold text-accent">{user.xp} XP</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </Card>
+
+          {/* Guild System */}
+          <div className="space-y-6">
+            
+            {/* Active Guild Status */}
+            {profile.guildId ? (
+              (() => {
+                const myGuild = guilds.find(g => g.id === profile.guildId);
+                return (
+                  <Card className="p-5 border border-border bg-bg-secondary space-y-4">
+                    <div className="space-y-1">
+                      <span className="text-[9px] font-mono text-accent font-bold uppercase tracking-wider">GUILD SAYA</span>
+                      <h3 className="text-base font-black text-text-primary mt-1">
+                        🛡️ {myGuild ? myGuild.name : 'Memuat nama guild...'}
+                      </h3>
+                      <p className="text-xs text-text-secondary leading-relaxed mt-1">
+                        {myGuild?.description || 'Tidak ada deskripsi guild.'}
+                      </p>
+                    </div>
+
+                    {myGuild && (
+                      <div className="flex justify-between items-center text-[10px] font-mono text-text-tertiary bg-bg-tertiary/40 p-2.5 rounded border border-border/40">
+                        <span>Anggota Aktif: {myGuild._count?.members || 1} siswa</span>
+                        <span>Total XP: {myGuild.xp || 0} XP</span>
+                      </div>
+                    )}
+
+                    <Button
+                      onClick={handleLeaveGuild}
+                      variant="outline"
+                      className="w-full h-8 text-xs border-danger text-danger hover:bg-danger/10 flex items-center justify-center gap-1.5"
+                    >
+                      <LogOut size={12} /> Keluar Guild
+                    </Button>
+                  </Card>
+                );
+              })()
+            ) : (
+              <div className="space-y-6">
+                {/* Create Guild Form */}
+                <Card className="p-5 border border-border bg-bg-secondary space-y-4">
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-bold text-text-primary flex items-center gap-1.5">
+                      <Plus size={14} className="text-primary" /> Buat Guild Baru
+                    </h3>
+                    <p className="text-[10px] text-text-secondary">Bentuk kelompok belajar mandiri bersama rekan sekolah.</p>
+                  </div>
+                  <form onSubmit={handleCreateGuild} className="space-y-3">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-mono text-text-tertiary uppercase block">Nama Guild</label>
+                      <input
+                        type="text"
+                        required
+                        value={newGuildName}
+                        onChange={(e) => setNewGuildName(e.target.value)}
+                        placeholder="Contoh: Python Wizards SMKN 2"
+                        className="w-full h-9 px-3 bg-bg-tertiary border border-border rounded text-xs text-text-primary focus:outline-none focus:border-primary transition-colors"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-mono text-text-tertiary uppercase block">Deskripsi Singkat</label>
+                      <textarea
+                        rows={2}
+                        value={newGuildDesc}
+                        onChange={(e) => setNewGuildDesc(e.target.value)}
+                        placeholder="Deskripsikan fokus belajar kelompok Anda..."
+                        className="w-full p-2.5 bg-bg-tertiary border border-border rounded text-xs text-text-primary focus:outline-none focus:border-primary transition-colors resize-none"
+                      />
+                    </div>
+                    <Button type="submit" disabled={creatingGuild} className="w-full h-9 text-xs">
+                      {creatingGuild ? 'Membuat...' : 'Buat Guild'}
+                    </Button>
+                  </form>
+                </Card>
+
+                {/* Available Guilds List */}
+                <Card className="p-5 border border-border bg-bg-secondary space-y-4">
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-bold text-text-primary flex items-center gap-1.5">
+                      <Users size={14} className="text-accent" /> Guild Belajar Tersedia
+                    </h3>
+                    <p className="text-[10px] text-text-secondary">Gabung ke guild belajar yang sudah ada untuk mempercepat XP.</p>
+                  </div>
+
+                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                    {guilds.filter(g => g.id !== profile.guildId).length > 0 ? (
+                      guilds.filter(g => g.id !== profile.guildId).map((guild) => (
+                        <div key={guild.id} className="p-3 rounded border border-border bg-bg-tertiary/20 flex items-center justify-between gap-4">
+                          <div className="min-w-0">
+                            <h4 className="text-xs font-bold text-text-primary truncate">🛡️ {guild.name}</h4>
+                            <p className="text-[10px] text-text-secondary truncate mt-0.5">{guild.description || 'Tidak ada deskripsi.'}</p>
+                            <span className="text-[8.5px] font-mono text-text-tertiary block mt-1">
+                              {guild._count?.members || 0} Anggota • {guild.xp || 0} XP
+                            </span>
+                          </div>
+                          <Button
+                            onClick={() => handleJoinGuild(guild.id)}
+                            size="sm"
+                            className="h-7 text-[10px] flex-shrink-0"
+                          >
+                            Gabung
+                          </Button>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-text-tertiary text-center py-4">Belum ada guild lain yang tersedia.</p>
+                    )}
+                  </div>
+                </Card>
+              </div>
+            )}
+
           </div>
         </div>
       )}

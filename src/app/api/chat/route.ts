@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { ratelimiter } from "@/lib/ratelimit";
+import { searchSimilarChunks } from "@/lib/actions/rag";
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,6 +37,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // RAG Search for school documents
+    const matchedChunks = await searchSimilarChunks(lastMessage, 2);
+    let ragContext = "";
+    if (matchedChunks.length > 0) {
+      ragContext = "\n\n**Referensi Materi Sekolah (Unggahan Guru):**\n" + matchedChunks.map(c => `* [Dari Dokumen: ${c.documentTitle}] "${c.content}"`).join("\n");
+    }
 
     // Extract context details
     const studentName = context?.studentName || "Alex Mercer";
@@ -69,6 +76,18 @@ export async function POST(req: NextRequest) {
       responseText += `\n\n**Contoh Tambahan:**\nJika kita memiliki persamaan eksponensial $3^{x} = 81$, karena basisnya adalah 3, kita ubah 81 menjadi basis yang sama: $81 = 3^4$. Dengan demikian, kita peroleh $x = 4$.`;
     } else if (query.includes("pkl") || query.includes("magang") || query.includes("industri")) {
       responseText += `\n\n*Catatan Kejuruan:* Topik ini juga sangat berguna untuk menganalisis pertumbuhan data di server atau memetakan performa database saat kamu melakukan PKL nanti!`;
+    }
+
+    // Append RAG references
+    if (ragContext) {
+      responseText += ragContext;
+    }
+
+    // Generative UI triggers
+    if (query.includes("kuis") || query.includes("tes") || query.includes("uji")) {
+      responseText += `\n\nCoba uji pemahamanmu dengan kuis interaktif ini:\n\n[QUIZ: Berapakah nilai dari eksponen $3^4$? | 12 | 27 | 64 | 81 | 3 | Eksponen $3^4$ berarti perkalian berulang angka 3 sebanyak 4 kali: $3 \\times 3 \\times 3 \\times 3 = 81$.]`;
+    } else if (query.includes("flashcard") || query.includes("kartu")) {
+      responseText += `\n\nBerikut adalah kartu hafalan cepat untuk membantumu mengingat:\n\n[FLASHCARD: Apa pilar utama Object-Oriented Programming (OOP)? | Enkapsulasi, Pewarisan (Inheritance), Polimorfisme, dan Abstraksi.]`;
     }
 
     // Convert responseText to a ReadableStream to stream word-by-word

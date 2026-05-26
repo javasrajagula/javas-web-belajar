@@ -53,6 +53,10 @@ model User {
   progress           Progress[]
   internships        Internship[]
   portfolioProjects  PortfolioProject[]
+
+  // Guild relations
+  guildId            String?
+  guild              Guild?      @relation(fields: [guildId], references: [id])
 }
 
 model Account {
@@ -189,3 +193,29 @@ model PortfolioProject {
   gradeScore    Int?
   createdAt     DateTime @default(now())
 }
+
+model Guild {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  xp          Int      @default(0)
+  members     User[]
+  createdAt   DateTime @default(now())
+}
+
+model Document {
+  id        String   @id @default(uuid())
+  title     String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  chunks    DocumentChunk[]
+}
+
+model DocumentChunk {
+  id         String   @id @default(uuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  content    String   @db.Text
+  embedding  Json?    // Array of floats
+}
+

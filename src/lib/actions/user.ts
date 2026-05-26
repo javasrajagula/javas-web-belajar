@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { UserProfile, UserRole, SchoolType, PortfolioProject, PKLJournalEntry } from '@/types';
+import { syncUserXpToRedis } from './guild';
 
 // Helper to convert Prisma User to UserProfile type
 function mapToUserProfile(dbUser: any): UserProfile {
@@ -44,7 +45,8 @@ function mapToUserProfile(dbUser: any): UserProfile {
       activityDescription: i.activityDescription || '',
       hoursWorked: i.hoursWorked || 8,
       approved: i.status === 'approved'
-    })) || []
+    })) || [],
+    guildId: dbUser.guildId
   };
 }
 
@@ -96,6 +98,12 @@ export async function updateUserProfile(
         }
       }
     });
+
+    if (updatedUser && updates.xp !== undefined) {
+      await syncUserXpToRedis(updatedUser.id, updatedUser.xp).catch(err => {
+        console.error("Redis sync error in updateUserProfile:", err);
+      });
+    }
 
     return mapToUserProfile(updatedUser);
   } catch (error) {

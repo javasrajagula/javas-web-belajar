@@ -15,6 +15,35 @@ import {
   Cpu, List, Hash
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import ChatQuizCard from '@/components/chat-quiz';
+import ChatFlashcard from '@/components/chat-flashcard';
+
+// Helper to parse Generative UI tokens
+function parseMessageContent(content: string) {
+  const quizRegex = /\[QUIZ:\s*([^\]]+)\]/g;
+  const flashcardRegex = /\[FLASHCARD:\s*([^\]]+)\]/g;
+
+  let quizMatch;
+  const quizzes: string[] = [];
+  const tempQuizRegex = new RegExp(quizRegex);
+  while ((quizMatch = tempQuizRegex.exec(content)) !== null) {
+    quizzes.push(quizMatch[1]);
+  }
+
+  let flashcardMatch;
+  const flashcards: string[] = [];
+  const tempFlashcardRegex = new RegExp(flashcardRegex);
+  while ((flashcardMatch = tempFlashcardRegex.exec(content)) !== null) {
+    flashcards.push(flashcardMatch[1]);
+  }
+
+  const cleanContent = content
+    .replace(quizRegex, '')
+    .replace(flashcardRegex, '')
+    .trim();
+
+  return { cleanContent, quizzes, flashcards };
+}
 
 const QUICK_PROMPTS = [
   'Jelaskan konsep ini dengan analogi sehari-hari',
@@ -26,7 +55,7 @@ const QUICK_PROMPTS = [
 
 export default function AITutorPage() {
   const { session, isResponding, setMode, sendMessage, clearHistory } = useTutorStore();
-  const { updateQuestProgress, profile } = useUserStore();
+  const { updateQuestProgress, profile, addXp } = useUserStore();
   const { completedLessons } = useCurriculumStore();
   
   const [input, setInput] = useState('');
@@ -240,9 +269,34 @@ export default function AITutorPage() {
                     }`}
                   >
                     {isTutor ? (
-                      <div className="prose prose-invert prose-xs max-w-none">
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
-                      </div>
+                      (() => {
+                        const { cleanContent, quizzes, flashcards } = parseMessageContent(msg.content);
+                        return (
+                          <div className="space-y-3">
+                            <div className="prose prose-invert prose-xs max-w-none">
+                              <ReactMarkdown>{cleanContent}</ReactMarkdown>
+                            </div>
+                            
+                            {quizzes.map((quiz, qIdx) => (
+                              <ChatQuizCard
+                                key={`quiz-${msg.id}-${qIdx}`}
+                                rawContent={quiz}
+                                onCorrect={() => {
+                                  addXp(50);
+                                  updateQuestProgress('quiz', 1);
+                                }}
+                              />
+                            ))}
+
+                            {flashcards.map((fc, fcIdx) => (
+                              <ChatFlashcard
+                                key={`fc-${msg.id}-${fcIdx}`}
+                                rawContent={fc}
+                              />
+                            ))}
+                          </div>
+                        );
+                      })()
                     ) : (
                       <p className="whitespace-pre-wrap">{msg.content}</p>
                     )}
