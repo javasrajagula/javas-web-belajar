@@ -24,7 +24,7 @@ export const MobileNav: React.FC = () => {
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-bg-secondary border-t-[4px] border-border z-40 mobile-nav-safe flex justify-around items-center h-16 px-2 select-none shadow-sm">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-bg-secondary border-t-[3px] border-border z-40 mobile-nav-safe flex justify-around items-center h-[4.25rem] px-2 select-none shadow-sm">
       {navItems.map((item) => {
         const isActive = pathname.startsWith(item.path);
         return (
@@ -32,8 +32,8 @@ export const MobileNav: React.FC = () => {
             key={item.path}
             href={item.path}
             className={clsx(
-              'flex flex-col items-center justify-center flex-1 h-12 py-2 border-[2px] transition-all duration-150',
-              isActive ? 'text-black bg-accent border-border shadow-xs' : 'text-text-tertiary border-transparent active:text-text-primary'
+              'flex flex-col items-center justify-center flex-1 h-12 py-2 border-[2px] transition-all duration-150 min-w-0',
+              isActive ? 'text-black bg-accent border-border shadow-xs' : 'text-text-secondary border-transparent active:text-text-primary'
             )}
           >
             <item.icon size={20} className={clsx('transition-transform duration-200', isActive && 'scale-110')} />

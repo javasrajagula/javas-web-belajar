@@ -121,14 +121,16 @@ ${context ? `\n## Materi Aktif Terkait:\n- Modul: ${context.lessonTitle || 'Umum
     }
 
     try {
+      const safeMessages = normalizeTutorMessages(messages);
+      if (!safeMessages.length) {
+        return new Response("Pesan tidak boleh kosong.", { status: 400 });
+      }
+
       const result = await runAiWithRetry(
         () => generateText({
           model: modelInstance,
           system: systemPrompt,
-          messages: messages.map((m: { role: string; content: string }) => ({
-            role: m.role as "user" | "assistant",
-            content: m.content,
-          })),
+          messages: safeMessages,
           temperature: 0.35,
         }),
         { label: 'Tutor AI' }
@@ -156,6 +158,46 @@ ${context ? `\n## Materi Aktif Terkait:\n- Modul: ${context.lessonTitle || 'Umum
     console.error("AI Tutor API error:", error);
     return new Response("Terjadi kesalahan internal pada server.", { status: 500 });
   }
+}
+
+function normalizeTutorMessages(messages: Array<{ role?: string; content?: string }>) {
+  const normalized = messages
+    .map((m) => ({
+      role: m.role === 'assistant' ? 'assistant' as const : 'user' as const,
+      content: String(m.content || '').trim(),
+    }))
+    .filter((m) => {
+      if (!m.content) return false;
+      if (
+        m.role === 'assistant' &&
+        (
+          m.content.startsWith('Halo! Saya adalah Tutor AI Academy OS') ||
+          m.content.startsWith('Maaf, Tutor AI belum bisa menjawab sekarang') ||
+          m.content.startsWith('Respons AI kosong atau gagal diproses')
+        )
+      ) {
+        return false;
+      }
+      return true;
+    })
+    .slice(-10);
+
+  while (normalized.length && normalized[0].role !== 'user') {
+    normalized.shift();
+  }
+
+  const collapsed: Array<{ role: 'user' | 'assistant'; content: string }> = [];
+  for (const message of normalized) {
+    const previous = collapsed[collapsed.length - 1];
+    const content = message.content.length > 6_000 ? `${message.content.slice(0, 6_000)}\n\n[Riwayat dipotong agar tetap aman dikirim ke AI.]` : message.content;
+    if (previous?.role === message.role) {
+      previous.content = `${previous.content}\n\n${content}`;
+    } else {
+      collapsed.push({ role: message.role, content });
+    }
+  }
+
+  return collapsed;
 }
 
 function generateMockTutorStream(messages: any[], mode: string, jurusan: string, kelas: number) {

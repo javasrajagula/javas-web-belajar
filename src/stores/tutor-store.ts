@@ -69,6 +69,29 @@ export const useTutorStore = create<TutorState>((set, get) => {
 
       try {
         const userProfile = useUserStore.getState().profile;
+        const apiMessages = get().session.messages
+          .slice(0, -1)
+          .filter((m) => {
+            const content = m.content.trim();
+            if (!content) return false;
+            if (
+              m.sender === 'tutor' &&
+              (
+                content.startsWith('Halo! Saya adalah Tutor AI Academy OS') ||
+                content.startsWith('Maaf, Tutor AI belum bisa menjawab sekarang') ||
+                content.startsWith('Respons AI kosong atau gagal diproses')
+              )
+            ) {
+              return false;
+            }
+            return true;
+          })
+          .slice(-10)
+          .map((m) => ({
+            role: m.sender === 'user' ? 'user' : 'assistant',
+            content: m.content
+          }));
+
         // Send request to streaming AI Tutor API route
         const response = await fetch('/api/ai/tutor', {
           method: 'POST',
@@ -76,10 +99,7 @@ export const useTutorStore = create<TutorState>((set, get) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            messages: get().session.messages.slice(0, -1).map(m => ({
-              role: m.sender === 'user' ? 'user' : 'assistant',
-              content: m.content
-            })),
+            messages: apiMessages,
             mode: get().session.mode,
             jurusan: resolveSmkPathway(userProfile.selectedPathway),
             kelas: userProfile.grade,

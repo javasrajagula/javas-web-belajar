@@ -93,11 +93,11 @@ export const TopBar: React.FC = () => {
 
   return (
     <>
-      <header className="flex items-center justify-between h-20 border-b-[4px] border-border bg-bg-primary px-6 select-none sticky top-0 z-20 shadow-sm">
+      <header className="flex items-center justify-between h-16 md:h-20 border-b-[3px] md:border-b-[4px] border-border bg-bg-primary px-3 sm:px-4 md:px-6 select-none sticky top-0 z-20 shadow-sm gap-3">
         {/* Left Side: Route Title */}
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg font-black text-text-primary tracking-tight uppercase">
-            Academy OS Ω / {getPageTitle()}
+        <div className="flex items-center gap-2 min-w-0">
+          <h2 className="text-sm sm:text-base md:text-lg font-black text-text-primary tracking-tight uppercase truncate">
+            <span className="hidden sm:inline">Academy OS / </span>{getPageTitle()}
           </h2>
         </div>
 
@@ -118,7 +118,7 @@ export const TopBar: React.FC = () => {
         </div>
 
         {/* Right Side: Quick Stats & Avatar */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-shrink-0">
           {/* Level Progress */}
           <div className="hidden lg:flex flex-col w-36">
             <div className="flex justify-between items-center text-[10px] font-mono text-text-secondary mb-1">
@@ -131,7 +131,7 @@ export const TopBar: React.FC = () => {
           {/* Online/Offline Status Indicator */}
           <Badge
             variant={isOnline ? 'success' : 'danger'}
-            className="text-[9.5px] font-mono font-black flex items-center gap-1 border-[2px] border-border shadow-xs rounded-none bg-secondary-subtle text-text-primary"
+            className="hidden sm:flex text-[9.5px] font-mono font-black items-center gap-1 border-[2px] border-border shadow-xs rounded-none bg-secondary-subtle text-text-primary"
           >
             {isOnline ? <Wifi size={10} className="text-success" /> : <WifiOff size={10} className="text-danger" />}
             {isOnline ? 'ONLINE' : 'OFFLINE'}
@@ -145,7 +145,7 @@ export const TopBar: React.FC = () => {
             >
               <Search size={16} />
             </button>
-            <button className="text-text-primary bg-white border-[2px] border-border p-2 hover:bg-accent transition-colors relative shadow-xs">
+            <button className="hidden sm:block text-text-primary bg-white border-[2px] border-border p-2 hover:bg-accent transition-colors relative shadow-xs">
               <Bell size={16} />
               <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-none animate-pulse" />
             </button>
@@ -155,7 +155,7 @@ export const TopBar: React.FC = () => {
 
       {/* Command Palette Modal */}
       {showSearchModal && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-start justify-center pt-24 px-4">
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-start justify-center pt-16 sm:pt-24 px-3 sm:px-4">
           <div className="bg-bg-secondary border-[4px] border-border rounded-none max-w-xl w-full shadow-xl overflow-hidden animate-scale-in">
             {/* Search Input */}
             <div className="flex items-center h-14 px-4 border-b-[3px] border-border bg-accent">

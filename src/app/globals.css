@@ -134,6 +134,8 @@ html {
   color-scheme: light;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -286,6 +288,7 @@ input[type="number"] {
 /* ---- AI Tutor chat overflow guard ---- */
 .ai-chat-scroll {
   overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .ai-message-bubble,
@@ -310,6 +313,14 @@ input[type="number"] {
    iOS Safari and many WebView shells auto-zoom focused inputs below 16px.
    Keep controls readable on phones while preserving compact desktop UI. */
 @media (max-width: 640px) {
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    touch-action: manipulation;
+  }
+
   input,
   textarea,
   select {

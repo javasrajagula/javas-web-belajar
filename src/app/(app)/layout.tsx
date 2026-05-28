@@ -41,9 +41,9 @@ export default function AppLayout({
       <Sidebar />
 
       {/* Main Body */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto pb-16 md:pb-0 h-screen relative bg-bg-tertiary">
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto pb-20 md:pb-0 h-screen relative bg-bg-tertiary">
         <TopBar />
-        <main className="flex-grow p-4 md:p-6 flex flex-col">
+        <main className="flex-grow p-3 sm:p-4 md:p-6 flex flex-col min-w-0">
           <PageTransition>{children}</PageTransition>
         </main>
       </div>

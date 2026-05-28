@@ -216,13 +216,13 @@ export default function AITutorPage() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 p-5 bg-[#E4E4E7] min-h-[calc(100vh-6rem)] border-[4px] border-black rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-black relative max-w-full overflow-x-hidden" style={{ backgroundImage: 'radial-gradient(rgba(0,0,0,0.15) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }}>
+    <div className="flex flex-col lg:flex-row gap-4 md:gap-6 p-3 sm:p-4 md:p-5 bg-[#E4E4E7] min-h-[calc(100dvh-9rem)] md:min-h-[calc(100vh-6rem)] border-[2px] md:border-[4px] border-black rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-black relative max-w-full overflow-x-hidden" style={{ backgroundImage: 'radial-gradient(rgba(0,0,0,0.12) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }}>
       
       {/* LEFT PANEL: History, Mode, Curriculum Context */}
-      <div className="w-full lg:w-80 flex flex-col gap-5 flex-shrink-0">
+      <div className="order-2 lg:order-1 w-full lg:w-80 flex flex-col gap-4 md:gap-5 flex-shrink-0">
         
         {/* History Widget */}
-        <div className="flex flex-col bg-white border-[4px] border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none overflow-hidden flex-1 min-h-[300px]">
+        <div className="flex flex-col bg-white border-[3px] md:border-[4px] border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none overflow-hidden flex-1 min-h-[220px] lg:min-h-[300px]">
           {/* Header */}
           <div className="bg-[#FCD34D] border-b-[3px] border-black px-4 py-3 flex items-center justify-between">
             <span className="font-extrabold text-sm uppercase tracking-wider font-mono flex items-center gap-1.5">
@@ -242,7 +242,7 @@ export default function AITutorPage() {
           </div>
 
           {/* Session List */}
-          <div className="p-3 flex-1 space-y-2.5 overflow-y-auto max-h-[320px]">
+          <div className="p-3 flex-1 space-y-2.5 overflow-y-auto max-h-[220px] lg:max-h-[320px]">
             {historySessions.map((hs) => {
               const active = activeSessionId === hs.id;
               return (
@@ -286,7 +286,7 @@ export default function AITutorPage() {
         </div>
 
         {/* Cognitive Mode Widget */}
-        <div className="bg-white border-[4px] border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none p-4 flex flex-col gap-3">
+        <div className="bg-white border-[3px] md:border-[4px] border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none p-4 flex flex-col gap-3">
           <div className="space-y-0.5">
             <h3 className="text-xs font-extrabold uppercase font-mono tracking-wider flex items-center gap-1">
               <Brain size={13} className="text-[#7C3AED]" /> COGNITIVE DECK
@@ -319,7 +319,7 @@ export default function AITutorPage() {
         </div>
 
         {/* Curriculum context picker */}
-        <div className="bg-white border-[4px] border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none p-4 space-y-3">
+        <div className="bg-white border-[3px] md:border-[4px] border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none p-4 space-y-3">
           <div className="space-y-0.5">
             <h3 className="text-xs font-extrabold uppercase font-mono tracking-wider flex items-center gap-1">
               <BookOpen size={13} className="text-purple-600" /> MAPEL CONTEXT
@@ -365,23 +365,23 @@ export default function AITutorPage() {
       </div>
 
       {/* RIGHT PANEL: Chat Deck (Interactive Connection) */}
-      <div className="flex-grow flex flex-col min-h-[500px] min-w-0 max-w-full">
-        <div className="flex-grow flex flex-col bg-white border-[4px] border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-none overflow-hidden min-h-[550px] max-h-[calc(100vh-10rem)] min-w-0 max-w-full">
+      <div className="order-1 lg:order-2 flex-grow flex flex-col min-h-[calc(100dvh-12rem)] lg:min-h-[500px] min-w-0 max-w-full">
+        <div className="flex-grow flex flex-col bg-white border-[3px] md:border-[4px] border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] md:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-none overflow-hidden min-h-[calc(100dvh-12rem)] lg:min-h-[550px] lg:max-h-[calc(100vh-10rem)] min-w-0 max-w-full">
           
           {/* Header */}
-          <div className="bg-[#7C3AED] text-white border-b-[3px] border-black px-5 py-4 flex items-center justify-between flex-shrink-0">
-            <div className="flex items-center gap-3">
+          <div className="bg-[#7C3AED] text-white border-b-[3px] border-black px-3 sm:px-5 py-3 sm:py-4 flex items-center justify-between gap-3 flex-shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <div className="w-8 h-8 rounded-lg bg-white border-2 border-black flex items-center justify-center shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)]">
                 <Brain size={18} className="text-[#7C3AED]" />
               </div>
               <div>
-                <h2 className="text-sm font-extrabold uppercase font-mono tracking-wider">TUTOR Ω</h2>
+                <h2 className="text-xs sm:text-sm font-extrabold uppercase font-mono tracking-wider">TUTOR AI</h2>
                 <p className="text-[9px] font-bold text-purple-200 uppercase tracking-widest font-mono">ACTIVE CONNECTION</p>
               </div>
             </div>
             
-            <div className="flex items-center gap-3">
-              <Badge className="bg-black text-[#4ADE80] font-mono border-2 border-black shadow-[1.5px_1.5px_0px_rgba(255,255,255,1)] px-2.5 py-1 text-[9px] flex items-center gap-1">
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              <Badge className="hidden sm:flex bg-black text-[#4ADE80] font-mono border-2 border-black shadow-[1.5px_1.5px_0px_rgba(255,255,255,1)] px-2.5 py-1 text-[9px] items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#4ADE80] animate-pulse" /> SYSTEM ONLINE
               </Badge>
 
@@ -411,7 +411,7 @@ export default function AITutorPage() {
           </div>
 
           {/* Chat Messages */}
-          <div ref={chatScrollRef} className="ai-chat-scroll flex-1 overflow-y-auto overflow-x-hidden p-5 space-y-6 bg-zinc-50/50 min-w-0" style={{ backgroundImage: 'radial-gradient(rgba(0,0,0,0.06) 1.2px, transparent 1.2px)', backgroundSize: '12px 12px' }}>
+          <div ref={chatScrollRef} className="ai-chat-scroll flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 space-y-4 sm:space-y-6 bg-zinc-50/50 min-w-0" style={{ backgroundImage: 'radial-gradient(rgba(0,0,0,0.05) 1.2px, transparent 1.2px)', backgroundSize: '12px 12px' }}>
             
             {displayMessages.length === 0 && activeSessionId === 'session-default' && (
               <div className="text-center py-12 space-y-4 max-w-md mx-auto">
@@ -429,12 +429,12 @@ export default function AITutorPage() {
                 <div key={msg.id} className={`flex flex-col ${isTutor ? 'items-start' : 'items-end'} space-y-1.5 min-w-0 w-full`}>
                   {/* Sender title */}
                   <span className="text-[9px] font-extrabold font-mono text-zinc-500 uppercase tracking-widest px-1">
-                    {isTutor ? 'TUTOR Ω' : `${profile.name.toUpperCase()} 👤`}
+                    {isTutor ? 'TUTOR AI' : profile.name.toUpperCase()}
                   </span>
                   
                   <div className={`flex ${isTutor ? 'justify-start' : 'justify-end'} w-full min-w-0`}>
                     <div
-                      className={`ai-message-bubble w-fit max-w-[92%] sm:max-w-[85%] border-[3px] border-black rounded-xl p-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] relative transition-all duration-200 ${
+                      className={`ai-message-bubble w-fit max-w-[96%] sm:max-w-[85%] border-[2px] sm:border-[3px] border-black rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-[2px_2px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_rgba(0,0,0,1)] relative transition-all duration-200 ${
                         isTutor
                           ? 'bg-[#7C3AED] text-white'
                           : 'bg-[#4ADE80] text-black'
@@ -445,7 +445,7 @@ export default function AITutorPage() {
                           const { cleanContent, quizzes, flashcards } = parseMessageContent(msg.content);
                           return (
                             <div className="space-y-4 min-w-0 max-w-full">
-                              <div className="ai-message-content font-sans text-xs leading-relaxed font-semibold">
+                              <div className="ai-message-content font-sans text-[13px] sm:text-xs leading-relaxed font-semibold">
                                 <ReactMarkdown
                                   components={{
                                     p: ({children}) => <p className="mb-3 last:mb-0 text-white font-semibold">{children}</p>,
@@ -509,9 +509,9 @@ export default function AITutorPage() {
 
             {isResponding && (
               <div className="flex flex-col items-start space-y-1.5">
-                <span className="text-[9px] font-extrabold font-mono text-zinc-500 uppercase tracking-widest px-1">TUTOR Ω</span>
+                <span className="text-[9px] font-extrabold font-mono text-zinc-500 uppercase tracking-widest px-1">TUTOR AI</span>
                 <div className="flex justify-start w-full">
-                  <div className="max-w-[70%] border-[3px] border-black rounded-xl p-4 bg-[#7C3AED] text-white shadow-[4px_4px_0px_rgba(0,0,0,1)] space-y-3">
+                  <div className="max-w-[92%] sm:max-w-[70%] border-[2px] sm:border-[3px] border-black rounded-xl p-4 bg-[#7C3AED] text-white shadow-[3px_3px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_rgba(0,0,0,1)] space-y-3">
                     <div className="flex items-center gap-2 text-[#4ADE80] text-[10px] font-extrabold font-mono">
                       <Cpu size={12} className="animate-spin text-[#4ADE80]" /> MEMPROSES LOGIKA BELAJAR...
                     </div>
@@ -525,7 +525,7 @@ export default function AITutorPage() {
           </div>
 
           {/* Quick Prompts */}
-          <div className="px-5 py-3 border-t-2 border-black bg-zinc-50 flex-shrink-0">
+          <div className="px-3 sm:px-5 py-3 border-t-2 border-black bg-zinc-50 flex-shrink-0">
             <div className="flex gap-2 overflow-x-auto scrollbar-none pb-0.5">
               {QUICK_PROMPTS.map((prompt, i) => (
                 <button
@@ -540,9 +540,9 @@ export default function AITutorPage() {
           </div>
 
           {/* Input Form */}
-          <form onSubmit={handleSend} className="ai-chat-input-form p-4 border-t-[3px] border-black bg-white flex flex-wrap sm:flex-nowrap gap-3 sm:gap-4 flex-shrink-0 items-center">
+          <form onSubmit={handleSend} className="ai-chat-input-form p-3 sm:p-4 border-t-[3px] border-black bg-white grid grid-cols-[auto_1fr] sm:flex sm:flex-nowrap gap-3 sm:gap-4 flex-shrink-0 items-center">
             {/* Action buttons (Paperclip & Sigma/Calculator) */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 order-2 sm:order-1">
               <button
                 type="button"
                 onClick={() => router.push('/brain')}
@@ -574,14 +574,14 @@ export default function AITutorPage() {
                   ? `Tanyakan materi: ${selectedSubject}...`
                   : 'Ketik tanggapan atau ajukan pertanyaan Anda di sini...'
               }
-              className="min-w-0 flex-grow h-11 px-4 bg-zinc-50 border-2 border-black rounded-lg text-base sm:text-xs font-bold text-black focus:outline-none placeholder:text-zinc-400 focus:bg-white transition-all shadow-[inset_1.5px_1.5px_3px_rgba(0,0,0,0.15)]"
+              className="col-span-2 sm:col-span-1 order-1 sm:order-2 min-w-0 w-full flex-grow h-12 sm:h-11 px-4 bg-zinc-50 border-2 border-black rounded-lg text-base sm:text-xs font-bold text-black focus:outline-none placeholder:text-zinc-500 focus:bg-white transition-all shadow-[inset_1.5px_1.5px_3px_rgba(0,0,0,0.15)]"
             />
 
             {/* Send button */}
             <button 
               type="submit" 
               disabled={isResponding || !input.trim()} 
-              className="h-11 px-6 flex-shrink-0 bg-[#FBBF24] hover:bg-[#F59E0B] text-black border-2 border-black rounded-lg font-bold text-xs shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+              className="order-3 sm:order-3 h-11 px-5 sm:px-6 flex-shrink-0 bg-[#FBBF24] hover:bg-[#F59E0B] text-black border-2 border-black rounded-lg font-bold text-xs shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
             >
               SEND <Send size={12} className="stroke-[2.5]" />
             </button>
