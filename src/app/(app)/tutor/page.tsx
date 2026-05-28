@@ -91,6 +91,7 @@ export default function AITutorPage() {
   const [mounted, setMounted] = useState(false);
   
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -115,7 +116,13 @@ export default function AITutorPage() {
   const completedCount = Object.keys(completedLessons).length;
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const chatScrollEl = chatScrollRef.current;
+    if (!chatScrollEl) return;
+
+    chatScrollEl.scrollTo({
+      top: chatScrollEl.scrollHeight,
+      behavior: isResponding ? 'auto' : 'smooth'
+    });
   }, [session.messages, isResponding, activeSessionId]);
 
   // Audio player loop for ambient study sound
@@ -209,7 +216,7 @@ export default function AITutorPage() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 p-5 bg-[#E4E4E7] min-h-[calc(100vh-6rem)] border-[4px] border-black rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-black relative" style={{ backgroundImage: 'radial-gradient(rgba(0,0,0,0.15) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }}>
+    <div className="flex flex-col lg:flex-row gap-6 p-5 bg-[#E4E4E7] min-h-[calc(100vh-6rem)] border-[4px] border-black rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-black relative max-w-full overflow-x-hidden" style={{ backgroundImage: 'radial-gradient(rgba(0,0,0,0.15) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }}>
       
       {/* LEFT PANEL: History, Mode, Curriculum Context */}
       <div className="w-full lg:w-80 flex flex-col gap-5 flex-shrink-0">
@@ -358,8 +365,8 @@ export default function AITutorPage() {
       </div>
 
       {/* RIGHT PANEL: Chat Deck (Interactive Connection) */}
-      <div className="flex-grow flex flex-col min-h-[500px]">
-        <div className="flex-grow flex flex-col bg-white border-[4px] border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-none overflow-hidden min-h-[550px] max-h-[calc(100vh-10rem)]">
+      <div className="flex-grow flex flex-col min-h-[500px] min-w-0 max-w-full">
+        <div className="flex-grow flex flex-col bg-white border-[4px] border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-none overflow-hidden min-h-[550px] max-h-[calc(100vh-10rem)] min-w-0 max-w-full">
           
           {/* Header */}
           <div className="bg-[#7C3AED] text-white border-b-[3px] border-black px-5 py-4 flex items-center justify-between flex-shrink-0">
@@ -404,7 +411,7 @@ export default function AITutorPage() {
           </div>
 
           {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto p-5 space-y-6 bg-zinc-50/50" style={{ backgroundImage: 'radial-gradient(rgba(0,0,0,0.06) 1.2px, transparent 1.2px)', backgroundSize: '12px 12px' }}>
+          <div ref={chatScrollRef} className="ai-chat-scroll flex-1 overflow-y-auto overflow-x-hidden p-5 space-y-6 bg-zinc-50/50 min-w-0" style={{ backgroundImage: 'radial-gradient(rgba(0,0,0,0.06) 1.2px, transparent 1.2px)', backgroundSize: '12px 12px' }}>
             
             {displayMessages.length === 0 && activeSessionId === 'session-default' && (
               <div className="text-center py-12 space-y-4 max-w-md mx-auto">
@@ -419,15 +426,15 @@ export default function AITutorPage() {
             {displayMessages.map((msg) => {
               const isTutor = msg.sender === 'tutor';
               return (
-                <div key={msg.id} className={`flex flex-col ${isTutor ? 'items-start' : 'items-end'} space-y-1.5`}>
+                <div key={msg.id} className={`flex flex-col ${isTutor ? 'items-start' : 'items-end'} space-y-1.5 min-w-0 w-full`}>
                   {/* Sender title */}
                   <span className="text-[9px] font-extrabold font-mono text-zinc-500 uppercase tracking-widest px-1">
                     {isTutor ? 'TUTOR Ω' : `${profile.name.toUpperCase()} 👤`}
                   </span>
                   
-                  <div className={`flex ${isTutor ? 'justify-start' : 'justify-end'} w-full`}>
+                  <div className={`flex ${isTutor ? 'justify-start' : 'justify-end'} w-full min-w-0`}>
                     <div
-                      className={`max-w-[85%] border-[3px] border-black rounded-xl p-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] relative transition-all duration-200 ${
+                      className={`ai-message-bubble w-fit max-w-[92%] sm:max-w-[85%] border-[3px] border-black rounded-xl p-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] relative transition-all duration-200 ${
                         isTutor
                           ? 'bg-[#7C3AED] text-white'
                           : 'bg-[#4ADE80] text-black'
@@ -437,8 +444,8 @@ export default function AITutorPage() {
                         (() => {
                           const { cleanContent, quizzes, flashcards } = parseMessageContent(msg.content);
                           return (
-                            <div className="space-y-4">
-                              <div className="font-sans text-xs leading-relaxed font-semibold">
+                            <div className="space-y-4 min-w-0 max-w-full">
+                              <div className="ai-message-content font-sans text-xs leading-relaxed font-semibold">
                                 <ReactMarkdown
                                   components={{
                                     p: ({children}) => <p className="mb-3 last:mb-0 text-white font-semibold">{children}</p>,
@@ -447,13 +454,14 @@ export default function AITutorPage() {
                                     ul: ({children}) => <ul className="list-disc pl-4 space-y-1 mb-3 text-white">{children}</ul>,
                                     ol: ({children}) => <ol className="list-decimal pl-4 space-y-1 mb-3 text-white">{children}</ol>,
                                     li: ({children}) => <li className="text-[11px] text-white/90">{children}</li>,
+                                    a: ({children, href}) => <a href={href} target="_blank" rel="noreferrer" className="text-yellow-200 underline decoration-yellow-200/60 break-all">{children}</a>,
                                     code: ({node, className, children, ...props}) => (
                                       <code className="bg-black/40 text-yellow-300 px-1 py-0.5 rounded font-mono text-[10px]" {...props}>
                                         {children}
                                       </code>
                                     ),
                                     pre: ({children}) => (
-                                      <pre className="bg-black/60 border border-black/40 p-3 rounded-lg font-mono text-[10px] text-green-400 overflow-x-auto my-3 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]">
+                                      <pre className="max-w-full bg-black/60 border border-black/40 p-3 rounded-lg font-mono text-[10px] text-green-400 overflow-x-auto my-3 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]">
                                         {children}
                                       </pre>
                                     )
@@ -486,7 +494,7 @@ export default function AITutorPage() {
                           );
                         })()
                       ) : (
-                        <p className="whitespace-pre-wrap text-xs font-bold leading-relaxed">{msg.content}</p>
+                        <p className="whitespace-pre-wrap text-xs font-bold leading-relaxed break-words">{msg.content}</p>
                       )}
                       
                       <div className="flex justify-between items-center mt-3 pt-1.5 border-t border-black/10 text-[9px] font-mono opacity-80">

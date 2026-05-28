@@ -283,6 +283,29 @@ input[type="number"] {
   background: rgba(255,255,255,0.08);
 }
 
+/* ---- AI Tutor chat overflow guard ---- */
+.ai-chat-scroll {
+  overscroll-behavior: contain;
+}
+
+.ai-message-bubble,
+.ai-message-content,
+.ai-message-content * {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.ai-message-content pre {
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.ai-message-content code {
+  white-space: pre-wrap;
+}
+
 /* ---- Card Flip utilities ---- */
 .perspective-1000 {
   perspective: 1000px;
