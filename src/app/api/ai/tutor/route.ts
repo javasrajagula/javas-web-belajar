@@ -132,6 +132,7 @@ ${context ? `\n## Materi Aktif Terkait:\n- Modul: ${context.lessonTitle || 'Umum
           system: systemPrompt,
           messages: safeMessages,
           temperature: 0.35,
+          maxRetries: 0,
         }),
         { label: 'Tutor AI' }
       );
