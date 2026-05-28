@@ -3,7 +3,7 @@ import { generateText } from "ai";
 import { auth } from "@/auth";
 import { ratelimiter } from "@/lib/ratelimit";
 import { searchSimilarChunks } from "@/lib/actions/rag";
-import { AI_ENV_ERROR, canUseDevelopmentFallback, getServerAiModel, getServerAiProviderStatus, runAiWithRetry } from "@/lib/ai-provider";
+import { AI_ENV_ERROR, canUseDevelopmentFallback, getAiProviderUserMessage, getServerAiModel, getServerAiProviderStatus, isAiQuotaError, runAiWithRetry } from "@/lib/ai-provider";
 
 export const maxDuration = 45;
 
@@ -150,7 +150,7 @@ ${context ? `\n## Materi Aktif Terkait:\n- Modul: ${context.lessonTitle || 'Umum
     } catch (aiError) {
       console.error("AI Tutor generation failed:", aiError);
       if (!canUseDevelopmentFallback()) {
-        return new Response("Provider AI gagal menjawab. Periksa konfigurasi Gemini/API key di Vercel.", { status: 502 });
+        return new Response(getAiProviderUserMessage(aiError), { status: isAiQuotaError(aiError) ? 429 : 502 });
       }
       return generateMockTutorStream(messages, mode, jurusan, kelas);
     }

@@ -70,6 +70,9 @@ export async function runAiWithRetry<T>(
       ]);
     } catch (error) {
       lastError = error;
+      if (isAiQuotaError(error)) {
+        throw error;
+      }
       if (attempt < attempts) {
         await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
       }
@@ -77,6 +80,60 @@ export async function runAiWithRetry<T>(
   }
 
   throw lastError;
+}
+
+export function isAiQuotaError(error: unknown) {
+  const details = collectAiErrorDetails(error);
+  return details.some((detail) =>
+    detail.statusCode === 429 ||
+    /RESOURCE_EXHAUSTED|quota exceeded|rate limit|too many requests/i.test(detail.message)
+  );
+}
+
+export function getAiProviderUserMessage(error: unknown) {
+  if (isAiQuotaError(error)) {
+    return 'Kuota Gemini untuk server sedang habis atau terkena rate limit. API key sudah terbaca, tetapi provider menolak request sementara. Coba lagi beberapa menit kemudian, ganti GEMINI_MODEL ke model yang kuotanya masih tersedia, atau aktifkan billing/kuota tambahan di Google AI Studio.';
+  }
+
+  const details = collectAiErrorDetails(error);
+  if (details.some((detail) => detail.statusCode === 401 || detail.statusCode === 403 || /API key|permission|auth/i.test(detail.message))) {
+    return 'Gemini menolak request karena konfigurasi API key atau izin belum valid. Periksa GEMINI_API_KEY di environment server/Vercel.';
+  }
+
+  return 'Provider AI gagal menjawab. Konfigurasi Gemini terbaca, tetapi request gagal diproses oleh provider.';
+}
+
+function collectAiErrorDetails(error: unknown): Array<{ statusCode?: number; message: string }> {
+  const seen = new Set<unknown>();
+  const details: Array<{ statusCode?: number; message: string }> = [];
+
+  const visit = (value: unknown) => {
+    if (!value || seen.has(value)) return;
+    seen.add(value);
+
+    if (typeof value === 'string') {
+      details.push({ message: value });
+      return;
+    }
+
+    if (value instanceof Error) {
+      const anyError = value as Error & {
+        statusCode?: number;
+        responseBody?: string;
+        lastError?: unknown;
+        errors?: unknown[];
+      };
+      details.push({
+        statusCode: anyError.statusCode,
+        message: `${anyError.message || ''}\n${anyError.responseBody || ''}`.trim(),
+      });
+      visit(anyError.lastError);
+      anyError.errors?.forEach(visit);
+    }
+  };
+
+  visit(error);
+  return details.length ? details : [{ message: 'Unknown AI provider error' }];
 }
 
 export const AI_ENV_ERROR =
