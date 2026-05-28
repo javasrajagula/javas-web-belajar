@@ -106,7 +106,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
       <div className="text-center py-20">
         <h2 className="text-sm font-bold text-danger">Pelajaran Tidak Ditemukan</h2>
         <p className="text-xs text-text-secondary mt-2">Materi yang Anda minta tidak terdaftar di kurikulum saat ini.</p>
-        <Link href="/subjects" className="mt-4 inline-block">
+        <Link href="/materi" className="mt-4 inline-block">
           <Button size="sm" variant="secondary">Kembali ke Mata Pelajaran</Button>
         </Link>
       </div>
@@ -246,7 +246,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
       {/* Lesson Header Navigation */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-bg-secondary border border-border p-4 rounded-lg">
         <div className="flex items-center gap-3">
-          <Link href="/subjects">
+          <Link href="/materi">
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
               <ArrowLeft size={16} />
             </Button>

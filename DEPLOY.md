@@ -1,44 +1,90 @@
-# Production Deployment Guide (Upgraded V2)
+# Production Deployment Guide
 
-Academy OS Ω is fully production-grade and ready for deployment to Vercel with a PostgreSQL database (e.g., Supabase, Neon, or AWS RDS).
+Academy OS Omega is a Next.js app with Prisma/PostgreSQL, Auth.js, AI SDK routes, and local PDF processing.
 
-## 1. Database Provisioning & Schema Migration
+## Local Run
 
-1. **Database Setup**: Create a PostgreSQL database instance on Supabase, Neon, or another provider.
-2. **Retrieve Connection String**: Copy the transaction/session database connection URI.
-3. **Run Schema Migrations**: From your local workspace, push the Prisma schema to the database:
-   ```bash
-   npx prisma db push
-   ```
-4. **Seed Database**: Load default SMA/SMK curriculum structures and demo accounts:
-   ```bash
-   npx prisma db seed
-   ```
+```bash
+npm install
+npx prisma generate
+npx prisma db push
+npx prisma db seed
+npm run dev -- --hostname 127.0.0.1 --port 3000
+```
 
-## 2. Environment Variables Configuration
+Open `http://127.0.0.1:3000`.
 
-Configure the following environment variables in your Vercel project settings:
+Demo account after seeding:
 
-### Database & App Target
-- `DATABASE_URL`: Your PostgreSQL database connection URI (e.g. `postgresql://...`)
-- `NEXT_PUBLIC_APP_URL`: Your production URL (e.g. `https://your-domain.vercel.app`)
-- `NEXT_PUBLIC_APP_NAME`: `Academy OS Ω`
+```text
+Email: alex@academy.os
+Password: academy123
+```
 
-### NextAuth v5 (Auth.js) Security
-- `AUTH_SECRET`: Generate a cryptographically secure random secret key (e.g. run `openssl rand -base64 33` or `npx auth secret`).
-- `AUTH_GOOGLE_ID` (Optional): Client ID for Google OAuth login.
-- `AUTH_GOOGLE_SECRET` (Optional): Client Secret for Google OAuth login.
-- `AUTH_GITHUB_ID` (Optional): Client ID for GitHub OAuth login.
-- `AUTH_GITHUB_SECRET` (Optional): Client Secret for GitHub OAuth login.
+## Required Environment Variables
 
-### Vercel AI SDK
-- `GEMINI_API_KEY` (Optional): API key for streaming Google Generative AI (replaces client-side streaming mocks with live models).
+Copy `.env.example` to `.env.local` for local development and set these values in your hosting provider:
 
-## 3. Vercel Project Build Command
+```text
+DATABASE_URL
+AUTH_SECRET
+NEXT_PUBLIC_APP_URL
+NEXT_PUBLIC_APP_NAME
+```
 
-In your Vercel Project Settings, confirm:
-- **Build Command**: `prisma generate && next build`
-- **Output Directory**: `.next`
-- **Install Command**: `npm install --legacy-peer-deps`
+For live AI features, set at least one:
 
-*Note: Pre-pending `prisma generate` before `next build` ensures the Prisma Client is fully generated in the Vercel builder environment prior to compilation.*
+```text
+GEMINI_API_KEY
+GOOGLE_GENERATIVE_AI_API_KEY
+ANTHROPIC_API_KEY
+```
+
+Optional:
+
+```text
+UPSTASH_REDIS_REST_URL
+UPSTASH_REDIS_REST_TOKEN
+GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET
+GITHUB_CLIENT_ID
+GITHUB_CLIENT_SECRET
+```
+
+## Database
+
+Use PostgreSQL from Neon, Supabase, RDS, or a compatible provider.
+
+```bash
+npx prisma db push
+npx prisma db seed
+```
+
+The seed creates SMK jurusan, mata pelajaran, bab, materi, bank soal, and a demo student.
+
+## Vercel Settings
+
+Recommended:
+
+```text
+Install Command: npm install
+Build Command: npx prisma generate && npm run build
+Output Directory: .next
+```
+
+Add all required environment variables in Vercel Project Settings. Never commit `.env`, `.env.local`, or real API keys.
+
+## Production Notes
+
+- `/api/ai/*` and `/api/pdf/process` read AI keys only server-side.
+- If AI keys are missing, tutor/question/PDF routes return a clear server error in production. Development fallback responses are only used outside production.
+- PDF uploads reject unsupported binary files and files larger than 10 MB.
+- Portfolio uploads currently write to `public/uploads/portfolio` locally. For serverless production, replace this with object storage such as Vercel Blob, S3, Supabase Storage, or Cloudinary.
+
+## Final Checks Before Deploy
+
+```bash
+npx tsc --noEmit --pretty false
+npm run lint
+npm run build
+```

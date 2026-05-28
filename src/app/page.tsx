@@ -70,6 +70,11 @@ const STATS = [
 
 export default function LandingPage() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = React.useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div ref={containerRef} className="min-h-screen bg-[#080810] text-white flex flex-col relative overflow-hidden">
@@ -85,7 +90,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(79,70,229,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(79,70,229,0.03)_1px,transparent_1px)] bg-[size:60px_60px]" />
         
         {/* Floating particles */}
-        {Array.from({ length: 20 }).map((_, i) => (
+        {mounted && Array.from({ length: 20 }).map((_, i) => (
           <motion.div
             key={i}
             className="absolute w-1 h-1 rounded-full bg-indigo-400/40"
@@ -266,7 +271,7 @@ export default function LandingPage() {
                 <div className="flex gap-3">
                   <div className="flex-1 p-3 rounded-lg bg-cyan-500/5 border border-cyan-500/10 text-xs text-cyan-400/80">
                     <span className="font-mono text-[9px] block mb-1">AI TUTOR</span>
-                    "Berdasarkan pola belajar Anda, saya rekomendasikan fokus di Integral Tertentu malam ini..."
+                    &quot;Berdasarkan pola belajar Anda, saya rekomendasikan fokus di Integral Tertentu malam ini...&quot;
                   </div>
                   <div className="flex-1 p-3 rounded-lg bg-amber-500/5 border border-amber-500/10 text-xs text-amber-400/80">
                     <span className="font-mono text-[9px] block mb-1">MISI RPG</span>

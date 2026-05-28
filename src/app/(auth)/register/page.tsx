@@ -28,7 +28,7 @@ export default function RegisterPage() {
 
     try {
       // 1. Create the user in PostgreSQL
-      await registerUser({ name, email });
+      await registerUser({ name, email, password });
 
       // 2. Perform credentials login immediately
       const res = await signIn('credentials', {

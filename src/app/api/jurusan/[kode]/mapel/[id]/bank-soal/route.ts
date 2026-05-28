@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { auth } from '@/auth';
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ kode: string; id: string }> }
 ) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Tidak terautentikasi' }, { status: 401 });
+    }
+
     const resolvedParams = await params;
     const { id: mapelId } = resolvedParams;
 
@@ -13,6 +19,7 @@ export async function GET(
     const tingkat = searchParams.get('tingkat');
     const tipe = searchParams.get('tipe');
     const kelasStr = searchParams.get('kelas');
+    const includeAnswers = searchParams.get('includeAnswers') === 'true';
 
     const filter: any = {
       mataPelajaranId: mapelId,
@@ -50,6 +57,12 @@ export async function GET(
       return {
         ...soal,
         pilihan: options,
+        ...(includeAnswers
+          ? {}
+          : {
+              jawabanBenar: undefined,
+              pembahasan: undefined,
+            }),
       };
     });
 

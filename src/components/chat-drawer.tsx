@@ -72,13 +72,15 @@ export default function ChatDrawer({
             ...messages.map((m) => ({ role: m.role, content: m.content })),
             { role: 'user', content: userText },
           ],
+          mode: 'teacher',
+          jurusan,
+          kelas,
           context: {
-            mode: 'teacher', // default explanation mode
             selectedPathway: jurusan,
             grade: kelas,
             schoolType: 'smk',
             lessonTitle: materiTitle,
-            materiContext: materiContent, // Embed current materi content as background context
+            contentPreview: materiContent.slice(0, 4000),
           },
         }),
       });
@@ -110,6 +112,10 @@ export default function ChatDrawer({
           return updated;
         });
       }
+
+      if (!chunkText.trim()) {
+        throw new Error('AI_EMPTY_RESPONSE');
+      }
     } catch (err) {
       console.error(err);
       toast.error('Gagal mendapatkan respons Tutor AI.');
@@ -117,7 +123,7 @@ export default function ChatDrawer({
         ...prev,
         {
           role: 'assistant',
-          content: '⚠️ Terjadi kesalahan koneksi. Pastikan koneksi internet stabil dan kunci API AI Anda sudah dikonfigurasi.',
+          content: 'Respons AI kosong atau gagal diproses. Untuk production, pastikan `GEMINI_API_KEY`, `GOOGLE_GENERATIVE_AI_API_KEY`, atau `ANTHROPIC_API_KEY` aktif di environment server.',
         },
       ]);
     } finally {

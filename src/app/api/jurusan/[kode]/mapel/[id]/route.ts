@@ -35,19 +35,16 @@ export async function GET(
     // If user is logged in, merge completion progress
     let completedMateriIds: string[] = [];
     if (userId) {
-      // We will look up from the Progress table
-      const progress = await prisma.progress.findMany({
+      const progress = await prisma.materiProgress.findMany({
         where: {
           userId,
           completed: true,
         },
         select: {
-          lessonId: true, // We can map lessonId to completed materi ID if lessonId contains the materi ID
+          materiId: true,
         },
       });
-      // In the context of custom vocational Materi, progress is saved in Progress table.
-      // Wait, does the Progress model have a lessonId? Yes. We can store materi progress in Progress too by mapping lessonId = materiId.
-      completedMateriIds = progress.map((p) => p.lessonId);
+      completedMateriIds = progress.map((p) => p.materiId);
     }
 
     // Attach completed flag to each materi item

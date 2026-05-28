@@ -12,9 +12,19 @@ export const getCurriculumData = (schoolType: 'sma' | 'smk'): Subject[] => {
 
 export const getSubjectsByPathway = (
   schoolType: 'sma' | 'smk',
-  grade: number
+  grade: number,
+  pathway?: string
 ): Subject[] => {
   const subjects = getCurriculumData(schoolType);
+  if (schoolType === 'smk') {
+    const activePathway = pathway || 'Umum';
+    return subjects.filter((sub) => {
+      if (sub.grade !== grade) return false;
+      const subPathway = (sub as any).pathway || 'Umum';
+      if (subPathway === 'Umum') return true;
+      return subPathway.toLowerCase() === activePathway.toLowerCase();
+    });
+  }
   return subjects.filter((sub) => sub.grade === grade);
 };
 

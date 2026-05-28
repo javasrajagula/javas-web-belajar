@@ -1,216 +1,264 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useUserStore } from '@/stores/user-store';
-import { useCurriculumStore } from '@/stores/curriculum-store';
-import { getSubjectsByPathway } from '@/lib/curriculum-data';
+import { resolveSmkPathway } from '@/lib/pathway';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { 
-  BookOpen, 
-  ChevronRight, 
-  ChevronDown, 
-  Sparkles, 
-  CheckCircle,
+import { Progress } from '@/components/ui/progress';
+import {
+  AlertCircle,
+  ArrowRight,
+  BookOpen,
+  ChevronDown,
+  ChevronRight,
   FileText,
-  Bookmark,
-  Award
+  GraduationCap,
+  RefreshCw,
+  Search,
 } from 'lucide-react';
+import { toast } from 'sonner';
+
+interface Mapel {
+  id: string;
+  kode: string;
+  nama: string;
+  kelas: number;
+  semester: number;
+  deskripsi: string;
+  bab: Array<{
+    id: string;
+    nomor: number;
+  }>;
+}
+
+interface JurusanDetail {
+  kode: string;
+  nama: string;
+  bidang: string;
+  mataPelajaran: Mapel[];
+}
 
 export default function SubjectsPage() {
   const { profile } = useUserStore();
-  const { completedLessons, portfolios, pklLogs } = useCurriculumStore();
-  const [expandedSubject, setExpandedSubject] = useState<string | null>(null);
+  const activePathway = resolveSmkPathway(profile.selectedPathway);
+  const [jurusan, setJurusan] = useState<JurusanDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [expandedMapelId, setExpandedMapelId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [kelasFilter, setKelasFilter] = useState<number | 'semua'>('semua');
 
-  // Load matching subjects from content layer
-  const subjects = getSubjectsByPathway(profile.schoolType, profile.grade);
-
-  const toggleSubject = (id: string) => {
-    setExpandedSubject(expandedSubject === id ? null : id);
-  };
-
-  // Helper to calculate progress
-  const getSubjectProgress = (subjectId: string) => {
-    const subject = subjects.find(s => s.id === subjectId);
-    if (!subject) return 0;
-    
-    let totalLessons = 0;
-    let completedCount = 0;
-    
-    subject.modules.forEach(mod => {
-      mod.lessons.forEach(les => {
-        totalLessons++;
-        if (completedLessons[les.id]) {
-          completedCount++;
+  useEffect(() => {
+    async function loadSubjects() {
+      setLoading(true);
+      setError('');
+      try {
+        const res = await fetch(`/api/jurusan/${activePathway}`);
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Gagal memuat mata pelajaran');
         }
-      });
-    });
+        setJurusan(data);
+        setExpandedMapelId(data.mataPelajaran?.[0]?.id || null);
+      } catch (err: any) {
+        setError(err.message || 'Gagal memuat data materi');
+        toast.error(err.message || 'Gagal memuat data materi');
+      } finally {
+        setLoading(false);
+      }
+    }
 
-    if (totalLessons === 0) return 0;
-    return Math.round((completedCount / totalLessons) * 100);
-  };
+    loadSubjects();
+  }, [activePathway]);
+
+  const filteredMapels = useMemo(() => {
+    const query = searchQuery.toLowerCase();
+    return (jurusan?.mataPelajaran || []).filter((mapel) => {
+      const matchesSearch =
+        mapel.nama.toLowerCase().includes(query) ||
+        mapel.kode.toLowerCase().includes(query) ||
+        mapel.deskripsi.toLowerCase().includes(query);
+      const matchesKelas = kelasFilter === 'semua' || mapel.kelas === kelasFilter;
+      return matchesSearch && matchesKelas;
+    });
+  }, [jurusan, kelasFilter, searchQuery]);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-bg-secondary border border-border p-6 rounded-lg relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent pointer-events-none" />
-        <div className="relative z-10 space-y-1">
-          <div className="flex items-center gap-2">
-            <Badge variant="primary" className="text-[10px] font-mono tracking-wider uppercase bg-primary/10 text-primary border-primary/20">
-              {profile.schoolType === 'sma' ? `SMA - FASE ${profile.grade === 10 ? 'E' : 'F'}` : `SMK KEJURUAN - FASE ${profile.grade === 10 ? 'E' : 'F'}`}
-            </Badge>
-            <Badge variant="secondary" className="text-[10px] font-mono tracking-wider uppercase bg-secondary/10 text-secondary border-secondary/20">
-              KELAS {profile.grade}
-            </Badge>
+    <div className="contrast-safe space-y-6 text-text-primary">
+      <section className="bg-white border-[4px] border-border shadow-sm p-5 sm:p-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge className="bg-accent text-black border-2 border-black font-black uppercase">
+                {activePathway}
+              </Badge>
+              <Badge className="bg-primary text-white border-2 border-black font-black uppercase">
+                Kelas {profile.grade}
+              </Badge>
+            </div>
+            <h1 className="text-2xl font-black">Materi & Mata Pelajaran</h1>
+            <p className="text-sm font-semibold text-text-secondary max-w-2xl">
+              Materi ini dibaca langsung dari database jurusan. Buka mata pelajaran, pilih bab, lalu masuk ke reader materi yang berisi teks, video, PDF, ringkasan, progres, dan Tutor AI.
+            </p>
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-text-primary mt-2">
-            Peta Kurikulum Nasional Terintegrasi
-          </h1>
-          <p className="text-xs text-text-secondary max-w-2xl leading-relaxed">
-            Struktur materi ini disesuaikan sepenuhnya dengan **Kurikulum Merdeka terbaru** untuk menyajikan proses *Deep Learning* secara terpadu.
-          </p>
+
+          <Link href="/jurusan">
+            <Button variant="secondary" className="w-full lg:w-auto">
+              <GraduationCap size={16} /> Ganti Jurusan
+            </Button>
+          </Link>
         </div>
-      </div>
+      </section>
 
-      {/* Main Subjects Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left: Subjects List */}
-        <div className="lg:col-span-2 space-y-4">
-          <h3 className="text-xs font-mono font-bold text-text-secondary uppercase tracking-widest pl-1">Daftar Mata Pelajaran</h3>
-          
-          {subjects.length > 0 ? (
-            subjects.map((sub) => {
-              const progress = getSubjectProgress(sub.id);
-              const isExpanded = expandedSubject === sub.id;
+      <section className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-5">
+        <Card className="p-4 bg-white h-fit">
+          <div className="space-y-4">
+            <div>
+              <label className="text-[10px] font-mono font-black uppercase text-text-secondary">Cari Materi</label>
+              <div className="relative mt-1.5">
+                <Search className="absolute left-3 top-2.5 w-4 h-4 text-text-tertiary" />
+                <input
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="Cari mapel, kode, deskripsi..."
+                  className="w-full h-10 pl-9 pr-3 border-[3px] border-border bg-bg-secondary text-sm font-bold text-text-primary focus:outline-none focus:bg-white"
+                />
+              </div>
+            </div>
 
-              return (
-                <Card key={sub.id} className="p-0 border border-border overflow-hidden transition-all duration-200">
-                  {/* Collapsible Header */}
-                  <div 
-                    onClick={() => toggleSubject(sub.id)}
-                    className="p-5 flex items-center justify-between cursor-pointer hover:bg-bg-tertiary/20 transition-colors"
+            <div>
+              <label className="text-[10px] font-mono font-black uppercase text-text-secondary">Filter Kelas</label>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                {(['semua', 10, 11, 12] as const).map((kelas) => (
+                  <button
+                    key={kelas}
+                    onClick={() => setKelasFilter(kelas)}
+                    className={`h-9 border-[3px] border-border text-xs font-black ${
+                      kelasFilter === kelas ? 'bg-accent text-black shadow-xs' : 'bg-white text-text-secondary hover:bg-bg-hover'
+                    }`}
                   >
-                    <div className="space-y-2 flex-1 pr-4 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <BookOpen size={16} className="text-primary flex-shrink-0" />
-                        <h4 className="text-sm font-bold text-text-primary truncate">{sub.title}</h4>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 max-w-[150px]">
-                          <Progress value={progress} color="accent" className="h-1" />
-                        </div>
-                        <span className="text-[10px] font-mono text-text-secondary">{progress}% penguasaan</span>
-                      </div>
-                    </div>
-                    <div>
-                      {isExpanded ? <ChevronDown size={18} className="text-text-tertiary" /> : <ChevronRight size={18} className="text-text-tertiary" />}
-                    </div>
-                  </div>
+                    {kelas === 'semua' ? 'Semua' : `Kelas ${kelas}`}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-                  {/* Collapsible Content */}
-                  {isExpanded && (
-                    <div className="border-t border-border bg-bg-tertiary/10 p-5 space-y-4 animate-fade-in">
-                      {/* CP Statement */}
-                      <div className="p-3.5 rounded bg-bg-secondary border border-border/60 text-[11px] leading-relaxed text-text-secondary space-y-1">
-                        <span className="font-mono font-bold text-text-primary text-[10px] uppercase flex items-center gap-1">
-                          <Sparkles size={11} className="text-secondary" /> Capaian Pembelajaran (CP)
-                        </span>
-                        <p>{sub.cpStatement}</p>
-                      </div>
+            <div className="border-[3px] border-border bg-bg-tertiary p-3">
+              <p className="text-[10px] font-mono font-black uppercase text-primary">Status Data</p>
+              <p className="mt-1 text-sm font-black">{loading ? 'Memuat...' : `${filteredMapels.length} mapel tampil`}</p>
+              <p className="mt-1 text-xs font-semibold text-text-secondary">
+                {jurusan ? `${jurusan.nama} - ${jurusan.bidang}` : 'Data jurusan belum terbaca.'}
+              </p>
+            </div>
+          </div>
+        </Card>
 
-                      {/* Modules list */}
-                      <div className="space-y-3">
-                        <span className="text-[9px] font-mono font-bold text-text-tertiary uppercase tracking-wider block">Daftar Modul Belajar</span>
-                        {sub.modules.map((mod) => (
-                          <div key={mod.id} className="space-y-1.5 pl-2 border-l-2 border-border">
-                            <span className="text-[10px] font-bold text-text-secondary font-mono">{mod.title}</span>
-                            <div className="space-y-1">
-                              {mod.lessons.map((les) => {
-                                const isCompleted = completedLessons[les.id];
-                                return (
-                                  <Link href={`/lessons/${les.id}`} key={les.id} className="flex items-center justify-between p-2.5 rounded bg-bg-secondary/40 border border-border/40 hover:border-primary/40 hover:bg-bg-tertiary/40 group transition-all duration-150">
-                                    <div className="flex items-center gap-2 min-w-0">
-                                      {isCompleted ? (
-                                        <CheckCircle size={12} className="text-success flex-shrink-0" />
-                                      ) : (
-                                        <div className="w-3 h-3 rounded-full border border-text-tertiary flex-shrink-0 group-hover:border-primary transition-colors" />
-                                      )}
-                                      <span className="text-xs text-text-primary truncate font-medium group-hover:text-primary transition-colors">{les.title}</span>
-                                    </div>
-                                    <ChevronRight size={12} className="text-text-tertiary group-hover:text-primary transition-colors" />
-                                  </Link>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+        <div className="space-y-4">
+          {loading && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[1, 2, 3, 4].map((item) => (
+                <Card key={item} className="p-5 bg-white animate-pulse">
+                  <div className="h-5 w-2/3 bg-bg-hover" />
+                  <div className="h-3 w-full bg-bg-hover mt-4" />
+                  <div className="h-3 w-4/5 bg-bg-hover mt-2" />
+                  <div className="h-10 w-32 bg-bg-hover mt-6" />
                 </Card>
-              );
-            })
-          ) : (
-            <div className="text-center py-12 text-xs text-text-secondary border border-dashed border-border rounded-lg">
-              Tidak ada mata pelajaran yang dijadwalkan untuk tingkat Anda saat ini.
+              ))}
             </div>
           )}
-        </div>
 
-        {/* Right: Path Info & Highlights */}
-        <div className="space-y-4">
-          <h3 className="text-xs font-mono font-bold text-text-secondary uppercase tracking-widest pl-1">Status Kesiapan</h3>
-          
-          {/* Diagnostic Info Card */}
-          <Card className="space-y-4">
-            <h4 className="text-xs font-bold text-text-primary flex items-center gap-1.5">
-              <Award size={14} className="text-accent" /> Evaluasi Kompetensi
-            </h4>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-text-secondary">Pelajaran Selesai:</span>
-                <span className="font-mono font-bold text-text-primary">
-                  {Object.keys(completedLessons).length} Sesi
-                </span>
-              </div>
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-text-secondary">Proyek Portofolio (SMK):</span>
-                <span className="font-mono font-bold text-text-primary">
-                  {portfolios.length} Proyek
-                </span>
-              </div>
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-text-secondary">Log Magang / PKL (SMK):</span>
-                <span className="font-mono font-bold text-text-primary">
-                  {pklLogs.length} Jurnal
-                </span>
-              </div>
-            </div>
-            
-            <div className="pt-2 border-t border-border/40">
-              <Link href="/analytics">
-                <Button variant="secondary" size="sm" className="w-full h-8 text-[11px] flex items-center justify-center gap-1">
-                  <FileText size={11} /> Buka Analisis Detail
-                </Button>
-              </Link>
-            </div>
-          </Card>
+          {!loading && error && (
+            <Card className="p-6 bg-white text-center">
+              <AlertCircle className="mx-auto text-danger" size={32} />
+              <h2 className="mt-3 text-lg font-black">Materi Gagal Dimuat</h2>
+              <p className="mt-1 text-sm font-semibold text-text-secondary">{error}</p>
+              <Button onClick={() => window.location.reload()} className="mt-4">
+                <RefreshCw size={14} /> Muat Ulang
+              </Button>
+            </Card>
+          )}
 
-          {/* Curriculum Guidelines */}
-          <Card className="space-y-3.5 bg-bg-secondary/40">
-            <h4 className="text-xs font-bold text-text-primary flex items-center gap-1.5">
-              <Bookmark size={14} className="text-primary" /> Profil Pelajar Pancasila
-            </h4>
-            <p className="text-[11px] text-text-secondary leading-relaxed">
-              Platform ini dirancang untuk mengembangkan Profil Pelajar Pancasila: **Bernalar Kritis**, **Mandiri**, dan **Kreatif** melalui materi deep learning.
-            </p>
-          </Card>
+          {!loading && !error && filteredMapels.length === 0 && (
+            <Card className="p-8 bg-white text-center">
+              <BookOpen className="mx-auto text-text-tertiary" size={36} />
+              <h2 className="mt-3 text-lg font-black">Tidak Ada Materi</h2>
+              <p className="mt-1 text-sm font-semibold text-text-secondary">
+                Tidak ada mata pelajaran yang cocok. Ubah filter atau pilih jurusan lain.
+              </p>
+            </Card>
+          )}
+
+          {!loading && !error && filteredMapels.map((mapel) => {
+            const isExpanded = expandedMapelId === mapel.id;
+            const firstBab = mapel.bab?.[0];
+            const progress = 0;
+
+            return (
+              <Card key={mapel.id} className="p-0 bg-white overflow-hidden">
+                <button
+                  onClick={() => setExpandedMapelId(isExpanded ? null : mapel.id)}
+                  className="w-full p-5 text-left flex items-start justify-between gap-4 hover:bg-bg-tertiary transition-colors"
+                >
+                  <div className="min-w-0 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge className="bg-primary text-white border-2 border-black font-black">{mapel.kode}</Badge>
+                      <Badge variant="secondary" className="font-black">Kelas {mapel.kelas}</Badge>
+                      <Badge variant="secondary" className="font-black">Semester {mapel.semester}</Badge>
+                    </div>
+                    <h2 className="text-lg font-black leading-tight">{mapel.nama}</h2>
+                    <p className="text-xs font-semibold text-text-secondary line-clamp-2">{mapel.deskripsi}</p>
+                    <div className="max-w-sm">
+                      <Progress value={progress} className="h-2" />
+                      <p className="mt-1 text-[10px] font-mono font-bold text-text-tertiary">{mapel.bab?.length || 0} bab tersedia</p>
+                    </div>
+                  </div>
+                  {isExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                </button>
+
+                {isExpanded && (
+                  <div className="border-t-[3px] border-black bg-bg-tertiary p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {(mapel.bab || []).map((bab) => (
+                        <Link
+                          key={bab.id}
+                          href={`/belajar/${activePathway}/${mapel.id}/${bab.id}`}
+                          className="border-[3px] border-border bg-white p-4 shadow-xs hover:-translate-y-0.5 transition-transform"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div>
+                              <p className="text-[10px] font-mono font-black uppercase text-primary">Bab {bab.nomor}</p>
+                              <h3 className="text-sm font-black">Buka Materi Bab {bab.nomor}</h3>
+                            </div>
+                            <ArrowRight size={17} />
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+
+                    <div className="mt-4 flex flex-col sm:flex-row gap-3">
+                      {firstBab && (
+                        <Link href={`/belajar/${activePathway}/${mapel.id}/${firstBab.id}`}>
+                          <Button className="w-full sm:w-auto">
+                            <BookOpen size={15} /> Mulai Belajar
+                          </Button>
+                        </Link>
+                      )}
+                      <Link href={`/ujian/${mapel.id}?mode=latihan_santai`}>
+                        <Button variant="secondary" className="w-full sm:w-auto">
+                          <FileText size={15} /> Latihan Soal
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </Card>
+            );
+          })}
         </div>
-      </div>
+      </section>
     </div>
   );
 }

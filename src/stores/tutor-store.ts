@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { TutorSession, ChatMessage } from '@/types';
 import { getStorageItem, setStorageItem } from '@/lib/storage';
-import { generateTutorReply } from '@/lib/ai-mock';
+import { useUserStore } from './user-store';
+import { resolveSmkPathway } from '@/lib/pathway';
 
 const DEFAULT_SESSION: TutorSession = {
   id: 'session-default',
@@ -67,8 +68,9 @@ export const useTutorStore = create<TutorState>((set, get) => {
       }));
 
       try {
-        // Send request to streaming API route
-        const response = await fetch('/api/chat', {
+        const userProfile = useUserStore.getState().profile;
+        // Send request to streaming AI Tutor API route
+        const response = await fetch('/api/ai/tutor', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -78,10 +80,10 @@ export const useTutorStore = create<TutorState>((set, get) => {
               role: m.sender === 'user' ? 'user' : 'assistant',
               content: m.content
             })),
-            context: {
-              ...context,
-              mode: get().session.mode
-            }
+            mode: get().session.mode,
+            jurusan: resolveSmkPathway(userProfile.selectedPathway),
+            kelas: userProfile.grade,
+            context
           }),
         });
 
@@ -97,7 +99,8 @@ export const useTutorStore = create<TutorState>((set, get) => {
               throw new Error("RATE_LIMIT:Batas laju terlampaui. Maksimal 15 pertanyaan per menit.");
             }
           }
-          throw new Error('API request failed');
+          const errorMessage = await response.text().catch(() => '');
+          throw new Error(errorMessage || 'Tutor AI gagal menjawab. Periksa konfigurasi GEMINI_API_KEY di server.');
         }
 
         const reader = response.body?.getReader();
@@ -126,6 +129,10 @@ export const useTutorStore = create<TutorState>((set, get) => {
             return { session: updated };
           });
         }
+
+        if (!chunkText.trim()) {
+          throw new Error('AI_EMPTY_RESPONSE');
+        }
         
         set({ isResponding: false });
       } catch (error: any) {
@@ -150,29 +157,20 @@ export const useTutorStore = create<TutorState>((set, get) => {
           return;
         }
         
-        // Fallback to local mock reply
-        try {
-          const fallbackReplyText = await generateTutorReply(
-            get().session.mode,
-            content,
-            get().session.messages.slice(0, -1)
-          );
-          
-          set((state) => {
-            const updatedMessages = state.session.messages.map((m) => {
-              if (m.id === tutorMsgId) {
-                return { ...m, content: fallbackReplyText };
-              }
-              return m;
-            });
-            const updated = { ...state.session, messages: updatedMessages };
-            setStorageItem('academy_os_tutor_session', updated);
-            return { session: updated, isResponding: false };
+        set((state) => {
+          const updatedMessages = state.session.messages.map((m) => {
+            if (m.id === tutorMsgId) {
+              return {
+                ...m,
+                content: `Maaf, Tutor AI belum bisa menjawab sekarang.\n\nAlasan: ${error?.message || 'koneksi atau konfigurasi AI bermasalah'}\n\nSaya tidak membuat jawaban cadangan agar tidak mengada-ada. Pastikan \`GEMINI_API_KEY\` sudah diatur di server/Vercel, lalu coba lagi.`
+              };
+            }
+            return m;
           });
-        } catch (fallbackErr) {
-          console.error('Mock fallback failed:', fallbackErr);
-          set({ isResponding: false });
-        }
+          const updated = { ...state.session, messages: updatedMessages };
+          setStorageItem('academy_os_tutor_session', updated);
+          return { session: updated, isResponding: false };
+        });
       }
     },
 

@@ -3,6 +3,20 @@
 import { prisma } from '@/lib/prisma';
 import { UserProfile, UserRole, SchoolType, PortfolioProject, PKLJournalEntry } from '@/types';
 import { syncUserXpToRedis } from './guild';
+import { auth } from '@/auth';
+import { hashPassword } from '@/lib/password';
+
+async function assertSessionEmail(requestedEmail: string) {
+  const session = await auth();
+  const sessionEmail = session?.user?.email?.toLowerCase();
+  const normalizedEmail = requestedEmail.toLowerCase();
+
+  if (!sessionEmail || sessionEmail !== normalizedEmail) {
+    throw new Error('Unauthorized');
+  }
+
+  return normalizedEmail;
+}
 
 // Helper to convert Prisma User to UserProfile type
 function mapToUserProfile(dbUser: any): UserProfile {
@@ -31,10 +45,10 @@ function mapToUserProfile(dbUser: any): UserProfile {
       id: p.id,
       title: p.title,
       description: p.description,
-      projectUrl: p.projectUrl || undefined,
-      repositoryUrl: p.repositoryUrl || undefined,
+      projectUrl: p.projectUrl || null,
+      repositoryUrl: p.repositoryUrl || null,
       skillsUsed: p.skillsUsed,
-      gradeScore: p.gradeScore || undefined,
+      gradeScore: p.gradeScore || null,
       createdAt: p.createdAt.toISOString()
     })) || [],
     pklLog: dbUser.internships?.map((i: any) => ({
@@ -52,8 +66,9 @@ function mapToUserProfile(dbUser: any): UserProfile {
 
 export async function getUserProfile(email: string): Promise<UserProfile | null> {
   try {
+    const authorizedEmail = await assertSessionEmail(email);
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: authorizedEmail },
       include: {
         portfolioProjects: {
           orderBy: { createdAt: 'desc' }
@@ -77,17 +92,48 @@ export async function updateUserProfile(
   updates: Partial<Omit<UserProfile, 'portfolio' | 'pklLog'>>
 ): Promise<UserProfile> {
   try {
-    const { weeklyProgress, weakTopics, skills, dailyQuests, lastActive, ...directFields } = updates;
+    const authorizedEmail = await assertSessionEmail(email);
+    const {
+      name,
+      avatar,
+      schoolType,
+      grade,
+      selectedPathway,
+      streak,
+      xp,
+      level,
+      studyTimeToday,
+      dailyGoalMinutes,
+      dailyGoalXp,
+      goals,
+      weeklyProgress,
+      weakTopics,
+      skills,
+      dailyQuests,
+      lastActive,
+    } = updates;
     
-    const dataToUpdate: any = { ...directFields };
-    if (weeklyProgress) dataToUpdate.weeklyProgress = weeklyProgress;
-    if (weakTopics) dataToUpdate.weakTopics = weakTopics;
-    if (skills) dataToUpdate.skills = skills;
-    if (dailyQuests) dataToUpdate.dailyQuests = dailyQuests;
+    const dataToUpdate: any = {};
+    if (name !== undefined) dataToUpdate.name = name;
+    if (avatar !== undefined) dataToUpdate.avatar = avatar;
+    if (schoolType !== undefined) dataToUpdate.schoolType = schoolType;
+    if (grade !== undefined) dataToUpdate.grade = grade;
+    if (selectedPathway !== undefined) dataToUpdate.selectedPathway = selectedPathway;
+    if (streak !== undefined) dataToUpdate.streak = streak;
+    if (xp !== undefined) dataToUpdate.xp = xp;
+    if (level !== undefined) dataToUpdate.level = level;
+    if (studyTimeToday !== undefined) dataToUpdate.studyTimeToday = studyTimeToday;
+    if (dailyGoalMinutes !== undefined) dataToUpdate.dailyGoalMinutes = dailyGoalMinutes;
+    if (dailyGoalXp !== undefined) dataToUpdate.dailyGoalXp = dailyGoalXp;
+    if (goals !== undefined) dataToUpdate.goals = goals;
+    if (weeklyProgress !== undefined) dataToUpdate.weeklyProgress = weeklyProgress;
+    if (weakTopics !== undefined) dataToUpdate.weakTopics = weakTopics;
+    if (skills !== undefined) dataToUpdate.skills = skills;
+    if (dailyQuests !== undefined) dataToUpdate.dailyQuests = dailyQuests;
     if (lastActive) dataToUpdate.lastActive = new Date(lastActive);
 
     const updatedUser = await prisma.user.update({
-      where: { email },
+      where: { email: authorizedEmail },
       data: dataToUpdate,
       include: {
         portfolioProjects: {
@@ -115,8 +161,9 @@ export async function updateUserProfile(
 // Progress Server Actions
 export async function getCompletedLessons(email: string) {
   try {
+    const authorizedEmail = await assertSessionEmail(email);
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: authorizedEmail },
       select: { id: true }
     });
 
@@ -149,8 +196,9 @@ export async function markLessonCompleteAction(
   scorePercentage?: number
 ) {
   try {
+    const authorizedEmail = await assertSessionEmail(email);
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email: authorizedEmail }
     });
 
     if (!user) throw new Error('User not found');
@@ -197,8 +245,9 @@ export async function markLessonCompleteAction(
 // Portfolio Server Actions
 export async function addPortfolioAction(email: string, project: Omit<PortfolioProject, 'id' | 'createdAt'>) {
   try {
+    const authorizedEmail = await assertSessionEmail(email);
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email: authorizedEmail }
     });
 
     if (!user) throw new Error('User not found');
@@ -219,10 +268,10 @@ export async function addPortfolioAction(email: string, project: Omit<PortfolioP
       id: newProject.id,
       title: newProject.title,
       description: newProject.description,
-      projectUrl: newProject.projectUrl || undefined,
-      repositoryUrl: newProject.repositoryUrl || undefined,
+      projectUrl: newProject.projectUrl || null,
+      repositoryUrl: newProject.repositoryUrl || null,
       skillsUsed: newProject.skillsUsed,
-      gradeScore: newProject.gradeScore || undefined,
+      gradeScore: newProject.gradeScore || null,
       createdAt: newProject.createdAt.toISOString()
     };
   } catch (error) {
@@ -233,8 +282,9 @@ export async function addPortfolioAction(email: string, project: Omit<PortfolioP
 
 export async function deletePortfolioAction(email: string, portfolioId: string) {
   try {
+    const authorizedEmail = await assertSessionEmail(email);
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email: authorizedEmail }
     });
 
     if (!user) throw new Error('User not found');
@@ -259,8 +309,9 @@ export async function addPklEntryAction(
   entry: Omit<PKLJournalEntry, 'id' | 'approved'> & { activityDescription?: string; hoursWorked?: number }
 ) {
   try {
+    const authorizedEmail = await assertSessionEmail(email);
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email: authorizedEmail }
     });
 
     if (!user) throw new Error('User not found');
@@ -294,8 +345,9 @@ export async function addPklEntryAction(
 
 export async function deletePklEntryAction(email: string, entryId: string) {
   try {
+    const authorizedEmail = await assertSessionEmail(email);
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email: authorizedEmail }
     });
 
     if (!user) throw new Error('User not found');
@@ -314,11 +366,16 @@ export async function deletePklEntryAction(email: string, entryId: string) {
   }
 }
 
-export async function registerUser(data: { name: string; email: string }) {
+export async function registerUser(data: { name: string; email: string; password: string }) {
   try {
+    const normalizedEmail = data.email.toLowerCase().trim();
+    if (data.password.length < 6) {
+      throw new Error('Kata sandi minimal 6 karakter');
+    }
+
     // Check if user already exists
     const existing = await prisma.user.findUnique({
-      where: { email: data.email }
+      where: { email: normalizedEmail }
     });
 
     if (existing) {
@@ -329,7 +386,8 @@ export async function registerUser(data: { name: string; email: string }) {
     const newUser = await prisma.user.create({
       data: {
         name: data.name,
-        email: data.email,
+        email: normalizedEmail,
+        passwordHash: hashPassword(data.password),
         avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
         role: 'student',
         schoolType: 'sma',
@@ -372,4 +430,3 @@ export async function registerUser(data: { name: string; email: string }) {
     throw new Error(error.message || 'Gagal meregistrasi pengguna');
   }
 }
-

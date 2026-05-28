@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: process.cwd(),
+  },
+  serverExternalPackages: ["@napi-rs/canvas", "pdf-parse"],
   images: {
     remotePatterns: [
       {
@@ -11,9 +15,6 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion", "date-fns"],
-  },
-  typescript: {
-    ignoreBuildErrors: true,
   },
 };
 

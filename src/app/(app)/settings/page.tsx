@@ -13,6 +13,7 @@ import {
   Sparkles,
   Check
 } from 'lucide-react';
+import { getJurusanOptions, resolveJurusanKode } from '@/lib/data/jurusan';
 
 export default function SettingsPage() {
   const { profile, updateProfile } = useUserStore();
@@ -24,7 +25,9 @@ export default function SettingsPage() {
   // Curriculum Select states
   const [schoolType, setSchoolType] = useState(profile.schoolType);
   const [grade, setGrade] = useState(profile.grade);
-  const [selectedPathway, setSelectedPathway] = useState(profile.selectedPathway);
+  const [selectedPathway, setSelectedPathway] = useState(
+    profile.schoolType === 'smk' ? resolveJurusanKode(profile.selectedPathway) : profile.selectedPathway
+  );
   
   const [savedSuccess, setSavedSuccess] = useState(false);
 
@@ -44,10 +47,12 @@ export default function SettingsPage() {
 
   const getAvailablePathways = () => {
     if (schoolType === 'sma') {
-      return ['Umum', 'IPA (MIPA)', 'IPS (IIS)', 'Bahasa'];
-    } else {
-      return ['Rekayasa Perangkat Lunak (RPL)', 'Teknik Komputer Jaringan (TKJ)', 'Desain Komunikasi Visual (DKV)', 'Akuntansi'];
+      return [{ value: 'Umum', label: 'Umum' }, { value: 'IPA', label: 'IPA (MIPA)' }, { value: 'IPS', label: 'IPS (IIS)' }, { value: 'Bahasa', label: 'Bahasa' }];
     }
+    return getJurusanOptions().map((jurusan) => ({
+      value: jurusan.kode,
+      label: `${jurusan.nama} (${jurusan.kode})`,
+    }));
   };
 
   return (
@@ -106,7 +111,7 @@ export default function SettingsPage() {
                 onChange={e => {
                   const val = e.target.value as 'sma' | 'smk';
                   setSchoolType(val);
-                  setSelectedPathway(val === 'sma' ? 'Umum' : 'Rekayasa Perangkat Lunak (RPL)');
+                  setSelectedPathway(val === 'sma' ? 'Umum' : resolveJurusanKode(selectedPathway));
                 }}
                 className="w-full h-9 px-2 bg-bg-tertiary border border-border rounded text-xs text-text-primary focus:outline-none focus:border-primary"
               >
@@ -137,8 +142,8 @@ export default function SettingsPage() {
                 onChange={e => setSelectedPathway(e.target.value)}
                 className="w-full h-9 px-2 bg-bg-tertiary border border-border rounded text-xs text-text-primary focus:outline-none focus:border-primary"
               >
-                {getAvailablePathways().map((path, i) => (
-                  <option key={i} value={path}>{path}</option>
+                {getAvailablePathways().map((path) => (
+                  <option key={path.value} value={path.value}>{path.label}</option>
                 ))}
               </select>
             </div>

@@ -32,7 +32,7 @@ export default function LoginPage() {
       });
 
       if (res?.error) {
-        setError('Alamat email tidak terdaftar atau sandi salah. Gunakan email demo: alex@academy.os atau budi@academy.os');
+        setError('Alamat email tidak terdaftar atau sandi salah. Demo: alex@academy.os / academy123');
         setIsLoading(false);
       } else {
         // Load the profile from DB into Zustand store

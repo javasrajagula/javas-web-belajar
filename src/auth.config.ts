@@ -2,16 +2,20 @@ import type { NextAuthConfig } from "next-auth";
 import { hasRouteAccess } from "./lib/auth/rbac";
 
 export const authConfig = {
+  trustHost: true,
   pages: {
     signIn: "/login",
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
+      const selectedPathway = (auth?.user as any)?.selectedPathway;
+      const needsOnboarding = isLoggedIn && (selectedPathway === 'Umum' || !selectedPathway);
       
       // Determine if accessing protected app routes
       const isApiRoute = nextUrl.pathname.startsWith("/api");
-      const isAuthRoute = nextUrl.pathname === "/login" || nextUrl.pathname === "/register" || nextUrl.pathname === "/onboarding";
+      const isAuthRoute = nextUrl.pathname === "/login" || nextUrl.pathname === "/register";
+      const isOnboardingRoute = nextUrl.pathname === "/onboarding";
       const isPublicRoute = nextUrl.pathname === "/";
       const isStaticOrAsset = nextUrl.pathname.startsWith("/_next") || nextUrl.pathname.includes(".") || nextUrl.pathname.startsWith("/public");
 
@@ -21,12 +25,23 @@ export const authConfig = {
 
       if (isAuthRoute) {
         if (isLoggedIn) {
+          return Response.redirect(new URL(needsOnboarding ? "/onboarding" : "/dashboard", nextUrl));
+        }
+        return true;
+      }
+
+      if (isOnboardingRoute) {
+        if (!isLoggedIn) {
+          const callbackUrl = encodeURIComponent(nextUrl.pathname + nextUrl.search);
+          return Response.redirect(new URL(`/login?callbackUrl=${callbackUrl}`, nextUrl));
+        }
+        if (!needsOnboarding) {
           return Response.redirect(new URL("/dashboard", nextUrl));
         }
         return true;
       }
 
-      // Any other path is protected (like /dashboard, /subjects, /tutor, etc.)
+      // Any other path is protected (like /dashboard, /materi, /tutor, etc.)
       if (!isLoggedIn) {
         let callbackUrl = nextUrl.pathname;
         if (nextUrl.search) {
@@ -34,6 +49,11 @@ export const authConfig = {
         }
         const encodedCallbackUrl = encodeURIComponent(callbackUrl);
         return Response.redirect(new URL(`/login?callbackUrl=${encodedCallbackUrl}`, nextUrl));
+      }
+
+      // If user is logged in but hasn't completed onboarding, force them to go to onboarding
+      if (needsOnboarding) {
+        return Response.redirect(new URL("/onboarding", nextUrl));
       }
 
       // Enforce Role-Based Access Control (RBAC)

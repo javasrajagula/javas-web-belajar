@@ -11,6 +11,7 @@ const DEFAULT_TASKS: Task[] = [
 interface PlannerState {
   tasks: Task[];
   addTask: (task: Omit<Task, 'id'>) => void;
+  addTasks: (tasks: Task[]) => void;
   toggleTask: (id: string) => void;
   deleteTask: (id: string) => void;
   generateAISchedule: (topics: string[], days: number) => void;
@@ -28,6 +29,12 @@ export const usePlannerStore = create<PlannerState>((set) => {
         id: `task-${Date.now()}`
       };
       const updated = [...state.tasks, newTask];
+      setStorageItem('academy_os_tasks', updated);
+      return { tasks: updated };
+    }),
+
+    addTasks: (newTasks) => set((state) => {
+      const updated = [...state.tasks, ...newTasks];
       setStorageItem('academy_os_tasks', updated);
       return { tasks: updated };
     }),

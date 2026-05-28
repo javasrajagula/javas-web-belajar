@@ -58,8 +58,8 @@ export default function ExamEnginePage() {
 
   // Load subjects from curriculum
   const curriculumSubjects = useMemo(
-    () => getSubjectsByPathway(profile.schoolType, profile.grade),
-    [profile.schoolType, profile.grade]
+    () => getSubjectsByPathway(profile.schoolType, profile.grade, profile.selectedPathway),
+    [profile.schoolType, profile.grade, profile.selectedPathway]
   );
 
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);

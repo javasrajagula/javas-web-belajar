@@ -24,7 +24,7 @@ export default function AnalyticsPage() {
   const { profile } = useUserStore();
   const { completedLessons, lessonScores } = useCurriculumStore();
 
-  const subjects = getSubjectsByPathway(profile.schoolType, profile.grade);
+  const subjects = getSubjectsByPathway(profile.schoolType, profile.grade, profile.selectedPathway);
 
   // Calculate overall readiness
   const getReadinessScore = () => {

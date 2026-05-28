@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { Material } from '@/types';
 import { getStorageItem, setStorageItem } from '@/lib/storage';
-import { generateAIPipeline } from '@/lib/ai-mock';
 
 const INDONESIAN_CURRICULUM_MATERIALS: Material[] = [
   // --- KELAS 10 ---
@@ -286,10 +285,71 @@ Reaksi redoks dinyatakan spontan jika nilai $E^0_{sel}$ bernilai positif ($> 0$)
   }
 ];
 
+function buildGroundedMaterialFromText(title: string, content: string) {
+  const clean = content.replace(/\s+/g, ' ').trim();
+  const sentences = clean
+    .split(/(?<=[.!?])\s+/)
+    .map((sentence) => sentence.trim())
+    .filter((sentence) => sentence.length >= 24);
+  const points = sentences.slice(0, 5);
+  const terms = Array.from(new Set(clean.match(/\b[A-Z][A-Za-z0-9-]{3,}\b/g) || []))
+    .slice(0, 6);
+
+  const summary = `# ${title}
+
+Ringkasan ini dibuat secara deterministik dari teks yang ditempel, bukan dari tebakan AI.
+
+## Ringkasan Singkat
+${points.length > 0 ? points.slice(0, 3).map((point) => `- ${point}`).join('\n') : '- Teks terlalu pendek untuk diringkas secara spesifik.'}
+
+## Poin Penting
+${points.length > 0 ? points.map((point, index) => `${index + 1}. ${point}`).join('\n') : '1. Tambahkan teks materi yang lebih lengkap agar sistem bisa membuat poin penting.'}
+
+## Batasan
+Jika membutuhkan analisis AI penuh, gunakan pemrosesan PDF/teks melalui endpoint server yang memakai GEMINI_API_KEY.`;
+
+  return {
+    summary,
+    quizzes: [
+      {
+        id: `q-${Date.now()}-1`,
+        question: `Berdasarkan catatan "${title}", apa gagasan utama yang paling terlihat?`,
+        options: [
+          points[0] || 'Gagasan utama belum cukup terbaca dari teks.',
+          'Informasi yang tidak disebutkan dalam catatan.',
+          'Kesimpulan yang tidak memiliki dukungan konteks.',
+          'Topik di luar materi yang ditempel.'
+        ],
+        correctOptionIndex: 0,
+        explanation: 'Jawaban diambil dari kalimat awal/utama yang tersedia di catatan pengguna.'
+      }
+    ],
+    flashcards: (terms.length > 0 ? terms : [title]).slice(0, 5).map((term, index) => ({
+      id: `fc-${Date.now()}-${index}`,
+      front: term,
+      back: `Istilah ini muncul dalam catatan "${title}". Buka ringkasan untuk melihat konteks kalimatnya.`,
+      mastered: false
+    })),
+    mindmap: [
+      { id: '1', label: title, position: { x: 250, y: 60 } },
+      { id: '2', label: points[0]?.slice(0, 40) || 'Poin utama', position: { x: 120, y: 170 } },
+      { id: '3', label: points[1]?.slice(0, 40) || 'Poin pendukung', position: { x: 380, y: 170 } },
+    ],
+    timeline: points.slice(0, 4).map((point, index) => ({
+      id: `tl-${Date.now()}-${index}`,
+      date: `Langkah ${index + 1}`,
+      title: `Pelajari poin ${index + 1}`,
+      description: point,
+    })),
+  };
+}
+
 interface MaterialsState {
   materials: Material[];
   isProcessing: boolean;
+  setIsProcessing: (isProcessing: boolean) => void;
   addMaterial: (title: string, content: string, fileType: 'pdf' | 'docx' | 'image' | 'text', fileName: string, fileSize: string) => Promise<string>;
+  addProcessedMaterial: (material: Material) => void;
   deleteMaterial: (id: string) => void;
   updateFlashcardStatus: (materialId: string, flashcardId: string, mastered: boolean) => void;
 }
@@ -301,10 +361,15 @@ export const useMaterialsStore = create<MaterialsState>((set, get) => {
     materials: initialMaterials,
     isProcessing: false,
 
+    setIsProcessing: (isProcessing) => set({ isProcessing }),
+
     addMaterial: async (title, content, fileType, fileName, fileSize) => {
       set({ isProcessing: true });
       try {
-        const pipelineResult = await generateAIPipeline(title, content);
+        if (!content.trim()) {
+          throw new Error('Konten materi kosong. Otak Kedua tidak membuat ringkasan dari teks kosong.');
+        }
+        const pipelineResult = buildGroundedMaterialFromText(title, content);
         const newId = `m-${Date.now()}`;
         const newMaterial: Material = {
           id: newId,
@@ -326,6 +391,12 @@ export const useMaterialsStore = create<MaterialsState>((set, get) => {
         console.error('Error generating material items:', error);
         throw error;
       }
+    },
+
+    addProcessedMaterial: (material) => {
+      const updated = [material, ...get().materials];
+      set({ materials: updated });
+      setStorageItem('academy_os_materials', updated);
     },
 
     deleteMaterial: (id) => set((state) => {

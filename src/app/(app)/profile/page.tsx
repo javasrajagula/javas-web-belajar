@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useUserStore } from '@/stores/user-store';
 import { useCurriculumStore } from '@/stores/curriculum-store';
 import { Card } from '@/components/ui/card';
@@ -18,11 +18,14 @@ import {
   FileText,
   Bookmark,
   Calendar,
-  Lock
+  Lock,
+  Upload
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { getJurusanOptions, getJurusanLabel, resolveJurusanKode } from '@/lib/data/jurusan';
 
 export default function ProfilePage() {
-  const { profile } = useUserStore();
+  const { profile, updateProfile } = useUserStore();
   const { portfolios, addPortfolio, deletePortfolio, pklLogs, addPklEntry, deletePklEntry } = useCurriculumStore();
 
   // Local states for inputs
@@ -32,6 +35,8 @@ export default function ProfilePage() {
   const [projUrl, setProjUrl] = useState('');
   const [projRepo, setProjRepo] = useState('');
   const [projSkills, setProjSkills] = useState('');
+  const [projFile, setProjFile] = useState<File | null>(null);
+  const [uploadingProject, setUploadingProject] = useState(false);
 
   const [showPklForm, setShowPklForm] = useState(false);
   const [pklDate, setPklDate] = useState('');
@@ -39,26 +44,85 @@ export default function ProfilePage() {
   const [pklMentor, setPklMentor] = useState('');
   const [pklActivity, setPklActivity] = useState('');
   const [pklHours, setPklHours] = useState(8);
+  const [profileJurusan, setProfileJurusan] = useState(resolveJurusanKode(profile.selectedPathway));
+  const [profileGrade, setProfileGrade] = useState(profile.grade || 10);
+  const [savingJurusan, setSavingJurusan] = useState(false);
 
-  const handleAddPortfolio = (e: React.FormEvent) => {
+  useEffect(() => {
+    setProfileJurusan(resolveJurusanKode(profile.selectedPathway));
+    setProfileGrade(profile.grade || 10);
+  }, [profile.grade, profile.selectedPathway]);
+
+  const handleSaveJurusan = async () => {
+    setSavingJurusan(true);
+    try {
+      const res = await fetch('/api/user/jurusan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jurusanKode: profileJurusan, kelas: profileGrade }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Gagal menyimpan jurusan');
+      await updateProfile({
+        schoolType: 'smk',
+        selectedPathway: profileJurusan,
+        grade: profileGrade,
+      });
+      toast.success('Jurusan profil berhasil disimpan dan disinkronkan.');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Gagal menyimpan jurusan profil.');
+    } finally {
+      setSavingJurusan(false);
+    }
+  };
+
+  const handleAddPortfolio = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!projTitle || !projDesc) return;
-    
-    addPortfolio({
-      title: projTitle,
-      description: projDesc,
-      projectUrl: projUrl || undefined,
-      repositoryUrl: projRepo || undefined,
-      skillsUsed: projSkills.split(',').map(s => s.trim()).filter(Boolean)
-    });
 
-    // Reset
-    setProjTitle('');
-    setProjDesc('');
-    setProjUrl('');
-    setProjRepo('');
-    setProjSkills('');
-    setShowPortfolioForm(false);
+    setUploadingProject(true);
+    try {
+      let uploadedUrl = '';
+      let uploadedName = '';
+
+      if (projFile) {
+        const formData = new FormData();
+        formData.append('file', projFile);
+        const res = await fetch('/api/uploads/portfolio', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const uploadResult = await res.json();
+        if (!res.ok) {
+          throw new Error(uploadResult.error || 'Gagal mengunggah file tugas');
+        }
+
+        uploadedUrl = uploadResult.url;
+        uploadedName = uploadResult.fileName;
+      }
+      
+      await addPortfolio({
+        title: projTitle,
+        description: uploadedName ? `${projDesc}\n\nLampiran: ${uploadedName}` : projDesc,
+        projectUrl: projUrl || uploadedUrl || undefined,
+        repositoryUrl: projRepo || undefined,
+        skillsUsed: projSkills.split(',').map(s => s.trim()).filter(Boolean)
+      });
+
+      setProjTitle('');
+      setProjDesc('');
+      setProjUrl('');
+      setProjRepo('');
+      setProjSkills('');
+      setProjFile(null);
+      setShowPortfolioForm(false);
+      toast.success('Portofolio tugas berhasil disimpan.');
+    } catch (error: any) {
+      toast.error(error.message || 'Gagal menyimpan portofolio.');
+    } finally {
+      setUploadingProject(false);
+    }
   };
 
   const handleAddPkl = (e: React.FormEvent) => {
@@ -122,6 +186,38 @@ export default function ProfilePage() {
               <span className="text-[10px] text-text-tertiary uppercase font-mono block">Durasi Sesi</span>
               <span className="text-sm font-bold text-secondary font-mono">{profile.studyTimeToday}m Hari Ini</span>
             </div>
+          </div>
+
+          <div className="w-full mt-5 pt-5 border-t border-border/40 space-y-2 text-left">
+            <label className="text-[10px] font-bold text-text-secondary uppercase">Jurusan Aktif</label>
+            <select
+              value={profileJurusan}
+              onChange={(event) => setProfileJurusan(resolveJurusanKode(event.target.value))}
+              className="w-full h-9 px-2 bg-bg-secondary border border-border rounded text-xs text-text-primary focus:outline-none focus:border-primary"
+            >
+              {getJurusanOptions().map((jurusan) => (
+                <option key={jurusan.kode} value={jurusan.kode}>
+                  {jurusan.nama} ({jurusan.kode})
+                </option>
+              ))}
+            </select>
+            <div className="grid grid-cols-[1fr_auto] gap-2">
+              <select
+                value={profileGrade}
+                onChange={(event) => setProfileGrade(Number(event.target.value))}
+                className="h-9 px-2 bg-bg-secondary border border-border rounded text-xs text-text-primary focus:outline-none focus:border-primary"
+              >
+                <option value={10}>Kelas X</option>
+                <option value={11}>Kelas XI</option>
+                <option value={12}>Kelas XII</option>
+              </select>
+              <Button size="sm" type="button" onClick={handleSaveJurusan} disabled={savingJurusan}>
+                {savingJurusan ? 'Simpan...' : 'Simpan'}
+              </Button>
+            </div>
+            <p className="text-[10px] text-text-secondary">
+              Tersimpan sebagai {getJurusanLabel(profile.selectedPathway)} dan dipakai oleh materi, bank soal, serta ujian.
+            </p>
           </div>
         </Card>
 
@@ -206,6 +302,21 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <div className="space-y-1">
+                  <label className="text-[9px] font-bold text-text-secondary uppercase">Upload File Tugas / Bukti Proyek</label>
+                  <label className="min-h-20 border-[3px] border-dashed border-border bg-bg-secondary flex flex-col items-center justify-center gap-1.5 cursor-pointer px-3 text-center">
+                    <Upload size={16} className="text-primary" />
+                    <span className="text-[10px] font-bold text-text-primary">
+                      {projFile ? projFile.name : 'Pilih file PDF, gambar, dokumen, atau arsip'}
+                    </span>
+                    <span className="text-[9px] text-text-secondary">Maksimal 10 MB</span>
+                    <input
+                      type="file"
+                      className="hidden"
+                      onChange={(event) => setProjFile(event.target.files?.[0] || null)}
+                    />
+                  </label>
+                </div>
+                <div className="space-y-1">
                   <label className="text-[9px] font-bold text-text-secondary uppercase">Teknologi (pisahkan dengan koma)</label>
                   <input
                     type="text" placeholder="Java, MySQL, Swing"
@@ -213,7 +324,9 @@ export default function ProfilePage() {
                     className="w-full h-8 px-2 bg-bg-secondary border border-border rounded text-xs text-text-primary focus:outline-none"
                   />
                 </div>
-                <Button type="submit" className="w-full h-8 text-xs">Simpan Portofolio</Button>
+                <Button type="submit" disabled={uploadingProject} className="w-full h-8 text-xs">
+                  {uploadingProject ? 'Mengunggah...' : 'Simpan Portofolio'}
+                </Button>
               </form>
             )}
 

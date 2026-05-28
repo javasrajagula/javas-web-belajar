@@ -176,10 +176,10 @@ export interface PortfolioProject {
   id: string;
   title: string;
   description: string;
-  projectUrl?: string;
-  repositoryUrl?: string;
+  projectUrl?: string | null;
+  repositoryUrl?: string | null;
   skillsUsed: string[];
-  gradeScore?: number;
+  gradeScore?: number | null;
   createdAt: string;
 }
 

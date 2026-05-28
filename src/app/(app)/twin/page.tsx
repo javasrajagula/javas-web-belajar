@@ -22,8 +22,8 @@ export default function DigitalTwinPage() {
 
   // Dynamic curriculum data
   const subjects = useMemo(
-    () => getSubjectsByPathway(profile.schoolType, profile.grade),
-    [profile.schoolType, profile.grade]
+    () => getSubjectsByPathway(profile.schoolType, profile.grade, profile.selectedPathway),
+    [profile.schoolType, profile.grade, profile.selectedPathway]
   );
 
   // Calculate real progress from completed lessons
@@ -279,7 +279,7 @@ export default function DigitalTwinPage() {
                     Berdasarkan analisis profil Anda, <strong className="text-text-primary">{weakSubjects[0]?.name}</strong> adalah 
                     area dengan penguasaan terendah saat ini (<span className="text-warning font-mono font-semibold">{weakSubjects[0]?.score}%</span>). 
                     Saya rekomendasikan sesi belajar intensif 30 menit malam ini untuk materi tersebut. 
-                    Gunakan mode <strong className="text-accent">"Penguji Sokrates"</strong> di AI Tutor untuk melatih pemahaman mendalam.
+                    Gunakan mode <strong className="text-accent">&quot;Penguji Sokrates&quot;</strong> di AI Tutor untuk melatih pemahaman mendalam.
                   </span>
                 ) : overallReadiness > 70 ? (
                   <span>
@@ -300,7 +300,7 @@ export default function DigitalTwinPage() {
                     <Brain size={13} /> Tanya AI Tutor
                   </Button>
                 </Link>
-                <Link href="/subjects">
+                <Link href="/materi">
                   <Button variant="secondary" className="w-full h-9 text-xs flex items-center justify-center gap-1">
                     <BookOpen size={13} /> Buka Kurikulum
                   </Button>

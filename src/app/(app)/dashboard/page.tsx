@@ -1,370 +1,388 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import {
+  ArrowRight,
+  BarChart3,
+  BookOpen,
+  Brain,
+  CheckCircle2,
+  Clock,
+  FileUp,
+  Flame,
+  Play,
+  RefreshCw,
+  ShieldCheck,
+  Sparkles,
+  Target,
+  Trophy,
+  Zap,
+} from 'lucide-react';
+import { toast } from 'sonner';
 import { useUserStore } from '@/stores/user-store';
-import { useCurriculumStore } from '@/stores/curriculum-store';
-import { getSubjectsByPathway } from '@/lib/curriculum-data';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Zap, 
-  Clock, 
-  Trophy, 
-  ArrowRight, 
-  Sparkles, 
-  Brain, 
-  CheckCircle2, 
-  ChevronRight,
-  TrendingUp,
-  Volume2,
-  VolumeX,
-  Play,
-  Pause,
-  Coffee,
-  CloudRain,
-  Music,
-  BookOpen
-} from 'lucide-react';
+import { resolveSmkPathway } from '@/lib/pathway';
+import { getJurusanLabel } from '@/lib/data/jurusan';
+
+interface UserStats {
+  totalExams: number;
+  averageScore: number;
+  totalQuestionsAnswered: number;
+  completedLessonsCount: number;
+  latestExam: {
+    id: string;
+    judul: string;
+    tipe: string;
+    nilaiAkhir: number;
+    benar: number;
+    salah: number;
+    createdAt: string;
+  } | null;
+  weakTopics: Array<{
+    topic: string;
+    mastery: number;
+    wrong: number;
+    total: number;
+  }>;
+}
+
+interface Mapel {
+  id: string;
+  kode: string;
+  nama: string;
+  kelas: number;
+  semester: number;
+  bab?: { id: string; nomor: number }[];
+}
+
+const EMPTY_STATS: UserStats = {
+  totalExams: 0,
+  averageScore: 0,
+  totalQuestionsAnswered: 0,
+  completedLessonsCount: 0,
+  latestExam: null,
+  weakTopics: [],
+};
+
+const SSR_SAFE_PROFILE = {
+  name: 'Siswa',
+  schoolType: 'smk',
+  selectedPathway: 'TKJ',
+  level: 1,
+  studyTimeToday: 0,
+  dailyGoalMinutes: 45,
+  streak: 0,
+};
+
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 11) return 'Selamat pagi';
+  if (hour < 15) return 'Selamat siang';
+  if (hour < 18) return 'Selamat sore';
+  return 'Selamat malam';
+}
 
 export default function DashboardPage() {
   const { profile, addStudyTime } = useUserStore();
-  const { completedLessons } = useCurriculumStore();
-  
-  // Pomodoro Focus Engine States
-  const [showFocusTimer, setShowFocusTimer] = useState(false);
-  const [timerMinutes, setTimerMinutes] = useState(25);
-  const [timerSeconds, setTimerSeconds] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
-  const [selectedDuration, setSelectedDuration] = useState(25);
-  
-  // Soundscape States
-  const [activeSound, setActiveSound] = useState<string | null>(null);
-  const [isPlayingSound, setIsPlayingSound] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const displayProfile = mounted ? profile : SSR_SAFE_PROFILE;
+  const selectedPathway = resolveSmkPathway(displayProfile.selectedPathway);
+  const pathwayName = getJurusanLabel(selectedPathway);
+
+  const [stats, setStats] = useState<UserStats>(EMPTY_STATS);
+  const [mapels, setMapels] = useState<Mapel[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [focusMinutes, setFocusMinutes] = useState(15);
+  const [focusRunning, setFocusRunning] = useState(false);
 
   useEffect(() => {
-    let interval: any = null;
-    if (isRunning) {
-      interval = setInterval(() => {
-        if (timerSeconds > 0) {
-          setTimerSeconds(prev => prev - 1);
-        } else if (timerMinutes > 0) {
-          setTimerMinutes(prev => prev - 1);
-          setTimerSeconds(59);
-          if ((selectedDuration * 60 - (timerMinutes * 60 + timerSeconds)) % 60 === 0) {
-            addStudyTime(1);
-          }
-        } else {
-          setIsRunning(false);
-          alert('Sesi Fokus Selesai! Waktunya istirahat sejenak.');
-          setShowFocusTimer(false);
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
+    async function loadDashboardData() {
+      setLoading(true);
+      try {
+        const [statsRes, mapelsRes] = await Promise.all([
+          fetch('/api/user/stats'),
+          fetch(`/api/jurusan/${selectedPathway}`),
+        ]);
+
+        if (statsRes.ok) {
+          setStats(await statsRes.json());
         }
-      }, 1000);
-    } else {
-      clearInterval(interval);
+
+        if (mapelsRes.ok) {
+          const data = await mapelsRes.json();
+          setMapels(data.mataPelajaran || []);
+        }
+      } catch (error) {
+        console.error('Failed to load dashboard:', error);
+        toast.error('Gagal memuat dashboard belajar.');
+      } finally {
+        setLoading(false);
+      }
     }
-    return () => clearInterval(interval);
-  }, [isRunning, timerMinutes, timerSeconds]);
 
-  const startTimer = () => {
-    setIsRunning(!isRunning);
-  };
+    loadDashboardData();
+  }, [mounted, selectedPathway]);
 
-  const resetTimer = (duration: number) => {
-    setIsRunning(false);
-    setSelectedDuration(duration);
-    setTimerMinutes(duration);
-    setTimerSeconds(0);
-  };
+  useEffect(() => {
+    if (!focusRunning) return;
 
-  const toggleSound = (soundId: string) => {
-    if (activeSound === soundId) {
-      setIsPlayingSound(!isPlayingSound);
-    } else {
-      setActiveSound(soundId);
-      setIsPlayingSound(true);
+    const timer = window.setInterval(() => {
+      setFocusMinutes((current) => {
+        if (current <= 1) {
+          window.clearInterval(timer);
+          setFocusRunning(false);
+          addStudyTime(15);
+          toast.success('Sesi fokus selesai. +15 menit belajar tercatat.');
+          return 15;
+        }
+        return current - 1;
+      });
+    }, 60000);
+
+    return () => window.clearInterval(timer);
+  }, [focusRunning, addStudyTime]);
+
+  const continueMapel = mapels[0] || null;
+  const continueBabId = continueMapel?.bab?.[0]?.id;
+  const dailyProgress = Math.min(100, Math.round((displayProfile.studyTimeToday / displayProfile.dailyGoalMinutes) * 100));
+  const weakestTopic = stats.weakTopics[0];
+
+  const aiPlan = useMemo(() => {
+    const plan = [];
+
+    if (displayProfile.studyTimeToday < displayProfile.dailyGoalMinutes) {
+      plan.push({
+        icon: Clock,
+        title: 'Selesaikan fokus 15 menit',
+        desc: `Target harian baru ${dailyProgress}% tercapai. Mulai sesi pendek dulu.`,
+        href: '#focus',
+        tone: 'yellow',
+      });
     }
-  };
 
-  const soundscapes = [
-    { id: 'lofi', label: 'Lofi Chill', icon: Music, desc: 'Beat santai pengiring fokus' },
-    { id: 'rain', label: 'Hujan Lebat', icon: CloudRain, desc: 'Frekuensi alam penenang otak' },
-    { id: 'cafe', label: 'Kafe Cyberpunk', icon: Coffee, desc: 'Suara latar ambient produktif' }
+    if (weakestTopic) {
+      plan.push({
+        icon: Target,
+        title: `Latih ulang: ${weakestTopic.topic}`,
+        desc: `Penguasaan ${weakestTopic.mastery}%. AI bisa buat ringkasan dan latihan tambahan.`,
+        href: `/tutor?prompt=${encodeURIComponent(`Buat rencana remedial singkat untuk topik ${weakestTopic.topic}`)}`,
+        tone: 'purple',
+      });
+    }
+
+    if (continueMapel && continueBabId) {
+      plan.push({
+        icon: BookOpen,
+        title: `Lanjut ${continueMapel.nama}`,
+        desc: `Mulai Bab ${continueMapel.bab?.[0]?.nomor || 1}, lalu kerjakan 5 soal cek pemahaman.`,
+        href: `/belajar/${selectedPathway}/${continueMapel.id}/${continueBabId}`,
+        tone: 'green',
+      });
+    }
+
+    plan.push({
+      icon: Brain,
+      title: 'Tanya Tutor AI',
+      desc: 'Minta AI menjelaskan materi yang membingungkan dengan analogi sederhana.',
+      href: '/tutor',
+      tone: 'purple',
+    });
+
+    return plan.slice(0, 4);
+  }, [continueBabId, continueMapel, dailyProgress, displayProfile.dailyGoalMinutes, displayProfile.studyTimeToday, selectedPathway, weakestTopic]);
+
+  const statCards = [
+    { label: 'Nilai Rata-rata', value: loading ? '...' : stats.averageScore || 0, icon: Trophy },
+    { label: 'Ujian Selesai', value: loading ? '...' : stats.totalExams, icon: ShieldCheck },
+    { label: 'Soal Dikerjakan', value: loading ? '...' : stats.totalQuestionsAnswered, icon: CheckCircle2 },
+    { label: 'Materi Tuntas', value: loading ? '...' : stats.completedLessonsCount, icon: BookOpen },
   ];
 
-  // Get matching curriculum lessons
-  const subjects = getSubjectsByPathway(profile.schoolType, profile.grade);
-  const recommendedLessons = subjects.flatMap(sub => 
-    sub.modules.flatMap(mod => 
-      mod.lessons.map(les => ({
-        ...les,
-        subjectTitle: sub.title,
-        moduleTitle: mod.title
-      }))
-    )
-  ).slice(0, 3);
-
   return (
-    <div className="space-y-6">
-      {/* Banner */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-bg-secondary border border-border p-6 rounded-lg relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent pointer-events-none" />
-        <div className="relative z-10 space-y-1">
-          <div className="flex items-center gap-2">
-            <Badge variant="primary" className="text-[9px] uppercase font-mono bg-primary/10 text-primary border-primary/20">
-              Jalur: {profile.schoolType === 'sma' ? 'SMA' : 'SMK'} - {profile.selectedPathway}
+    <div className="space-y-6 text-text-primary">
+      <section className="grid grid-cols-1 xl:grid-cols-12 gap-5">
+        <div className="xl:col-span-8 bg-accent border-[4px] border-border shadow-[8px_8px_0_#1a1c1c] p-5 sm:p-7">
+          <div className="flex flex-wrap items-center gap-2 mb-5">
+            <Badge className="bg-white text-black border-2 border-black font-extrabold uppercase">
+              {displayProfile.schoolType.toUpperCase()} - {selectedPathway}
             </Badge>
-            <Badge variant="secondary" className="text-[9px] uppercase font-mono bg-secondary/10 text-secondary border-secondary/20">
-              Kelas {profile.grade}
+            <Badge className="bg-primary text-white border-2 border-black font-extrabold uppercase">
+              Level {displayProfile.level}
             </Badge>
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-text-primary pt-1">
-            Selamat datang kembali, {profile.name}
-          </h1>
-          <p className="text-xs text-text-secondary">
-            Sistem aktif. Target harian belajar Anda dipertahankan selama <span className="text-primary font-semibold">{profile.streak} hari beruntun</span>.
-          </p>
-        </div>
-        <div className="flex items-center gap-2 relative z-10">
-          {!showFocusTimer ? (
-            <Button onClick={() => setShowFocusTimer(true)} className="flex items-center gap-2 h-9 text-xs">
-              <Clock size={14} /> Buka Ruang Pomodoro
-            </Button>
-          ) : (
-            <Button onClick={() => setShowFocusTimer(false)} variant="secondary" className="h-9 text-xs">
-              Tutup Pengukur Fokus
-            </Button>
-          )}
-        </div>
-      </div>
 
-      {/* Pomodoro Focus & Sounds */}
-      {showFocusTimer && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-slide-up">
-          <Card className="lg:col-span-2 flex flex-col justify-between p-6 bg-gradient-to-br from-bg-secondary to-bg-tertiary/20 border border-border">
-            <div className="flex justify-between items-center">
-              <span className="text-[10px] font-bold text-text-secondary tracking-widest font-mono">POMODORO FOCUS DECK</span>
-              <div className="flex gap-1.5">
-                {[25, 50, 60].map((dur) => (
-                  <button
-                    key={dur}
-                    onClick={() => resetTimer(dur)}
-                    className={`px-2.5 py-1 rounded text-[10px] font-semibold border cursor-pointer transition-colors ${
-                      selectedDuration === dur
-                        ? 'border-primary bg-primary/10 text-primary'
-                        : 'border-border bg-bg-tertiary/60 text-text-secondary hover:text-text-primary'
-                    }`}
-                  >
-                    {dur} Menit
-                  </button>
-                ))}
-              </div>
-            </div>
+          <div className="max-w-3xl space-y-3">
+            <p className="font-mono text-xs font-extrabold uppercase tracking-widest">{mounted ? getGreeting() : 'Selamat belajar'}, {displayProfile.name}</p>
+            <h1 className="text-2xl sm:text-4xl font-black leading-tight text-black">
+              Hari ini AI menyusun jalur belajar paling pendek untuk maju.
+            </h1>
+            <p className="text-sm font-semibold text-black/75">
+              Fokus utama: {weakestTopic ? `perkuat ${weakestTopic.topic}` : `bangun ritme belajar di ${pathwayName}`}. Dashboard ini sekarang menjadi ruang komando harian, bukan sekadar papan angka.
+            </p>
+          </div>
 
-            <div className="py-8 text-center">
-              <h2 className="text-6xl font-extrabold font-mono text-text-primary tracking-tight">
-                {timerMinutes.toString().padStart(2, '0')}:{timerSeconds.toString().padStart(2, '0')}
-              </h2>
-              <p className="text-[10px] text-text-tertiary mt-2">Status: {isRunning ? 'Fokus aktif' : 'Jeda'}</p>
-            </div>
-
-            <div className="flex gap-2">
-              <Button onClick={startTimer} className="flex-grow flex items-center justify-center gap-1.5 h-9 text-xs">
-                {isRunning ? <Pause size={12} /> : <Play size={12} />} {isRunning ? 'Jeda Sesi' : 'Mulai Sesi'}
+          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+            <Link href="/tutor">
+              <Button className="w-full sm:w-auto bg-primary text-white">
+                <Sparkles size={16} /> Buka Tutor AI
               </Button>
-              <Button onClick={() => resetTimer(selectedDuration)} variant="secondary" className="h-9 text-xs">
-                Mulai Ulang
-              </Button>
-            </div>
-          </Card>
-
-          <Card className="space-y-4">
-            <div className="space-y-1">
-              <h3 className="text-sm font-bold text-text-primary">Terapi Suara Ambient</h3>
-              <p className="text-[11px] text-text-secondary">Aktifkan frekuensi suara untuk merangsang konsentrasi gelombang otak.</p>
-            </div>
-
-            <div className="space-y-2">
-              {soundscapes.map((sound) => {
-                const isActive = activeSound === sound.id;
-                const isPlayingThis = isActive && isPlayingSound;
-                return (
-                  <div
-                    key={sound.id}
-                    onClick={() => toggleSound(sound.id)}
-                    className={`p-3 border rounded-lg cursor-pointer transition-all duration-150 flex items-center justify-between ${
-                      isPlayingThis
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border bg-bg-tertiary/40 hover:bg-bg-tertiary'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <div className={`p-1.5 rounded ${isPlayingThis ? 'bg-primary/10 text-primary' : 'bg-bg-secondary text-text-secondary'}`}>
-                        <sound.icon size={13} />
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-bold text-text-primary">{sound.label}</h4>
-                        <p className="text-[9px] text-text-secondary mt-0.5">{sound.desc}</p>
-                      </div>
-                    </div>
-                    {isPlayingThis ? <Volume2 size={13} className="text-primary animate-pulse" /> : <VolumeX size={13} className="text-text-tertiary" />}
-                  </div>
-                );
-              })}
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* Target Progress Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Daily Target */}
-        <Card className="flex flex-col justify-between">
-          <div className="flex justify-between items-start">
-            <span className="text-xs font-semibold text-text-secondary">Target Harian</span>
-            <CheckCircle2 size={16} className="text-primary" />
-          </div>
-          <div className="mt-4">
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl font-bold font-mono">{profile.studyTimeToday}</span>
-              <span className="text-xs text-text-secondary">/ {profile.dailyGoalMinutes}m</span>
-            </div>
-            <Progress value={(profile.studyTimeToday / profile.dailyGoalMinutes) * 100} color="accent" className="mt-2 h-1" />
-          </div>
-        </Card>
-
-        {/* Level RPG */}
-        <Card className="flex flex-col justify-between">
-          <div className="flex justify-between items-start">
-            <span className="text-xs font-semibold text-text-secondary">Tingkat Kemampuan</span>
-            <Trophy size={16} className="text-accent" />
-          </div>
-          <div className="mt-4">
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl font-bold font-mono">Tingkat {profile.level}</span>
-              <span className="text-xs text-text-secondary">{profile.xp} XP</span>
-            </div>
-            <Progress value={(profile.xp / (profile.level * 500)) * 100} color="accent" className="mt-2 h-1" />
-          </div>
-        </Card>
-
-        {/* Streak */}
-        <Card className="flex flex-col justify-between">
-          <div className="flex justify-between items-start">
-            <span className="text-xs font-semibold text-text-secondary">Beruntun Belajar</span>
-            <Zap size={16} className="text-accent fill-accent" />
-          </div>
-          <div className="mt-4">
-            <span className="text-2xl font-bold font-mono">{profile.streak} Hari</span>
-            <div className="flex gap-1 mt-3">
-              {['S', 'S', 'R', 'K', 'J', 'S', 'M'].map((day, idx) => {
-                const hasStudied = idx < 5;
-                return (
-                  <div
-                    key={day}
-                    className={`flex-1 h-3 rounded-[2px] ${
-                      hasStudied ? 'bg-primary/80' : 'bg-bg-tertiary'
-                    }`}
-                  />
-                );
-              })}
-            </div>
-          </div>
-        </Card>
-
-        {/* Weak Topics */}
-        <Card className="flex flex-col justify-between">
-          <div className="flex justify-between items-start">
-            <span className="text-xs font-semibold text-text-secondary">Topik Butuh Latihan</span>
-            <TrendingUp size={16} className="text-danger" />
-          </div>
-          <div className="mt-4 space-y-1.5">
-            {profile.weakTopics.slice(0, 2).map((wt) => (
-              <div key={wt.topic} className="flex justify-between items-center text-xs">
-                <span className="text-text-primary truncate max-w-[120px]">{wt.topic}</span>
-                <span className="text-danger font-mono font-medium">{wt.mastery}% dikuasai</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-      </div>
-
-      {/* Main Layout Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Left Side: Lesson Progression */}
-        <div className="lg:col-span-2 space-y-6">
-          
-          {/* Subjects Progress list */}
-          <Card className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-sm font-bold text-text-primary">Mata Pelajaran Kurikulum Aktif</h3>
-              <Link href="/subjects" className="text-xs text-primary hover:underline flex items-center gap-1">
-                Buka Peta Kurikulum <ChevronRight size={12} />
+            </Link>
+            {continueMapel && continueBabId && (
+              <Link href={`/belajar/${selectedPathway}/${continueMapel.id}/${continueBabId}`}>
+                <Button variant="secondary" className="w-full sm:w-auto">
+                  <Play size={16} /> Lanjut Belajar
+                </Button>
               </Link>
-            </div>
-
-            <div className="divide-y divide-border">
-              {recommendedLessons.map((les) => {
-                if (!les.id) return null;
-                const isCompleted = completedLessons[les.id];
-                return (
-                  <div key={les.id} className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between group">
-                    <div className="space-y-1 min-w-0 flex-1 pr-4">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="primary" className="text-[8px] px-1 py-0 font-mono bg-primary/10 text-primary border-primary/20">
-                          {les.subjectTitle}
-                        </Badge>
-                        <span className="text-[9px] font-mono text-text-tertiary">{les.moduleTitle}</span>
-                      </div>
-                      <h4 className="text-xs font-bold text-text-primary truncate group-hover:text-primary transition-colors mt-1">
-                        {les.title}
-                      </h4>
-                    </div>
-                    <Link href={`/lessons/${les.id}`}>
-                      <Button size="sm" variant="secondary" className="h-8 text-xs flex items-center gap-1.5">
-                        {isCompleted ? 'Pelajari Ulang' : 'Mulai Belajar'} <ArrowRight size={12} />
-                      </Button>
-                    </Link>
-                  </div>
-                );
-              })}
-            </div>
-          </Card>
+            )}
+          </div>
         </div>
 
-        {/* Right Column */}
-        <div className="space-y-6">
-          {/* Achievements RPG */}
-          <Card className="space-y-4">
-            <h3 className="text-sm font-bold text-text-primary flex items-center gap-1.5">
-              <Trophy size={14} className="text-accent" /> Misi Aktivitas Harian
-            </h3>
-            <div className="space-y-3">
-              {profile.dailyQuests.map((quest) => (
-                <div key={quest.id} className="space-y-1.5 p-3 rounded bg-bg-tertiary/40 border border-border">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className={`font-semibold ${quest.completed ? 'text-text-tertiary line-through' : 'text-text-primary'}`}>
-                      {quest.title}
-                    </span>
-                    <Badge variant={quest.completed ? 'success' : 'primary'} className="text-[8px]">
-                      +{quest.xpReward} XP
-                    </Badge>
+        <Card id="focus" className="xl:col-span-4 p-5 bg-white">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-mono font-black uppercase text-text-secondary">Target Harian</p>
+              <h2 className="text-xl font-black text-text-primary">{dailyProgress}% selesai</h2>
+            </div>
+            <div className="h-14 w-14 border-[3px] border-black bg-secondary text-white shadow-[4px_4px_0_#1a1c1c] flex items-center justify-center">
+              <Zap size={24} />
+            </div>
+          </div>
+
+          <Progress value={dailyProgress} className="h-3 mt-5" />
+          <div className="mt-3 flex justify-between text-xs font-bold">
+            <span>{displayProfile.studyTimeToday} menit</span>
+            <span>{displayProfile.dailyGoalMinutes} menit</span>
+          </div>
+
+          <div className="mt-5 border-[3px] border-black bg-bg-tertiary p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-mono font-black uppercase text-text-secondary">Focus Sprint</p>
+                <p className="text-2xl font-black">{focusMinutes}:00</p>
+              </div>
+              <Button onClick={() => setFocusRunning((value) => !value)} size="sm">
+                {focusRunning ? <RefreshCw size={14} /> : <Play size={14} />}
+                {focusRunning ? 'Jeda' : 'Mulai'}
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </section>
+
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {statCards.map((stat) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={stat.label} className="p-4 bg-white">
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-[10px] font-mono font-black uppercase text-text-secondary">{stat.label}</p>
+                <Icon size={17} className="text-primary" />
+              </div>
+              <p className="mt-3 text-2xl font-black">{stat.value}</p>
+            </Card>
+          );
+        })}
+      </section>
+
+      <section className="grid grid-cols-1 xl:grid-cols-12 gap-5">
+        <Card className="xl:col-span-7 p-5 bg-white">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b-[3px] border-black pb-4">
+            <div>
+              <p className="text-[10px] font-mono font-black uppercase text-primary">AI Action Plan</p>
+              <h2 className="text-lg font-black">Apa yang perlu dilakukan sekarang</h2>
+            </div>
+            <Badge className="bg-accent text-black border-2 border-black font-black uppercase">
+              {aiPlan.length} aksi
+            </Badge>
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+            {aiPlan.map((item) => {
+              const Icon = item.icon;
+              const toneClass = item.tone === 'green' ? 'bg-secondary text-white' : item.tone === 'purple' ? 'bg-primary text-white' : 'bg-accent text-black';
+              return (
+                <Link key={item.title} href={item.href} className="group border-[3px] border-black bg-bg-tertiary p-4 shadow-[4px_4px_0_#1a1c1c] transition-transform hover:-translate-y-0.5">
+                  <div className={`mb-3 h-10 w-10 border-[3px] border-black ${toneClass} flex items-center justify-center`}>
+                    <Icon size={18} />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Progress value={(quest.current / quest.target) * 100} color={quest.completed ? 'success' : 'accent'} className="h-1 flex-1" />
-                    <span className="text-[9px] font-mono text-text-secondary">
-                      {quest.current}/{quest.target}
-                    </span>
+                  <h3 className="text-sm font-black">{item.title}</h3>
+                  <p className="mt-1 text-xs font-semibold text-text-secondary leading-relaxed">{item.desc}</p>
+                  <div className="mt-3 inline-flex items-center gap-1 text-xs font-black uppercase">
+                    Kerjakan <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
                   </div>
+                </Link>
+              );
+            })}
+          </div>
+        </Card>
+
+        <Card className="xl:col-span-5 p-5 bg-white">
+          <div className="flex items-center justify-between border-b-[3px] border-black pb-4">
+            <div>
+              <p className="text-[10px] font-mono font-black uppercase text-danger">Diagnosis AI</p>
+              <h2 className="text-lg font-black">Topik yang perlu dikuatkan</h2>
+            </div>
+            <BarChart3 size={20} className="text-primary" />
+          </div>
+
+          <div className="mt-4 space-y-3">
+            {stats.weakTopics.length > 0 ? (
+              stats.weakTopics.map((topic) => (
+                <div key={topic.topic} className="border-[3px] border-black bg-bg-tertiary p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-xs font-black line-clamp-1">{topic.topic}</p>
+                    <span className="text-xs font-mono font-black">{topic.mastery}%</span>
+                  </div>
+                  <Progress value={topic.mastery} className="h-2 mt-2" />
+                  <p className="mt-2 text-[10px] font-semibold text-text-secondary">
+                    {topic.wrong} dari {topic.total} jawaban perlu diperbaiki.
+                  </p>
                 </div>
-              ))}
-            </div>
-          </Card>
-        </div>
-      </div>
+              ))
+            ) : (
+              <div className="border-[3px] border-dashed border-black bg-bg-tertiary p-5 text-sm font-semibold text-text-secondary">
+                Belum ada pola kelemahan. Kerjakan ujian atau latihan dulu agar AI bisa membaca kebutuhanmu.
+              </div>
+            )}
+          </div>
+        </Card>
+      </section>
+
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <Card className="p-5 bg-white">
+          <Flame className="text-danger" size={20} />
+          <h3 className="mt-3 text-base font-black">Streak {displayProfile.streak} hari</h3>
+          <p className="mt-1 text-xs font-semibold text-text-secondary">Pertahankan ritme dengan satu sesi fokus pendek setiap hari.</p>
+        </Card>
+
+        <Card className="p-5 bg-white">
+          <FileUp className="text-secondary" size={20} />
+          <h3 className="mt-3 text-base font-black">Portfolio dan tugas</h3>
+          <p className="mt-1 text-xs font-semibold text-text-secondary">Simpan bukti proyek, link, dan file tugas di profil siswa.</p>
+          <Link href="/profile" className="mt-4 inline-flex text-xs font-black uppercase items-center gap-1">
+            Buka Profil <ArrowRight size={13} />
+          </Link>
+        </Card>
+
+        <Card className="p-5 bg-white">
+          <ShieldCheck className="text-primary" size={20} />
+          <h3 className="mt-3 text-base font-black">Mode ujian serius</h3>
+          <p className="mt-1 text-xs font-semibold text-text-secondary">Nilai dihitung server-side dan hasil ujian memberi diagnosis topik.</p>
+          <Link href="/ujian/mulai" className="mt-4 inline-flex text-xs font-black uppercase items-center gap-1">
+            Mulai Ujian <ArrowRight size={13} />
+          </Link>
+        </Card>
+      </section>
     </div>
   );
 }

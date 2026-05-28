@@ -8,31 +8,31 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'bg-primary': '#09090b',
-        'bg-secondary': '#131316',
-        'bg-tertiary': '#1c1c21',
-        'bg-elevated': '#18181b',
-        'bg-hover': '#27272a',
-        'border': '#27272a',
-        'border-subtle': '#1f1f23',
-        'text-primary': '#fafafa',
-        'text-secondary': '#a1a1aa',
-        'text-tertiary': '#71717a',
-        'text-muted': '#52525b',
+        'bg-primary': '#f9f9f9',
+        'bg-secondary': '#ffffff',
+        'bg-tertiary': '#f3f3f4',
+        'bg-elevated': '#eeeeee',
+        'bg-hover': '#e2e2e2',
+        'border': '#1a1c1c',
+        'border-subtle': '#cec6ad',
+        'text-primary': '#1a1c1c',
+        'text-secondary': '#4b4734',
+        'text-tertiary': '#7d7761',
+        'text-muted': '#8f8977',
         
         // Pembaruan Palet Warna Premium
-        'primary': '#4F46E5',         // Indigo 600
-        'primary-hover': '#6366F1',   // Indigo 500
-        'primary-subtle': 'rgba(79, 70, 229, 0.12)',
-        'primary-glow': 'rgba(79, 70, 229, 0.25)',
+        'primary': '#8127cf',
+        'primary-hover': '#6900b3',
+        'primary-subtle': 'rgba(129, 39, 207, 0.12)',
+        'primary-glow': 'rgba(129, 39, 207, 0.25)',
         
-        'secondary': '#06B6D4',       // Cyan 500
-        'secondary-hover': '#22D3EE', // Cyan 400
-        'secondary-subtle': 'rgba(6, 182, 212, 0.12)',
+        'secondary': '#006d36',
+        'secondary-hover': '#005227',
+        'secondary-subtle': 'rgba(109, 254, 156, 0.22)',
         
-        'accent': '#F59E0B',          // Amber 500
-        'accent-hover': '#FBBF24',    // Amber 400
-        'accent-subtle': 'rgba(245, 158, 11, 0.12)',
+        'accent': '#fde047',
+        'accent-hover': '#e2c62d',
+        'accent-subtle': 'rgba(253, 224, 71, 0.35)',
         
         'success': '#22c55e',
         'success-subtle': 'rgba(34, 197, 94, 0.12)',
@@ -44,21 +44,21 @@ module.exports = {
         'info-subtle': 'rgba(59, 130, 246, 0.12)',
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "Inter", "sans-serif"],
+        sans: ["var(--font-sans)", "Lexend", "sans-serif"],
         mono: ["var(--font-mono)", "Geist Mono", "monospace"],
       },
       borderRadius: {
-        sm: '8px',
-        md: '12px',
-        lg: '16px',
-        xl: '20px',
+        sm: '0px',
+        md: '0px',
+        lg: '0px',
+        xl: '0px',
       },
       boxShadow: {
-        xs: '0 1px 2px rgba(0, 0, 0, 0.4)',
-        sm: '0 2px 4px rgba(0, 0, 0, 0.3)',
-        md: '0 4px 12px rgba(0, 0, 0, 0.25)',
-        lg: '0 8px 24px rgba(0, 0, 0, 0.3)',
-        xl: '0 16px 48px rgba(0, 0, 0, 0.35)',
+        xs: '3px 3px 0 #1a1c1c',
+        sm: '4px 4px 0 #1a1c1c',
+        md: '6px 6px 0 #1a1c1c',
+        lg: '8px 8px 0 #1a1c1c',
+        xl: '10px 10px 0 #1a1c1c',
       },
       animation: {
         'fade-in': 'fade-in 0.2s ease-out',

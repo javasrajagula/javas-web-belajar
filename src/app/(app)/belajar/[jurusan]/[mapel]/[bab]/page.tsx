@@ -44,6 +44,14 @@ interface MapelDetail {
   bab: Bab[];
 }
 
+function parseStructuredResource(konten: string) {
+  try {
+    return JSON.parse(konten);
+  } catch {
+    return null;
+  }
+}
+
 export default function BelajarPage({
   params,
 }: {
@@ -247,8 +255,10 @@ export default function BelajarPage({
     }
   };
 
+  const structuredResource = activeMateri ? parseStructuredResource(activeMateri.konten) : null;
+
   return (
-    <div className="min-h-[calc(100vh-64px)] grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] bg-bg-primary text-text-primary">
+    <div className="contrast-safe min-h-[calc(100vh-64px)] grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] bg-bg-primary text-text-primary">
       
       {/* PANEL KIRI: DAFTAR BAB & MATERI */}
       <div className="border-r border-border bg-bg-secondary p-4 flex flex-col overflow-y-auto max-h-[calc(100vh-64px)]">
@@ -382,15 +392,32 @@ export default function BelajarPage({
             <div className="mb-12">
               {activeMateri.tipe === 'video' ? (
                 <div className="space-y-4">
-                  <div className="aspect-video w-full rounded-xl overflow-hidden shadow-lg border border-border bg-black">
-                    <iframe
-                      src={activeMateri.konten}
-                      title={activeMateri.judul}
-                      className="w-full h-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    ></iframe>
-                  </div>
+                  {structuredResource?.embedUrl || (!structuredResource && activeMateri.konten.startsWith('http')) ? (
+                    <div className="aspect-video w-full rounded-xl overflow-hidden shadow-lg border border-border bg-black">
+                      <iframe
+                        src={structuredResource?.embedUrl || activeMateri.konten}
+                        title={activeMateri.judul}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      ></iframe>
+                    </div>
+                  ) : (
+                    <div className="bg-bg-secondary p-4 rounded-xl border border-border">
+                      <h3 className="text-xs font-bold mb-2 flex items-center space-x-2 text-primary">
+                        <Play className="w-4 h-4" />
+                        <span>{structuredResource?.title || 'Panduan Praktik Tertulis'}</span>
+                      </h3>
+                      <p className="text-xs text-text-secondary leading-relaxed">
+                        {structuredResource?.description || structuredResource?.unavailableReason || 'Video eksternal belum tersedia untuk materi ini.'}
+                      </p>
+                      {Array.isArray(structuredResource?.transcript) && (
+                        <ol className="mt-3 list-decimal space-y-1 pl-4 text-xs text-text-secondary">
+                          {structuredResource.transcript.map((step: string) => <li key={step}>{step}</li>)}
+                        </ol>
+                      )}
+                    </div>
+                  )}
                   <div className="bg-bg-secondary p-4 rounded-xl border border-border">
                     <h3 className="text-xs font-bold mb-2 flex items-center space-x-2 text-primary">
                       <Play className="w-4 h-4" />
@@ -406,22 +433,29 @@ export default function BelajarPage({
                   <div className="w-full bg-bg-secondary border border-border rounded-xl p-6 text-center flex flex-col items-center justify-center space-y-4 shadow-sm min-h-[300px]">
                     <FileText className="w-12 h-12 text-primary animate-pulse" />
                     <div>
-                      <h3 className="text-sm font-bold">Buku & Modul Panduan Praktis Kejuruan</h3>
+                      <h3 className="text-sm font-bold">{structuredResource?.title || 'Buku & Modul Panduan Praktis Kejuruan'}</h3>
                       <p className="text-xs text-text-secondary mt-1 max-w-sm mx-auto">
-                        Modul standar belajar kejuruan terintegrasi. Anda dapat membuka atau mengunduh berkas PDF dokumen secara lengkap.
+                        {structuredResource?.description || 'Modul standar belajar kejuruan terintegrasi. Anda dapat membuka atau mengunduh berkas PDF dokumen secara lengkap jika file tersedia.'}
                       </p>
                     </div>
+                    {!structuredResource?.pdfUrl && structuredResource?.unavailableReason && (
+                      <p className="max-w-md border border-border bg-bg-primary p-3 text-xs text-text-secondary">
+                        {structuredResource.unavailableReason}
+                      </p>
+                    )}
                     <div className="flex flex-wrap gap-2 justify-center">
-                      <a 
-                        href={activeMateri.konten} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="px-4 py-2 bg-primary hover:bg-primary-hover border border-primary text-white text-xs font-semibold rounded-md flex items-center space-x-1.5 transition-colors"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        <span>Unduh PDF Modul</span>
-                      </a>
-                      <Link href="/second-brain">
+                      {(structuredResource?.pdfUrl || (!structuredResource && activeMateri.konten.startsWith('http'))) && (
+                        <a 
+                          href={structuredResource?.pdfUrl || activeMateri.konten} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="px-4 py-2 bg-primary hover:bg-primary-hover border border-primary text-white text-xs font-semibold rounded-md flex items-center space-x-1.5 transition-colors"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>Unduh PDF Modul</span>
+                        </a>
+                      )}
+                      <Link href="/brain">
                         <button className="px-4 py-2 bg-bg-hover hover:bg-border text-text-primary border border-border text-xs font-semibold rounded-md flex items-center space-x-1.5 transition-colors">
                           <Sparkles className="w-3.5 h-3.5 text-primary" />
                           <span>Unggah ke Second Brain AI</span>
@@ -431,9 +465,11 @@ export default function BelajarPage({
                   </div>
                   
                   {/* PDF viewer fallback/embed */}
-                  <div className="w-full h-[600px] border border-border rounded-xl overflow-hidden shadow-sm bg-bg-secondary">
-                    <iframe src={activeMateri.konten} className="w-full h-full"></iframe>
-                  </div>
+                  {(structuredResource?.pdfUrl || (!structuredResource && activeMateri.konten.startsWith('http'))) && (
+                    <div className="w-full h-[600px] border border-border rounded-xl overflow-hidden shadow-sm bg-bg-secondary">
+                      <iframe src={structuredResource?.pdfUrl || activeMateri.konten} className="w-full h-full"></iframe>
+                    </div>
+                  )}
                 </div>
               ) : (
                 /* RENDERING TEKS & RINGKASAN MENGGUNAKAN MARKDOWN */
@@ -467,7 +503,7 @@ export default function BelajarPage({
                   <ArrowRight className="w-4 h-4" />
                 </button>
               ) : (
-                <Link href="/exams">
+                <Link href="/ujian/mulai">
                   <button className="px-4 py-2 bg-success hover:bg-success/90 border border-success text-white rounded-md text-xs font-bold flex items-center space-x-1 transition-all animate-bounce">
                     <span>Uji Kompetensi Bab 🎉</span>
                   </button>

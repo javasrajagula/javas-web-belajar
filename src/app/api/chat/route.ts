@@ -1,12 +1,9 @@
 import { NextRequest } from "next/server";
 import { streamText } from "ai";
-import { google } from "@ai-sdk/google";
 import { auth } from "@/auth";
 import { ratelimiter } from "@/lib/ratelimit";
 import { searchSimilarChunks } from "@/lib/actions/rag";
-
-// Check if Gemini API key is configured
-const hasGeminiKey = !!process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+import { AI_ENV_ERROR, canUseDevelopmentFallback, getServerAiModel } from "@/lib/ai-provider";
 
 export async function POST(req: NextRequest) {
   try {
@@ -124,9 +121,10 @@ Sisipkan kuis/flashcard secara natural saat relevan, terutama ketika siswa memin
 ${ragContext}`;
 
     // ─── Gemini AI Streaming ───
-    if (hasGeminiKey) {
+    const model = getServerAiModel();
+    if (model) {
       const result = streamText({
-        model: google("gemini-2.0-flash"),
+        model,
         system: systemPrompt,
         messages: messages.map((m: { role: string; content: string }) => ({
           role: m.role as "user" | "assistant",
@@ -136,6 +134,10 @@ ${ragContext}`;
       });
 
       return result.toTextStreamResponse();
+    }
+
+    if (!canUseDevelopmentFallback()) {
+      return new Response(AI_ENV_ERROR, { status: 503 });
     }
 
     // ─── Fallback: Mock Streaming (jika tidak ada API key) ───

@@ -1,11 +1,88 @@
 [
   {
+    "id": "smk-rpl-10",
+    "title": "Dasar-Dasar Pemrograman (RPL Kelas X)",
+    "phase": "E",
+    "schoolType": "smk",
+    "grade": 10,
+    "pathway": "RPL",
+    "cpStatement": "Menguasai dasar-dasar pemrograman prosedural, variabel, tipe data, struktur kontrol keputusan, dan perulangan.",
+    "isDigitalSkill": true,
+    "modules": [
+      {
+        "id": "smk-rpl-10-mod1",
+        "title": "Dasar Algoritma dan Pemrograman",
+        "lessons": [
+          {
+            "id": "smk-rpl-10-mod1-les1",
+            "title": "Variabel, Tipe Data, dan Percabangan",
+            "explanation": "### Pengenalan Algoritma\n\nAlgoritma adalah urutan langkah logis untuk menyelesaikan masalah. Variabel digunakan untuk menyimpan data dalam memori.",
+            "visualExample": "```js\nlet umur = 17;\nif (umur >= 17) {\n  console.log('Bisa membuat SIM');\n}\n```",
+            "summary": "1. Variabel menyimpan data.\n2. Struktur kontrol menentukan alur eksekusi.",
+            "quizzes": [
+              {
+                "id": "q-rpl-10",
+                "question": "Apakah fokus utama dalam materi 'Variabel, Tipe Data, dan Percabangan'?",
+                "options": [
+                  "Mematuhi standar operational procedure (SOP)",
+                  "Mempercepat proses kerja tanpa aturan",
+                  "Menggunakan software versi lama",
+                  "Mengabaikan arahan instruktur kelas"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "Dalam dunia kerja, efisiensi dan keamanan dicapai melalui disiplin penerapan SOP."
+              }
+            ],
+            "flashcards": [
+              {
+                "id": "fc-rpl-10",
+                "front": "Apa istilah kunci dalam 'Variabel, Tipe Data, dan Percabangan'?",
+                "back": "Konsep inti yang menjadi dasar pengerjaan praktikum di bengkel/industri."
+              }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-rpl-10",
+                "question": "Jika terjadi kendala pada implementasi praktis ini, tindakan K3 manakah yang harus diprioritaskan?",
+                "options": [
+                  "Memastikan kondisi aman bagi diri sendiri, rekan kerja, dan perangkat sebelum bertindak",
+                  "Langsung memperbaikinya sendiri secara terburu-buru",
+                  "Membiarkannya agar orang lain yang membereskan",
+                  "Menghapus riwayat error"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "K3 mengajarkan bahwa keselamatan nyawa manusia dan keutuhan fasilitas adalah prioritas mutlak."
+              }
+            ],
+            "practiceBank": [
+              {
+                "question": "Tuliskan satu contoh nyata penerapan 'Variabel, Tipe Data, dan Percabangan' di dunia industri.",
+                "answer": "Penerapan dilakukan berdasarkan lembar instruksi kerja (LKS) dan SOP yang berlaku."
+              }
+            ],
+            "podcastScript": [
+              {
+                "role": "guru",
+                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Variabel, Tipe Data, dan Percabangan."
+              },
+              {
+                "role": "siswa",
+                "text": "Hai pak! Materi ini kelihatannya menantang, tapi seru untuk dipraktikkan langsung di lab!"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "smk-rpl-11",
     "title": "Dasar Pemrograman OOP (RPL Kelas XI)",
     "phase": "F",
     "schoolType": "smk",
     "grade": 11,
-    "cpStatement": "Pada akhir Fase F, peserta didik mampu mengimplementasikan konsep pemrograman berorientasi objek (OOP) menggunakan bahasa Java, C#, atau C++ serta merancang sistem database relasional.",
+    "pathway": "RPL",
+    "cpStatement": "Mengimplementasikan konsep pemrograman berorientasi objek (OOP) menggunakan bahasa Java, C#, atau C++ serta merancang sistem database relasional.",
     "isDigitalSkill": true,
     "modules": [
       {
@@ -15,61 +92,210 @@
           {
             "id": "smk-rpl-11-mod1-les1",
             "title": "Pilar Enkapsulasi dan Pewarisan",
-            "explanation": "### 1. Enkapsulasi (Encapsulation)\n\nEnkapsulasi adalah teknik menyembunyikan detail implementasi internal suatu objek dan membatasi akses langsung ke data menggunakan hak akses `private`, serta menyediakan gerbang akses melalui metode public `getter` dan `setter`.\n\n### 2. Pewarisan (Inheritance)\n\nPewarisan adalah mekanisme di mana suatu kelas anak (subclass) mewarisi seluruh properti dan metode public/protected dari kelas induk (superclass).",
-            "visualExample": "```java\n// Contoh Implementasi Enkapsulasi & Pewarisan di Java\npublic class AkunSiswa {\n    private String namaSiswa;\n    private int xpPoints;\n\n    public String getNamaSiswa() {\n        return namaSiswa;\n    }\n    public void setNamaSiswa(String nama) {\n        this.namaSiswa = nama;\n    }\n}\n```",
-            "summary": "1. Enkapsulasi menjaga keamanan data objek dari modifikasi luar secara langsung.\n2. Pewarisan meningkatkan efisiensi kode dengan mengurangi redundansi (*code reusability*).",
+            "explanation": "### 1. Enkapsulasi (Encapsulation)\n\nEnkapsulasi menyembunyikan detail internal objek dan membatasi akses langsung menggunakan public getter dan setter.",
+            "visualExample": "```java\npublic class Siswa {\n  private String nama;\n  public String getNama() { return nama; }\n}\n```",
+            "summary": "1. Enkapsulasi menjaga keamanan data objek.\n2. Pewarisan mendukung code reusability.",
             "quizzes": [
               {
-                "id": "q-smk-1",
-                "question": "Kata kunci (keyword) yang digunakan dalam Java untuk menandakan pewarisan kelas induk adalah...",
-                "options": ["extends", "implements", "inherits", "super"],
+                "id": "q-rpl-11",
+                "question": "Apakah fokus utama dalam materi 'Pilar Enkapsulasi dan Pewarisan'?",
+                "options": [
+                  "Mematuhi standar operational procedure (SOP)",
+                  "Mempercepat proses kerja tanpa aturan",
+                  "Menggunakan software versi lama",
+                  "Mengabaikan arahan instruktur kelas"
+                ],
                 "correctOptionIndex": 0,
-                "explanation": "Keyword 'extends' digunakan untuk mewarisi sifat class, sedangkan 'implements' digunakan untuk merealisasikan interface."
+                "explanation": "Dalam dunia kerja, efisiensi dan keamanan dicapai melalui disiplin penerapan SOP."
               }
             ],
             "flashcards": [
               {
-                "id": "fc-smk-1",
-                "front": "Apa fungsi keyword 'super' dalam konstruktor Java?",
-                "back": "Memanggil metode konstruktor milik superclass (kelas induk) untuk melakukan inisialisasi awal variabel warisan."
+                "id": "fc-rpl-11",
+                "front": "Apa istilah kunci dalam 'Pilar Enkapsulasi dan Pewarisan'?",
+                "back": "Konsep inti yang menjadi dasar pengerjaan praktikum di bengkel/industri."
               }
             ],
             "hotsQuestions": [
               {
-                "id": "hots-smk-1",
-                "question": "Dalam arsitektur microservices, mengapa pilar abstraksi dan enkapsulasi dinilai krusial untuk kestabilan sistem?",
+                "id": "hots-rpl-11",
+                "question": "Jika terjadi kendala pada implementasi praktis ini, tindakan K3 manakah yang harus diprioritaskan?",
                 "options": [
-                  "Karena menyembunyikan logika database sehingga mengurangi beban lalu lintas jaringan.",
-                  "Karena membatasi akses langsung antar modul, mencegah kegagalan satu komponen merambat ke komponen lainnya.",
-                  "Karena mempercepat kompilasi file biner bahasa Java.",
-                  "Karena memaksa memori RAM menggunakan memori cache lokal."
+                  "Memastikan kondisi aman bagi diri sendiri, rekan kerja, dan perangkat sebelum bertindak",
+                  "Langsung memperbaikinya sendiri secara terburu-buru",
+                  "Membiarkannya agar orang lain yang membereskan",
+                  "Menghapus riwayat error"
                 ],
-                "correctOptionIndex": 1,
-                "explanation": "Pencegahan kegagalan merambat (coupling yang longgar) dicapai dengan mengisolasi data melalui enkapsulasi dan abstraksi API layanan."
+                "correctOptionIndex": 0,
+                "explanation": "K3 mengajarkan bahwa keselamatan nyawa manusia dan keutuhan fasilitas adalah prioritas mutlak."
               }
             ],
             "practiceBank": [
               {
-                "question": "Buatlah diagram kelas (Class Diagram) sederhana yang menghubungkan antara Superclass 'Kendaraan' dengan Subclass 'MobilListrik'.",
-                "answer": "Kelas MobilListrik mewarisi properti dari Kendaraan dan menambahkan bateraiKapasitas."
+                "question": "Tuliskan satu contoh nyata penerapan 'Pilar Enkapsulasi dan Pewarisan' di dunia industri.",
+                "answer": "Penerapan dilakukan berdasarkan lembar instruksi kerja (LKS) dan SOP yang berlaku."
               }
             ],
             "podcastScript": [
               {
-                "role": "budi",
-                "text": "Halo kawan vokasi! Pak Budi kembali lagi. Hari ini kita membahas fondasi utama rekayasa perangkat lunak."
+                "role": "guru",
+                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Pilar Enkapsulasi dan Pewarisan."
               },
               {
-                "role": "siska",
-                "text": "Hai kawan-kawan! Kita bicara tentang OOP. Bagi yang bercita-cita jadi Programmer, OOP ini wajib dikuasai ya!"
+                "role": "siswa",
+                "text": "Hai pak! Materi ini kelihatannya menantang, tapi seru untuk dipraktikkan langsung di lab!"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "smk-rpl-12",
+    "title": "Pemrograman Web Lanjut (RPL Kelas XII)",
+    "phase": "F",
+    "schoolType": "smk",
+    "grade": 12,
+    "pathway": "RPL",
+    "cpStatement": "Merancang dan membangun aplikasi web dinamis berskala industri dengan arsitektur RESTful API dan integrasi basis data.",
+    "isDigitalSkill": true,
+    "modules": [
+      {
+        "id": "smk-rpl-12-mod1",
+        "title": "Web Service & RESTful API",
+        "lessons": [
+          {
+            "id": "smk-rpl-12-mod1-les1",
+            "title": "Arsitektur REST API dengan Node.js",
+            "explanation": "### RESTful API\n\nRESTful API menggunakan HTTP method (GET, POST, PUT, DELETE) untuk komunikasi stateless antar client dan server.",
+            "visualExample": "```js\napp.get('/api/siswa', (req, res) => {\n  res.json({ nama: 'Alex' });\n});\n```",
+            "summary": "1. REST API bersifat stateless.\n2. Menggunakan JSON untuk pertukaran data.",
+            "quizzes": [
+              {
+                "id": "q-rpl-12",
+                "question": "Apakah fokus utama dalam materi 'Arsitektur REST API dengan Node.js'?",
+                "options": [
+                  "Mematuhi standar operational procedure (SOP)",
+                  "Mempercepat proses kerja tanpa aturan",
+                  "Menggunakan software versi lama",
+                  "Mengabaikan arahan instruktur kelas"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "Dalam dunia kerja, efisiensi dan keamanan dicapai melalui disiplin penerapan SOP."
+              }
+            ],
+            "flashcards": [
+              {
+                "id": "fc-rpl-12",
+                "front": "Apa istilah kunci dalam 'Arsitektur REST API dengan Node.js'?",
+                "back": "Konsep inti yang menjadi dasar pengerjaan praktikum di bengkel/industri."
+              }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-rpl-12",
+                "question": "Jika terjadi kendala pada implementasi praktis ini, tindakan K3 manakah yang harus diprioritaskan?",
+                "options": [
+                  "Memastikan kondisi aman bagi diri sendiri, rekan kerja, dan perangkat sebelum bertindak",
+                  "Langsung memperbaikinya sendiri secara terburu-buru",
+                  "Membiarkannya agar orang lain yang membereskan",
+                  "Menghapus riwayat error"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "K3 mengajarkan bahwa keselamatan nyawa manusia dan keutuhan fasilitas adalah prioritas mutlak."
+              }
+            ],
+            "practiceBank": [
+              {
+                "question": "Tuliskan satu contoh nyata penerapan 'Arsitektur REST API dengan Node.js' di dunia industri.",
+                "answer": "Penerapan dilakukan berdasarkan lembar instruksi kerja (LKS) dan SOP yang berlaku."
+              }
+            ],
+            "podcastScript": [
+              {
+                "role": "guru",
+                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Arsitektur REST API dengan Node.js."
               },
               {
-                "role": "budi",
-                "text": "Betul sekali, Kak Siska. Kenapa kelas harus dibungkus atau dienkapsulasi?"
+                "role": "siswa",
+                "text": "Hai pak! Materi ini kelihatannya menantang, tapi seru untuk dipraktikkan langsung di lab!"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "smk-tkj-10",
+    "title": "Dasar-Dasar Teknik Jaringan (TKJ Kelas X)",
+    "phase": "E",
+    "schoolType": "smk",
+    "grade": 10,
+    "pathway": "TKJ",
+    "cpStatement": "Memahami prinsip dasar komunikasi data, perakitan komputer, instalasi OS, dan dasar-dasar jaringan komputer.",
+    "isDigitalSkill": true,
+    "modules": [
+      {
+        "id": "smk-tkj-10-mod1",
+        "title": "Instalasi Jaringan Dasar",
+        "lessons": [
+          {
+            "id": "smk-tkj-10-mod1-les1",
+            "title": "Pengalamatan IP Jaringan & Subnetting",
+            "explanation": "### Pengenalan IP Address\n\nIP address adalah identitas unik perangkat dalam jaringan. Subnetting membagi jaringan besar menjadi sub-jaringan lebih kecil.",
+            "visualExample": "```bash\nIP: 192.168.1.1\nSubnet Mask: 255.255.255.0\nNetwork ID: 192.168.1.0\n```",
+            "summary": "1. IP Address mengidentifikasi host.\n2. Subnetting mengefisiensikan alamat IP.",
+            "quizzes": [
+              {
+                "id": "q-tkj-10",
+                "question": "Apakah fokus utama dalam materi 'Pengalamatan IP Jaringan & Subnetting'?",
+                "options": [
+                  "Mematuhi standar operational procedure (SOP)",
+                  "Mempercepat proses kerja tanpa aturan",
+                  "Menggunakan software versi lama",
+                  "Mengabaikan arahan instruktur kelas"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "Dalam dunia kerja, efisiensi dan keamanan dicapai melalui disiplin penerapan SOP."
+              }
+            ],
+            "flashcards": [
+              {
+                "id": "fc-tkj-10",
+                "front": "Apa istilah kunci dalam 'Pengalamatan IP Jaringan & Subnetting'?",
+                "back": "Konsep inti yang menjadi dasar pengerjaan praktikum di bengkel/industri."
+              }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-tkj-10",
+                "question": "Jika terjadi kendala pada implementasi praktis ini, tindakan K3 manakah yang harus diprioritaskan?",
+                "options": [
+                  "Memastikan kondisi aman bagi diri sendiri, rekan kerja, dan perangkat sebelum bertindak",
+                  "Langsung memperbaikinya sendiri secara terburu-buru",
+                  "Membiarkannya agar orang lain yang membereskan",
+                  "Menghapus riwayat error"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "K3 mengajarkan bahwa keselamatan nyawa manusia dan keutuhan fasilitas adalah prioritas mutlak."
+              }
+            ],
+            "practiceBank": [
+              {
+                "question": "Tuliskan satu contoh nyata penerapan 'Pengalamatan IP Jaringan & Subnetting' di dunia industri.",
+                "answer": "Penerapan dilakukan berdasarkan lembar instruksi kerja (LKS) dan SOP yang berlaku."
+              }
+            ],
+            "podcastScript": [
+              {
+                "role": "guru",
+                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Pengalamatan IP Jaringan & Subnetting."
               },
               {
-                "role": "siska",
-                "text": "Sederhananya, bayangkan mobil. Kita tidak perlu tahu bagaimana piston mesin meledak, kita cukup injak pedal gas. Enkapsulasi menyembunyikan kerumitan itu."
+                "role": "siswa",
+                "text": "Hai pak! Materi ini kelihatannya menantang, tapi seru untuk dipraktikkan langsung di lab!"
               }
             ]
           }
@@ -83,7 +309,8 @@
     "phase": "F",
     "schoolType": "smk",
     "grade": 11,
-    "cpStatement": "Peserta didik mampu mengkonfigurasi dan menguji routing statis serta dinamis pada perangkat router Mikrotik maupun Cisco, demi membangun konektivitas jaringan berskala menengah.",
+    "pathway": "TKJ",
+    "cpStatement": "Mengkonfigurasi dan menguji routing statis serta dinamis pada perangkat router Mikrotik maupun Cisco untuk jaringan menengah.",
     "isDigitalSkill": true,
     "modules": [
       {
@@ -93,53 +320,1046 @@
           {
             "id": "smk-tkj-11-mod1-les1",
             "title": "Konfigurasi Routing Statis",
-            "explanation": "### Pengertian Routing Statis\n\nRouting statis adalah proses konfigurasi rute jaringan secara manual pada tabel routing oleh administrator jaringan. Rute ini tidak berubah kecuali diubah secara manual.\n\n### Perintah Dasar RouterOS Mikrotik:\n\n```bash\n/ip route add dst-address=192.168.2.0/24 gateway=192.168.1.254\n```",
-            "visualExample": "#### Skema Topologi Routing Statis\n\n```\n[PC Klien A] ---> [Router Mikrotik A] === (Routing Statis) ===> [Router Mikrotik B] ---> [PC Klien B]\n```",
-            "summary": "1. Routing statis sangat efisien untuk jaringan berskala kecil.\n2. Gateway harus berada dalam subnet yang sama dengan interface router yang terhubung langsung.",
+            "explanation": "### Routing Statis\n\nRouting statis adalah pengisian tabel routing secara manual oleh network administrator.",
+            "visualExample": "```bash\n/ip route add dst-address=192.168.2.0/24 gateway=192.168.1.254\n```",
+            "summary": "1. Routing statis cocok untuk skala kecil.\n2. Gateway harus berada dalam subnet yang sama.",
             "quizzes": [
               {
-                "id": "q-tkj-1",
-                "question": "Parameter apa yang wajib diisi saat membuat routing statis agar paket data tahu jalur keluar antar router?",
-                "options": ["dst-address dan gateway", "src-address dan dns", "dhcp-server dan pool", "subnet-mask saja"],
+                "id": "q-tkj-11",
+                "question": "Apakah fokus utama dalam materi 'Konfigurasi Routing Statis'?",
+                "options": [
+                  "Mematuhi standar operational procedure (SOP)",
+                  "Mempercepat proses kerja tanpa aturan",
+                  "Menggunakan software versi lama",
+                  "Mengabaikan arahan instruktur kelas"
+                ],
                 "correctOptionIndex": 0,
-                "explanation": "dst-address (alamat tujuan) dan gateway (gerbang lompatan berikutnya) adalah parameter vital dalam routing statis."
+                "explanation": "Dalam dunia kerja, efisiensi dan keamanan dicapai melalui disiplin penerapan SOP."
               }
             ],
             "flashcards": [
               {
-                "id": "fc-tkj-1",
-                "front": "Berapakah Administrative Distance (AD) default untuk routing statis?",
-                "back": "AD default untuk routing statis adalah 1, menandakan tingkat kepercayaan rute yang sangat tinggi."
+                "id": "fc-tkj-11",
+                "front": "Apa istilah kunci dalam 'Konfigurasi Routing Statis'?",
+                "back": "Konsep inti yang menjadi dasar pengerjaan praktikum di bengkel/industri."
               }
             ],
             "hotsQuestions": [
               {
-                "id": "hots-tkj-1",
-                "question": "Jika gateway dari rute statis bernilai aktif tetapi status rute tertulis 'unreachable', tindakan diagnostik apa yang paling masuk akal?",
+                "id": "hots-tkj-11",
+                "question": "Jika terjadi kendala pada implementasi praktis ini, tindakan K3 manakah yang harus diprioritaskan?",
                 "options": [
-                  "Mengganti kabel LAN klien.",
-                  "Memeriksa tabel ARP untuk memastikan MAC Address gateway terdeteksi di segmen fisik interface.",
-                  "Menghapus IP address pada interface loopback.",
-                  "Melakukan reboot pada PC klien."
+                  "Memastikan kondisi aman bagi diri sendiri, rekan kerja, dan perangkat sebelum bertindak",
+                  "Langsung memperbaikinya sendiri secara terburu-buru",
+                  "Membiarkannya agar orang lain yang membereskan",
+                  "Menghapus riwayat error"
                 ],
-                "correctOptionIndex": 1,
-                "explanation": "'Unreachable' menandakan router tidak dapat menemukan rute fisik atau MAC Address (ARP) untuk berkomunikasi dengan gateway tujuan."
+                "correctOptionIndex": 0,
+                "explanation": "K3 mengajarkan bahwa keselamatan nyawa manusia dan keutuhan fasilitas adalah prioritas mutlak."
               }
             ],
             "practiceBank": [
               {
-                "question": "Sebutkan perbedaan mendasar antara routing statis dan routing dinamis OSPF.",
-                "answer": "Routing statis dikonfigurasi secara manual, sedangkan OSPF mempelajari rute tetangga secara otomatis menggunakan protokol pertukaran status link."
+                "question": "Tuliskan satu contoh nyata penerapan 'Konfigurasi Routing Statis' di dunia industri.",
+                "answer": "Penerapan dilakukan berdasarkan lembar instruksi kerja (LKS) dan SOP yang berlaku."
               }
             ],
             "podcastScript": [
               {
-                "role": "budi",
-                "text": "Selamat berjumpa kembali di saluran Jaringan Cyber! Pak Budi di sini bersama router andalan kita."
+                "role": "guru",
+                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Konfigurasi Routing Statis."
               },
               {
-                "role": "siska",
-                "text": "Halo semuanya! Hari ini kita akan membahas jalan pintas manual, alias Routing Statis di Mikrotik!"
+                "role": "siswa",
+                "text": "Hai pak! Materi ini kelihatannya menantang, tapi seru untuk dipraktikkan langsung di lab!"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "smk-tkj-12",
+    "title": "Teknologi Jaringan Berbasis Luas WAN (TKJ Kelas XII)",
+    "phase": "F",
+    "schoolType": "smk",
+    "grade": 12,
+    "pathway": "TKJ",
+    "cpStatement": "Mengkonfigurasi teknologi WAN, jaringan nirkabel luar ruangan, serat optik (fiber optic), dan keamanan jaringan tingkat lanjut.",
+    "isDigitalSkill": true,
+    "modules": [
+      {
+        "id": "smk-tkj-12-mod1",
+        "title": "Keamanan Jaringan & WAN",
+        "lessons": [
+          {
+            "id": "smk-tkj-12-mod1-les1",
+            "title": "Konfigurasi VPN dan Firewall Filter",
+            "explanation": "### Virtual Private Network (VPN)\n\nVPN mengenkripsi lalu lintas data yang melintasi jaringan publik untuk keamanan interkoneksi cabang.",
+            "visualExample": "```bash\n/interface ovpn-client add connect-to=202.152.0.1 user=kantor password=rahasia\n```",
+            "summary": "1. VPN mengenkripsi koneksi publik.\n2. Firewall menyaring paket data mencurigakan.",
+            "quizzes": [
+              {
+                "id": "q-tkj-12",
+                "question": "Apakah fokus utama dalam materi 'Konfigurasi VPN dan Firewall Filter'?",
+                "options": [
+                  "Mematuhi standar operational procedure (SOP)",
+                  "Mempercepat proses kerja tanpa aturan",
+                  "Menggunakan software versi lama",
+                  "Mengabaikan arahan instruktur kelas"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "Dalam dunia kerja, efisiensi dan keamanan dicapai melalui disiplin penerapan SOP."
+              }
+            ],
+            "flashcards": [
+              {
+                "id": "fc-tkj-12",
+                "front": "Apa istilah kunci dalam 'Konfigurasi VPN dan Firewall Filter'?",
+                "back": "Konsep inti yang menjadi dasar pengerjaan praktikum di bengkel/industri."
+              }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-tkj-12",
+                "question": "Jika terjadi kendala pada implementasi praktis ini, tindakan K3 manakah yang harus diprioritaskan?",
+                "options": [
+                  "Memastikan kondisi aman bagi diri sendiri, rekan kerja, dan perangkat sebelum bertindak",
+                  "Langsung memperbaikinya sendiri secara terburu-buru",
+                  "Membiarkannya agar orang lain yang membereskan",
+                  "Menghapus riwayat error"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "K3 mengajarkan bahwa keselamatan nyawa manusia dan keutuhan fasilitas adalah prioritas mutlak."
+              }
+            ],
+            "practiceBank": [
+              {
+                "question": "Tuliskan satu contoh nyata penerapan 'Konfigurasi VPN dan Firewall Filter' di dunia industri.",
+                "answer": "Penerapan dilakukan berdasarkan lembar instruksi kerja (LKS) dan SOP yang berlaku."
+              }
+            ],
+            "podcastScript": [
+              {
+                "role": "guru",
+                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Konfigurasi VPN dan Firewall Filter."
+              },
+              {
+                "role": "siswa",
+                "text": "Hai pak! Materi ini kelihatannya menantang, tapi seru untuk dipraktikkan langsung di lab!"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "smk-akl-10",
+    "title": "Pengantar Dasar Akuntansi (AKL Kelas X)",
+    "phase": "E",
+    "schoolType": "smk",
+    "grade": 10,
+    "pathway": "AKL",
+    "cpStatement": "Memahami siklus akuntansi perusahaan jasa dan dagang, jurnal umum, buku besar, dan penyusunan laporan keuangan dasar.",
+    "isDigitalSkill": true,
+    "modules": [
+      {
+        "id": "smk-akl-10-mod1",
+        "title": "Siklus Akuntansi Jasa",
+        "lessons": [
+          {
+            "id": "smk-akl-10-mod1-les1",
+            "title": "Jurnal Umum dan Persamaan Dasar",
+            "explanation": "### Persamaan Dasar Akuntansi\n\nAset = Liabilitas + Ekuitas. Setiap transaksi dicatat dengan prinsip double-entry.",
+            "visualExample": "```\nKas (Debit) ............ Rp 1.000.000\n   Modal (Kredit) ....... Rp 1.000.000\n```",
+            "summary": "1. Persamaan dasar: Aset = Liabilitas + Ekuitas.\n2. Debit dan Kredit harus selalu seimbang.",
+            "quizzes": [
+              {
+                "id": "q-akl-10",
+                "question": "Apakah fokus utama dalam materi 'Jurnal Umum dan Persamaan Dasar'?",
+                "options": [
+                  "Mematuhi standar operational procedure (SOP)",
+                  "Mempercepat proses kerja tanpa aturan",
+                  "Menggunakan software versi lama",
+                  "Mengabaikan arahan instruktur kelas"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "Dalam dunia kerja, efisiensi dan keamanan dicapai melalui disiplin penerapan SOP."
+              }
+            ],
+            "flashcards": [
+              {
+                "id": "fc-akl-10",
+                "front": "Apa istilah kunci dalam 'Jurnal Umum dan Persamaan Dasar'?",
+                "back": "Konsep inti yang menjadi dasar pengerjaan praktikum di bengkel/industri."
+              }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-akl-10",
+                "question": "Jika terjadi kendala pada implementasi praktis ini, tindakan K3 manakah yang harus diprioritaskan?",
+                "options": [
+                  "Memastikan kondisi aman bagi diri sendiri, rekan kerja, dan perangkat sebelum bertindak",
+                  "Langsung memperbaikinya sendiri secara terburu-buru",
+                  "Membiarkannya agar orang lain yang membereskan",
+                  "Menghapus riwayat error"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "K3 mengajarkan bahwa keselamatan nyawa manusia dan keutuhan fasilitas adalah prioritas mutlak."
+              }
+            ],
+            "practiceBank": [
+              {
+                "question": "Tuliskan satu contoh nyata penerapan 'Jurnal Umum dan Persamaan Dasar' di dunia industri.",
+                "answer": "Penerapan dilakukan berdasarkan lembar instruksi kerja (LKS) dan SOP yang berlaku."
+              }
+            ],
+            "podcastScript": [
+              {
+                "role": "guru",
+                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Jurnal Umum dan Persamaan Dasar."
+              },
+              {
+                "role": "siswa",
+                "text": "Hai pak! Materi ini kelihatannya menantang, tapi seru untuk dipraktikkan langsung di lab!"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "smk-akl-11",
+    "title": "Akuntansi Keuangan Lembaga (AKL Kelas XI)",
+    "phase": "F",
+    "schoolType": "smk",
+    "grade": 11,
+    "pathway": "AKL",
+    "cpStatement": "Menyusun laporan keuangan konsolidasi, akuntansi piutang, persediaan, dan aktiva tetap sesuai PSAK.",
+    "isDigitalSkill": true,
+    "modules": [
+      {
+        "id": "smk-akl-11-mod1",
+        "title": "Akuntansi Aktiva Tetap",
+        "lessons": [
+          {
+            "id": "smk-akl-11-mod1-les1",
+            "title": "Metode Penyusutan Garis Lurus",
+            "explanation": "### Penyusutan Aset\n\nPenyusutan adalah alokasi biaya perolehan aset tetap selama masa manfaatnya.",
+            "visualExample": "```\nBiaya Penyusutan = (Harga Perolehan - Nilai Residu) / Umur Ekonomis\n```",
+            "summary": "1. Penyusutan mencerminkan penurunan nilai guna aset.\n2. Garis lurus mengalokasikan nilai yang sama tiap tahun.",
+            "quizzes": [
+              {
+                "id": "q-akl-11",
+                "question": "Apakah fokus utama dalam materi 'Metode Penyusutan Garis Lurus'?",
+                "options": [
+                  "Mematuhi standar operational procedure (SOP)",
+                  "Mempercepat proses kerja tanpa aturan",
+                  "Menggunakan software versi lama",
+                  "Mengabaikan arahan instruktur kelas"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "Dalam dunia kerja, efisiensi dan keamanan dicapai melalui disiplin penerapan SOP."
+              }
+            ],
+            "flashcards": [
+              {
+                "id": "fc-akl-11",
+                "front": "Apa istilah kunci dalam 'Metode Penyusutan Garis Lurus'?",
+                "back": "Konsep inti yang menjadi dasar pengerjaan praktikum di bengkel/industri."
+              }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-akl-11",
+                "question": "Jika terjadi kendala pada implementasi praktis ini, tindakan K3 manakah yang harus diprioritaskan?",
+                "options": [
+                  "Memastikan kondisi aman bagi diri sendiri, rekan kerja, dan perangkat sebelum bertindak",
+                  "Langsung memperbaikinya sendiri secara terburu-buru",
+                  "Membiarkannya agar orang lain yang membereskan",
+                  "Menghapus riwayat error"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "K3 mengajarkan bahwa keselamatan nyawa manusia dan keutuhan fasilitas adalah prioritas mutlak."
+              }
+            ],
+            "practiceBank": [
+              {
+                "question": "Tuliskan satu contoh nyata penerapan 'Metode Penyusutan Garis Lurus' di dunia industri.",
+                "answer": "Penerapan dilakukan berdasarkan lembar instruksi kerja (LKS) dan SOP yang berlaku."
+              }
+            ],
+            "podcastScript": [
+              {
+                "role": "guru",
+                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Metode Penyusutan Garis Lurus."
+              },
+              {
+                "role": "siswa",
+                "text": "Hai pak! Materi ini kelihatannya menantang, tapi seru untuk dipraktikkan langsung di lab!"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "smk-akl-12",
+    "title": "Komputer Akuntansi MYOB (AKL Kelas XII)",
+    "phase": "F",
+    "schoolType": "smk",
+    "grade": 12,
+    "pathway": "AKL",
+    "cpStatement": "Mengoperasikan aplikasi komputer akuntansi (MYOB/Zahir) untuk memproses data transaksi perusahaan dagang dan industri secara digital.",
+    "isDigitalSkill": true,
+    "modules": [
+      {
+        "id": "smk-akl-12-mod1",
+        "title": "Sistem Informasi Akuntansi",
+        "lessons": [
+          {
+            "id": "smk-akl-12-mod1-les1",
+            "title": "Setup Chart of Accounts di MYOB",
+            "explanation": "### Setup Akun MYOB\n\nChart of accounts (daftar akun) dikelompokkan menjadi Aset, Liabilitas, Ekuitas, Pendapatan, dan Beban.",
+            "visualExample": "```\n1-0000 ASSETS\n2-0000 LIABILITIES\n3-0000 EQUITY\n```",
+            "summary": "1. MYOB mengotomatiskan posting buku besar.\n2. Integrasi akun mempercepat pembuatan laporan.",
+            "quizzes": [
+              {
+                "id": "q-akl-12",
+                "question": "Apakah fokus utama dalam materi 'Setup Chart of Accounts di MYOB'?",
+                "options": [
+                  "Mematuhi standar operational procedure (SOP)",
+                  "Mempercepat proses kerja tanpa aturan",
+                  "Menggunakan software versi lama",
+                  "Mengabaikan arahan instruktur kelas"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "Dalam dunia kerja, efisiensi dan keamanan dicapai melalui disiplin penerapan SOP."
+              }
+            ],
+            "flashcards": [
+              {
+                "id": "fc-akl-12",
+                "front": "Apa istilah kunci dalam 'Setup Chart of Accounts di MYOB'?",
+                "back": "Konsep inti yang menjadi dasar pengerjaan praktikum di bengkel/industri."
+              }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-akl-12",
+                "question": "Jika terjadi kendala pada implementasi praktis ini, tindakan K3 manakah yang harus diprioritaskan?",
+                "options": [
+                  "Memastikan kondisi aman bagi diri sendiri, rekan kerja, dan perangkat sebelum bertindak",
+                  "Langsung memperbaikinya sendiri secara terburu-buru",
+                  "Membiarkannya agar orang lain yang membereskan",
+                  "Menghapus riwayat error"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "K3 mengajarkan bahwa keselamatan nyawa manusia dan keutuhan fasilitas adalah prioritas mutlak."
+              }
+            ],
+            "practiceBank": [
+              {
+                "question": "Tuliskan satu contoh nyata penerapan 'Setup Chart of Accounts di MYOB' di dunia industri.",
+                "answer": "Penerapan dilakukan berdasarkan lembar instruksi kerja (LKS) dan SOP yang berlaku."
+              }
+            ],
+            "podcastScript": [
+              {
+                "role": "guru",
+                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Setup Chart of Accounts di MYOB."
+              },
+              {
+                "role": "siswa",
+                "text": "Hai pak! Materi ini kelihatannya menantang, tapi seru untuk dipraktikkan langsung di lab!"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "smk-otkp-10",
+    "title": "Dasar-Dasar Perkantoran Modern (OTKP Kelas X)",
+    "phase": "E",
+    "schoolType": "smk",
+    "grade": 10,
+    "pathway": "OTKP",
+    "cpStatement": "Memahami konsep administrasi perkantoran, penanganan surat masuk/keluar, komunikasi telepon, dan pelayanan prima (*service excellence*).",
+    "isDigitalSkill": true,
+    "modules": [
+      {
+        "id": "smk-otkp-10-mod1",
+        "title": "Manajemen Dokumen Kantor",
+        "lessons": [
+          {
+            "id": "smk-otkp-10-mod1-les1",
+            "title": "Prosedur Surat Masuk & Keluar",
+            "explanation": "### Surat Masuk dan Keluar\n\nPenanganan surat masuk mengikuti langkah: penerimaan, penyortiran, pencatatan di buku agenda, pengarahan, dan penyimpanan.",
+            "visualExample": "```\n[Surat Masuk] -> [Penerimaan] -> [Penyortiran] -> [Buku Agenda] -> [Disposisi]\n```",
+            "summary": "1. Buku agenda mencatat arus persuratan.\n2. Lembar disposisi memuat arahan pimpinan.",
+            "quizzes": [
+              {
+                "id": "q-otkp-10",
+                "question": "Apakah fokus utama dalam materi 'Prosedur Surat Masuk & Keluar'?",
+                "options": [
+                  "Mematuhi standar operational procedure (SOP)",
+                  "Mempercepat proses kerja tanpa aturan",
+                  "Menggunakan software versi lama",
+                  "Mengabaikan arahan instruktur kelas"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "Dalam dunia kerja, efisiensi dan keamanan dicapai melalui disiplin penerapan SOP."
+              }
+            ],
+            "flashcards": [
+              {
+                "id": "fc-otkp-10",
+                "front": "Apa istilah kunci dalam 'Prosedur Surat Masuk & Keluar'?",
+                "back": "Konsep inti yang menjadi dasar pengerjaan praktikum di bengkel/industri."
+              }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-otkp-10",
+                "question": "Jika terjadi kendala pada implementasi praktis ini, tindakan K3 manakah yang harus diprioritaskan?",
+                "options": [
+                  "Memastikan kondisi aman bagi diri sendiri, rekan kerja, dan perangkat sebelum bertindak",
+                  "Langsung memperbaikinya sendiri secara terburu-buru",
+                  "Membiarkannya agar orang lain yang membereskan",
+                  "Menghapus riwayat error"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "K3 mengajarkan bahwa keselamatan nyawa manusia dan keutuhan fasilitas adalah prioritas mutlak."
+              }
+            ],
+            "practiceBank": [
+              {
+                "question": "Tuliskan satu contoh nyata penerapan 'Prosedur Surat Masuk & Keluar' di dunia industri.",
+                "answer": "Penerapan dilakukan berdasarkan lembar instruksi kerja (LKS) dan SOP yang berlaku."
+              }
+            ],
+            "podcastScript": [
+              {
+                "role": "guru",
+                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Prosedur Surat Masuk & Keluar."
+              },
+              {
+                "role": "siswa",
+                "text": "Hai pak! Materi ini kelihatannya menantang, tapi seru untuk dipraktikkan langsung di lab!"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "smk-otkp-11",
+    "title": "Otomatisasi Tata Kelola Kepegawaian (OTKP Kelas XI)",
+    "phase": "F",
+    "schoolType": "smk",
+    "grade": 11,
+    "pathway": "OTKP",
+    "cpStatement": "Mengelola administrasi kepegawaian, daftar hadir, SOP cuti, mutasi, promosi, dan berkas kepegawaian digital.",
+    "isDigitalSkill": true,
+    "modules": [
+      {
+        "id": "smk-otkp-11-mod1",
+        "title": "Administrasi Kepegawaian",
+        "lessons": [
+          {
+            "id": "smk-otkp-11-mod1-les1",
+            "title": "Pengelolaan SOP Cuti Karyawan",
+            "explanation": "### SOP Cuti Kepegawaian\n\nCuti karyawan merupakan hak yang pengajuannya diatur melalui lembar permohonan dan persetujuan pejabat berwenang.",
+            "visualExample": "```\n[Karyawan Ajukan Cuti] -> [Verifikasi Sisa Cuti] -> [Persetujuan HRD] -> [Penerbitan SK Cuti]\n```",
+            "summary": "1. Cuti harus terencana dan tercatat.\n2. Dokumen cuti disimpan dalam portofolio pegawai.",
+            "quizzes": [
+              {
+                "id": "q-otkp-11",
+                "question": "Apakah fokus utama dalam materi 'Pengelolaan SOP Cuti Karyawan'?",
+                "options": [
+                  "Mematuhi standar operational procedure (SOP)",
+                  "Mempercepat proses kerja tanpa aturan",
+                  "Menggunakan software versi lama",
+                  "Mengabaikan arahan instruktur kelas"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "Dalam dunia kerja, efisiensi dan keamanan dicapai melalui disiplin penerapan SOP."
+              }
+            ],
+            "flashcards": [
+              {
+                "id": "fc-otkp-11",
+                "front": "Apa istilah kunci dalam 'Pengelolaan SOP Cuti Karyawan'?",
+                "back": "Konsep inti yang menjadi dasar pengerjaan praktikum di bengkel/industri."
+              }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-otkp-11",
+                "question": "Jika terjadi kendala pada implementasi praktis ini, tindakan K3 manakah yang harus diprioritaskan?",
+                "options": [
+                  "Memastikan kondisi aman bagi diri sendiri, rekan kerja, dan perangkat sebelum bertindak",
+                  "Langsung memperbaikinya sendiri secara terburu-buru",
+                  "Membiarkannya agar orang lain yang membereskan",
+                  "Menghapus riwayat error"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "K3 mengajarkan bahwa keselamatan nyawa manusia dan keutuhan fasilitas adalah prioritas mutlak."
+              }
+            ],
+            "practiceBank": [
+              {
+                "question": "Tuliskan satu contoh nyata penerapan 'Pengelolaan SOP Cuti Karyawan' di dunia industri.",
+                "answer": "Penerapan dilakukan berdasarkan lembar instruksi kerja (LKS) dan SOP yang berlaku."
+              }
+            ],
+            "podcastScript": [
+              {
+                "role": "guru",
+                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Pengelolaan SOP Cuti Karyawan."
+              },
+              {
+                "role": "siswa",
+                "text": "Hai pak! Materi ini kelihatannya menantang, tapi seru untuk dipraktikkan langsung di lab!"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "smk-otkp-12",
+    "title": "Tata Ruang & Kearsipan Digital (OTKP Kelas XII)",
+    "phase": "F",
+    "schoolType": "smk",
+    "grade": 12,
+    "pathway": "OTKP",
+    "cpStatement": "Merancang tata ruang kantor ergonomis dan mengelola sistem kearsipan digital (E-Filing) berbasis cloud database.",
+    "isDigitalSkill": true,
+    "modules": [
+      {
+        "id": "smk-otkp-12-mod1",
+        "title": "Kearsipan Digital (E-Filing)",
+        "lessons": [
+          {
+            "id": "smk-otkp-12-mod1-les1",
+            "title": "Pengindeksan Arsip Elektronik",
+            "explanation": "### E-Filing System\n\nArsip digital disimpan dengan sistem indeks berkas agar pencarian kembali (retrieval) dapat dilakukan dengan cepat.",
+            "visualExample": "```\nIndeks: Surat Penawaran -> Kode: SP.2026 -> Folder: Pemasaran/SuratKeluar\n```",
+            "summary": "1. E-Filing mengefisiensikan ruang fisik.\n2. Backup berkas cloud mencegah kehilangan data.",
+            "quizzes": [
+              {
+                "id": "q-otkp-12",
+                "question": "Apakah fokus utama dalam materi 'Pengindeksan Arsip Elektronik'?",
+                "options": [
+                  "Mematuhi standar operational procedure (SOP)",
+                  "Mempercepat proses kerja tanpa aturan",
+                  "Menggunakan software versi lama",
+                  "Mengabaikan arahan instruktur kelas"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "Dalam dunia kerja, efisiensi dan keamanan dicapai melalui disiplin penerapan SOP."
+              }
+            ],
+            "flashcards": [
+              {
+                "id": "fc-otkp-12",
+                "front": "Apa istilah kunci dalam 'Pengindeksan Arsip Elektronik'?",
+                "back": "Konsep inti yang menjadi dasar pengerjaan praktikum di bengkel/industri."
+              }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-otkp-12",
+                "question": "Jika terjadi kendala pada implementasi praktis ini, tindakan K3 manakah yang harus diprioritaskan?",
+                "options": [
+                  "Memastikan kondisi aman bagi diri sendiri, rekan kerja, dan perangkat sebelum bertindak",
+                  "Langsung memperbaikinya sendiri secara terburu-buru",
+                  "Membiarkannya agar orang lain yang membereskan",
+                  "Menghapus riwayat error"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "K3 mengajarkan bahwa keselamatan nyawa manusia dan keutuhan fasilitas adalah prioritas mutlak."
+              }
+            ],
+            "practiceBank": [
+              {
+                "question": "Tuliskan satu contoh nyata penerapan 'Pengindeksan Arsip Elektronik' di dunia industri.",
+                "answer": "Penerapan dilakukan berdasarkan lembar instruksi kerja (LKS) dan SOP yang berlaku."
+              }
+            ],
+            "podcastScript": [
+              {
+                "role": "guru",
+                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Pengindeksan Arsip Elektronik."
+              },
+              {
+                "role": "siswa",
+                "text": "Hai pak! Materi ini kelihatannya menantang, tapi seru untuk dipraktikkan langsung di lab!"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "smk-bdp-10",
+    "title": "Dasar Pemasaran Digital (BDP Kelas X)",
+    "phase": "E",
+    "schoolType": "smk",
+    "grade": 10,
+    "pathway": "BDP",
+    "cpStatement": "Memahami prinsip dasar pemasaran, perilaku konsumen, riset pasar sederhana, dan etika bisnis digital.",
+    "isDigitalSkill": true,
+    "modules": [
+      {
+        "id": "smk-bdp-10-mod1",
+        "title": "Riset Pasar Digital",
+        "lessons": [
+          {
+            "id": "smk-bdp-10-mod1-les1",
+            "title": "Analisis Target Pasar & Persona",
+            "explanation": "### Buyer Persona\n\nBuyer persona adalah representasi semi-fiktif dari pelanggan ideal berdasarkan data riset pasar.",
+            "visualExample": "```\nPersona: Budi, 18 tahun, pelajar SMK, mencari buku pemrograman praktis online.\n```",
+            "summary": "1. Persona membantu memfokuskan pesan promosi.\n2. Riset pasar meminimalkan risiko produk gagal.",
+            "quizzes": [
+              {
+                "id": "q-bdp-10",
+                "question": "Apakah fokus utama dalam materi 'Analisis Target Pasar & Persona'?",
+                "options": [
+                  "Mematuhi standar operational procedure (SOP)",
+                  "Mempercepat proses kerja tanpa aturan",
+                  "Menggunakan software versi lama",
+                  "Mengabaikan arahan instruktur kelas"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "Dalam dunia kerja, efisiensi dan keamanan dicapai melalui disiplin penerapan SOP."
+              }
+            ],
+            "flashcards": [
+              {
+                "id": "fc-bdp-10",
+                "front": "Apa istilah kunci dalam 'Analisis Target Pasar & Persona'?",
+                "back": "Konsep inti yang menjadi dasar pengerjaan praktikum di bengkel/industri."
+              }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-bdp-10",
+                "question": "Jika terjadi kendala pada implementasi praktis ini, tindakan K3 manakah yang harus diprioritaskan?",
+                "options": [
+                  "Memastikan kondisi aman bagi diri sendiri, rekan kerja, dan perangkat sebelum bertindak",
+                  "Langsung memperbaikinya sendiri secara terburu-buru",
+                  "Membiarkannya agar orang lain yang membereskan",
+                  "Menghapus riwayat error"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "K3 mengajarkan bahwa keselamatan nyawa manusia dan keutuhan fasilitas adalah prioritas mutlak."
+              }
+            ],
+            "practiceBank": [
+              {
+                "question": "Tuliskan satu contoh nyata penerapan 'Analisis Target Pasar & Persona' di dunia industri.",
+                "answer": "Penerapan dilakukan berdasarkan lembar instruksi kerja (LKS) dan SOP yang berlaku."
+              }
+            ],
+            "podcastScript": [
+              {
+                "role": "guru",
+                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Analisis Target Pasar & Persona."
+              },
+              {
+                "role": "siswa",
+                "text": "Hai pak! Materi ini kelihatannya menantang, tapi seru untuk dipraktikkan langsung di lab!"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "smk-bdp-11",
+    "title": "Bisnis Online & E-Commerce (BDP Kelas XI)",
+    "phase": "F",
+    "schoolType": "smk",
+    "grade": 11,
+    "pathway": "BDP",
+    "cpStatement": "Mengelola toko online pada marketplace, optimasi SEO on-page/off-page, dan pengelolaan kampanye periklanan digital dasar.",
+    "isDigitalSkill": true,
+    "modules": [
+      {
+        "id": "smk-bdp-11-mod1",
+        "title": "Optimasi Toko Online",
+        "lessons": [
+          {
+            "id": "smk-bdp-11-mod1-les1",
+            "title": "Riset Kata Kunci SEO Marketplace",
+            "explanation": "### Search Engine Optimization (SEO)\n\nSEO marketplace menggunakan kata kunci populer pada judul produk agar mudah dicari calon pembeli.",
+            "visualExample": "```\nJudul Optimal: Laptop Gaming ASUS ROG AMD Ryzen 7 RAM 16GB SSD 512GB Murah\n```",
+            "summary": "1. Kata kunci harus diletakkan pada judul dan deskripsi.\n2. Ulasan positif menaikkan ranking produk.",
+            "quizzes": [
+              {
+                "id": "q-bdp-11",
+                "question": "Apakah fokus utama dalam materi 'Riset Kata Kunci SEO Marketplace'?",
+                "options": [
+                  "Mematuhi standar operational procedure (SOP)",
+                  "Mempercepat proses kerja tanpa aturan",
+                  "Menggunakan software versi lama",
+                  "Mengabaikan arahan instruktur kelas"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "Dalam dunia kerja, efisiensi dan keamanan dicapai melalui disiplin penerapan SOP."
+              }
+            ],
+            "flashcards": [
+              {
+                "id": "fc-bdp-11",
+                "front": "Apa istilah kunci dalam 'Riset Kata Kunci SEO Marketplace'?",
+                "back": "Konsep inti yang menjadi dasar pengerjaan praktikum di bengkel/industri."
+              }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-bdp-11",
+                "question": "Jika terjadi kendala pada implementasi praktis ini, tindakan K3 manakah yang harus diprioritaskan?",
+                "options": [
+                  "Memastikan kondisi aman bagi diri sendiri, rekan kerja, dan perangkat sebelum bertindak",
+                  "Langsung memperbaikinya sendiri secara terburu-buru",
+                  "Membiarkannya agar orang lain yang membereskan",
+                  "Menghapus riwayat error"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "K3 mengajarkan bahwa keselamatan nyawa manusia dan keutuhan fasilitas adalah prioritas mutlak."
+              }
+            ],
+            "practiceBank": [
+              {
+                "question": "Tuliskan satu contoh nyata penerapan 'Riset Kata Kunci SEO Marketplace' di dunia industri.",
+                "answer": "Penerapan dilakukan berdasarkan lembar instruksi kerja (LKS) dan SOP yang berlaku."
+              }
+            ],
+            "podcastScript": [
+              {
+                "role": "guru",
+                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Riset Kata Kunci SEO Marketplace."
+              },
+              {
+                "role": "siswa",
+                "text": "Hai pak! Materi ini kelihatannya menantang, tapi seru untuk dipraktikkan langsung di lab!"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "smk-bdp-12",
+    "title": "Social Media Strategy & Ads (BDP Kelas XII)",
+    "phase": "F",
+    "schoolType": "smk",
+    "grade": 12,
+    "pathway": "BDP",
+    "cpStatement": "Merancang strategi konten media sosial, menganalisis matriks keterlibatan (engagement rate), dan mengelola iklan berbayar (Meta/TikTok Ads).",
+    "isDigitalSkill": true,
+    "modules": [
+      {
+        "id": "smk-bdp-12-mod1",
+        "title": "Periklanan Berbayar",
+        "lessons": [
+          {
+            "id": "smk-bdp-12-mod1-les1",
+            "title": "Setup Custom Audience di Meta Ads",
+            "explanation": "### Targeting Iklan\n\nTargeting iklan sosial media menentukan efektivitas biaya per klik (CPC). Custom audience menargetkan pengguna yang sudah pernah berinteraksi.",
+            "visualExample": "```\nAudience: Retargeting -> Pengunjung web 30 hari terakhir -> Umur 18-35 tahun\n```",
+            "summary": "1. Retargeting menghemat anggaran iklan.\n2. Analisis A/B testing menguji efektivitas materi iklan.",
+            "quizzes": [
+              {
+                "id": "q-bdp-12",
+                "question": "Apakah fokus utama dalam materi 'Setup Custom Audience di Meta Ads'?",
+                "options": [
+                  "Mematuhi standar operational procedure (SOP)",
+                  "Mempercepat proses kerja tanpa aturan",
+                  "Menggunakan software versi lama",
+                  "Mengabaikan arahan instruktur kelas"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "Dalam dunia kerja, efisiensi dan keamanan dicapai melalui disiplin penerapan SOP."
+              }
+            ],
+            "flashcards": [
+              {
+                "id": "fc-bdp-12",
+                "front": "Apa istilah kunci dalam 'Setup Custom Audience di Meta Ads'?",
+                "back": "Konsep inti yang menjadi dasar pengerjaan praktikum di bengkel/industri."
+              }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-bdp-12",
+                "question": "Jika terjadi kendala pada implementasi praktis ini, tindakan K3 manakah yang harus diprioritaskan?",
+                "options": [
+                  "Memastikan kondisi aman bagi diri sendiri, rekan kerja, dan perangkat sebelum bertindak",
+                  "Langsung memperbaikinya sendiri secara terburu-buru",
+                  "Membiarkannya agar orang lain yang membereskan",
+                  "Menghapus riwayat error"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "K3 mengajarkan bahwa keselamatan nyawa manusia dan keutuhan fasilitas adalah prioritas mutlak."
+              }
+            ],
+            "practiceBank": [
+              {
+                "question": "Tuliskan satu contoh nyata penerapan 'Setup Custom Audience di Meta Ads' di dunia industri.",
+                "answer": "Penerapan dilakukan berdasarkan lembar instruksi kerja (LKS) dan SOP yang berlaku."
+              }
+            ],
+            "podcastScript": [
+              {
+                "role": "guru",
+                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Setup Custom Audience di Meta Ads."
+              },
+              {
+                "role": "siswa",
+                "text": "Hai pak! Materi ini kelihatannya menantang, tapi seru untuk dipraktikkan langsung di lab!"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "smk-mm-10",
+    "title": "Dasar-Dasar Desain Grafis (MM Kelas X)",
+    "phase": "E",
+    "schoolType": "smk",
+    "grade": 10,
+    "pathway": "MM",
+    "cpStatement": "Memahami nirmana, tata letak, tipografi, teori warna, dan dasar pengoperasian perangkat lunak desain vektor (CorelDraw/Illustrator).",
+    "isDigitalSkill": true,
+    "modules": [
+      {
+        "id": "smk-mm-10-mod1",
+        "title": "Tipografi & Tata Letak",
+        "lessons": [
+          {
+            "id": "smk-mm-10-mod1-les1",
+            "title": "Prinsip Hierarki Visual Tipografi",
+            "explanation": "### Hierarki Visual\n\nHierarki visual menuntun mata pembaca dalam mencerna urutan informasi penting (Headline, Sub-headline, Body Text).",
+            "visualExample": "```\n[UKURAN BESAR - JUDUL]\n  [Ukuran Sedang - Penjelas]\n    [Ukuran Kecil - Detail Teks]\n```",
+            "summary": "1. Kontras ukuran membedakan kepentingan informasi.\n2. Batasi penggunaan jenis font (maksimal 2-3).",
+            "quizzes": [
+              {
+                "id": "q-mm-10",
+                "question": "Apakah fokus utama dalam materi 'Prinsip Hierarki Visual Tipografi'?",
+                "options": [
+                  "Mematuhi standar operational procedure (SOP)",
+                  "Mempercepat proses kerja tanpa aturan",
+                  "Menggunakan software versi lama",
+                  "Mengabaikan arahan instruktur kelas"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "Dalam dunia kerja, efisiensi dan keamanan dicapai melalui disiplin penerapan SOP."
+              }
+            ],
+            "flashcards": [
+              {
+                "id": "fc-mm-10",
+                "front": "Apa istilah kunci dalam 'Prinsip Hierarki Visual Tipografi'?",
+                "back": "Konsep inti yang menjadi dasar pengerjaan praktikum di bengkel/industri."
+              }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-mm-10",
+                "question": "Jika terjadi kendala pada implementasi praktis ini, tindakan K3 manakah yang harus diprioritaskan?",
+                "options": [
+                  "Memastikan kondisi aman bagi diri sendiri, rekan kerja, dan perangkat sebelum bertindak",
+                  "Langsung memperbaikinya sendiri secara terburu-buru",
+                  "Membiarkannya agar orang lain yang membereskan",
+                  "Menghapus riwayat error"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "K3 mengajarkan bahwa keselamatan nyawa manusia dan keutuhan fasilitas adalah prioritas mutlak."
+              }
+            ],
+            "practiceBank": [
+              {
+                "question": "Tuliskan satu contoh nyata penerapan 'Prinsip Hierarki Visual Tipografi' di dunia industri.",
+                "answer": "Penerapan dilakukan berdasarkan lembar instruksi kerja (LKS) dan SOP yang berlaku."
+              }
+            ],
+            "podcastScript": [
+              {
+                "role": "guru",
+                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Prinsip Hierarki Visual Tipografi."
+              },
+              {
+                "role": "siswa",
+                "text": "Hai pak! Materi ini kelihatannya menantang, tapi seru untuk dipraktikkan langsung di lab!"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "smk-mm-11",
+    "title": "Desain Grafis Percetakan & Vector (MM Kelas XI)",
+    "phase": "F",
+    "schoolType": "smk",
+    "grade": 11,
+    "pathway": "MM",
+    "cpStatement": "Membuat ilustrasi vektor, desain publikasi cetak (brosur, poster), kemasan produk, dan fotografi studio dasar.",
+    "isDigitalSkill": true,
+    "modules": [
+      {
+        "id": "smk-mm-11-mod1",
+        "title": "Ilustrasi Vektor Produk",
+        "lessons": [
+          {
+            "id": "smk-mm-11-mod1-les1",
+            "title": "Menggunakan Pen Tool untuk Tracing",
+            "explanation": "### Tracing Vektor\n\nPen tool digunakan untuk menggambar kurva bezier dengan menempatkan anchor points secara presisi untuk tracing gambar raster.",
+            "visualExample": "```\n[Anchor Point 1] --- (Bezier Handle) ---> [Anchor Point 2]\n```",
+            "summary": "1. Gambar vektor tidak pecah saat diperbesar.\n2. Pen tool mengontrol lengkungan kurva secara presisi.",
+            "quizzes": [
+              {
+                "id": "q-mm-11",
+                "question": "Apakah fokus utama dalam materi 'Menggunakan Pen Tool untuk Tracing'?",
+                "options": [
+                  "Mematuhi standar operational procedure (SOP)",
+                  "Mempercepat proses kerja tanpa aturan",
+                  "Menggunakan software versi lama",
+                  "Mengabaikan arahan instruktur kelas"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "Dalam dunia kerja, efisiensi dan keamanan dicapai melalui disiplin penerapan SOP."
+              }
+            ],
+            "flashcards": [
+              {
+                "id": "fc-mm-11",
+                "front": "Apa istilah kunci dalam 'Menggunakan Pen Tool untuk Tracing'?",
+                "back": "Konsep inti yang menjadi dasar pengerjaan praktikum di bengkel/industri."
+              }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-mm-11",
+                "question": "Jika terjadi kendala pada implementasi praktis ini, tindakan K3 manakah yang harus diprioritaskan?",
+                "options": [
+                  "Memastikan kondisi aman bagi diri sendiri, rekan kerja, dan perangkat sebelum bertindak",
+                  "Langsung memperbaikinya sendiri secara terburu-buru",
+                  "Membiarkannya agar orang lain yang membereskan",
+                  "Menghapus riwayat error"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "K3 mengajarkan bahwa keselamatan nyawa manusia dan keutuhan fasilitas adalah prioritas mutlak."
+              }
+            ],
+            "practiceBank": [
+              {
+                "question": "Tuliskan satu contoh nyata penerapan 'Menggunakan Pen Tool untuk Tracing' di dunia industri.",
+                "answer": "Penerapan dilakukan berdasarkan lembar instruksi kerja (LKS) dan SOP yang berlaku."
+              }
+            ],
+            "podcastScript": [
+              {
+                "role": "guru",
+                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Menggunakan Pen Tool untuk Tracing."
+              },
+              {
+                "role": "siswa",
+                "text": "Hai pak! Materi ini kelihatannya menantang, tapi seru untuk dipraktikkan langsung di lab!"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "smk-mm-12",
+    "title": "Teknik Animasi 2D dan 3D (MM Kelas XII)",
+    "phase": "F",
+    "schoolType": "smk",
+    "grade": 12,
+    "pathway": "MM",
+    "cpStatement": "Membuat animasi 2D frame-by-frame/tweening, pemodelan objek 3D (modeling, texturing, rigging, animating) menggunakan Blender.",
+    "isDigitalSkill": true,
+    "modules": [
+      {
+        "id": "smk-mm-12-mod1",
+        "title": "Pemodelan 3D Blender",
+        "lessons": [
+          {
+            "id": "smk-mm-12-mod1-les1",
+            "title": "Teknik Pemodelan Low Poly 3D",
+            "explanation": "### Low Poly Modeling\n\nLow poly menggunakan jumlah poligon (faces) sesedikit mungkin untuk menghasilkan aset 3D yang ringan dijalankan di game engine.",
+            "visualExample": "```\nShortcut Blender: Tab (Edit Mode), E (Extrude), S (Scale), G (Grab/Move)\n```",
+            "summary": "1. Rendahnya poligon menghemat memori rendering.\n2. Extrude memperluas geometri model.",
+            "quizzes": [
+              {
+                "id": "q-mm-12",
+                "question": "Apakah fokus utama dalam materi 'Teknik Pemodelan Low Poly 3D'?",
+                "options": [
+                  "Mematuhi standar operational procedure (SOP)",
+                  "Mempercepat proses kerja tanpa aturan",
+                  "Menggunakan software versi lama",
+                  "Mengabaikan arahan instruktur kelas"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "Dalam dunia kerja, efisiensi dan keamanan dicapai melalui disiplin penerapan SOP."
+              }
+            ],
+            "flashcards": [
+              {
+                "id": "fc-mm-12",
+                "front": "Apa istilah kunci dalam 'Teknik Pemodelan Low Poly 3D'?",
+                "back": "Konsep inti yang menjadi dasar pengerjaan praktikum di bengkel/industri."
+              }
+            ],
+            "hotsQuestions": [
+              {
+                "id": "hots-mm-12",
+                "question": "Jika terjadi kendala pada implementasi praktis ini, tindakan K3 manakah yang harus diprioritaskan?",
+                "options": [
+                  "Memastikan kondisi aman bagi diri sendiri, rekan kerja, dan perangkat sebelum bertindak",
+                  "Langsung memperbaikinya sendiri secara terburu-buru",
+                  "Membiarkannya agar orang lain yang membereskan",
+                  "Menghapus riwayat error"
+                ],
+                "correctOptionIndex": 0,
+                "explanation": "K3 mengajarkan bahwa keselamatan nyawa manusia dan keutuhan fasilitas adalah prioritas mutlak."
+              }
+            ],
+            "practiceBank": [
+              {
+                "question": "Tuliskan satu contoh nyata penerapan 'Teknik Pemodelan Low Poly 3D' di dunia industri.",
+                "answer": "Penerapan dilakukan berdasarkan lembar instruksi kerja (LKS) dan SOP yang berlaku."
+              }
+            ],
+            "podcastScript": [
+              {
+                "role": "guru",
+                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Teknik Pemodelan Low Poly 3D."
+              },
+              {
+                "role": "siswa",
+                "text": "Hai pak! Materi ini kelihatannya menantang, tapi seru untuk dipraktikkan langsung di lab!"
               }
             ]
           }
@@ -148,4 +1368,3 @@
     ]
   }
 ]
-

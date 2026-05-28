@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { UserProfile, Achievement, DailyQuest } from '@/types';
 import { getStorageItem, setStorageItem } from '@/lib/storage';
-import { getUserProfile, updateUserProfile } from '@/lib/actions/user';
 
 const DEFAULT_PROFILE: UserProfile = {
   name: 'Alex Mercer',
@@ -68,15 +67,46 @@ interface UserState {
   updateProfile: (profile: Partial<UserProfile>) => Promise<void>;
 }
 
+async function fetchProfileFromApi(): Promise<UserProfile | null> {
+  const response = await fetch('/api/user/profile', { cache: 'no-store' });
+  if (response.status === 401) return null;
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.error || 'Gagal memuat profil pengguna');
+  }
+  return response.json();
+}
+
+async function patchProfileToApi(updates: Partial<Omit<UserProfile, 'portfolio' | 'pklLog'>>): Promise<UserProfile | null> {
+  const response = await fetch('/api/user/profile', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updates),
+  });
+  if (response.status === 401) return null;
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.error || 'Gagal menyimpan profil pengguna');
+  }
+  return response.json();
+}
+
+function saveProfileInBackground(
+  updates: Partial<Omit<UserProfile, 'portfolio' | 'pklLog'>>,
+  label: string
+) {
+  patchProfileToApi(updates).catch((error) => {
+    console.warn(`${label}:`, error);
+  });
+}
+
 export const useUserStore = create<UserState>((set, get) => {
-  const initialProfile = getStorageItem<UserProfile>('academy_os_user_profile', DEFAULT_PROFILE);
-
   return {
-    profile: initialProfile,
+    profile: DEFAULT_PROFILE,
 
-    loadFromDb: async (email) => {
+    loadFromDb: async () => {
       try {
-        const dbProfile = await getUserProfile(email);
+        const dbProfile = await fetchProfileFromApi();
         if (dbProfile) {
           // Preserve local achievements if database doesn't manage them yet
           const achievements = get().profile.achievements.length > 0 
@@ -91,15 +121,16 @@ export const useUserStore = create<UserState>((set, get) => {
           setStorageItem('academy_os_user_profile', updatedProfile);
         }
       } catch (error) {
-        console.error('Failed to load profile from DB:', error);
+        console.warn('Failed to load profile from API:', error);
       }
     },
 
-    syncLocalToDb: async (email) => {
+    syncLocalToDb: async () => {
       try {
         const localProfile = get().profile;
         const { portfolio, pklLog, ...updates } = localProfile;
-        const dbProfile = await updateUserProfile(email, updates);
+        const dbProfile = await patchProfileToApi(updates);
+        if (!dbProfile) return;
         set({ 
           profile: {
             ...localProfile,
@@ -109,7 +140,7 @@ export const useUserStore = create<UserState>((set, get) => {
           }
         });
       } catch (error) {
-        console.error('Failed to sync profile to DB:', error);
+        console.warn('Failed to sync profile to API:', error);
       }
     },
 
@@ -143,11 +174,11 @@ export const useUserStore = create<UserState>((set, get) => {
         };
         
         // Async background save to DB
-        updateUserProfile(state.profile.email, {
+        saveProfileInBackground({
           xp: Math.max(0, newXp),
           level: newLevel,
           weeklyProgress: updatedWeeklyProgress
-        }).catch(err => console.error('Failed to sync XP to DB:', err));
+        }, 'Failed to sync XP');
 
         setStorageItem('academy_os_user_profile', updated);
         return { profile: updated };
@@ -197,11 +228,11 @@ export const useUserStore = create<UserState>((set, get) => {
         };
 
         // Async background save to DB
-        updateUserProfile(state.profile.email, {
+        saveProfileInBackground({
           studyTimeToday: newStudyTime,
           weeklyProgress: updatedWeeklyProgress,
           dailyQuests: updatedQuests
-        }).catch(err => console.error('Failed to sync study time to DB:', err));
+        }, 'Failed to sync study time');
 
         setStorageItem('academy_os_user_profile', updated);
         
@@ -228,9 +259,9 @@ export const useUserStore = create<UserState>((set, get) => {
         };
 
         // Async background save to DB
-        updateUserProfile(state.profile.email, {
+        saveProfileInBackground({
           dailyQuests: updatedQuests
-        }).catch(err => console.error('Failed to sync completed quest to DB:', err));
+        }, 'Failed to sync completed quest');
 
         setStorageItem('academy_os_user_profile', updated);
         setTimeout(() => state.addXp(quest.xpReward), 0);
@@ -263,9 +294,9 @@ export const useUserStore = create<UserState>((set, get) => {
         };
 
         // Async background save to DB
-        updateUserProfile(state.profile.email, {
+        saveProfileInBackground({
           dailyQuests: updatedQuests
-        }).catch(err => console.error('Failed to sync quest progress to DB:', err));
+        }, 'Failed to sync quest progress');
 
         setStorageItem('academy_os_user_profile', updated);
 
@@ -304,9 +335,9 @@ export const useUserStore = create<UserState>((set, get) => {
         };
 
         // Async background save to DB
-        updateUserProfile(state.profile.email, {
+        saveProfileInBackground({
           skills: updatedSkills
-        }).catch(err => console.error('Failed to sync skills to DB:', err));
+        }, 'Failed to sync skills');
 
         setStorageItem('academy_os_user_profile', updated);
         return { profile: updated };
@@ -331,10 +362,10 @@ export const useUserStore = create<UserState>((set, get) => {
         };
 
         // Async background save to DB
-        updateUserProfile(state.profile.email, {
+        saveProfileInBackground({
           studyTimeToday: 0,
           weeklyProgress: cleanProgress
-        }).catch(err => console.error('Failed to sync reset progress to DB:', err));
+        }, 'Failed to sync reset progress');
 
         setStorageItem('academy_os_user_profile', updated);
         return { profile: updated };
@@ -353,13 +384,12 @@ export const useUserStore = create<UserState>((set, get) => {
 
       // Sync to PostgreSQL
       try {
-        const email = get().profile.email;
         const { portfolio, pklLog, ...updates } = profileUpdates;
         if (Object.keys(updates).length > 0) {
-          await updateUserProfile(email, updates);
+          await patchProfileToApi(updates);
         }
       } catch (err) {
-        console.error('Failed to update user profile in DB:', err);
+        console.warn('Failed to update user profile in API:', err);
       }
     }
   };

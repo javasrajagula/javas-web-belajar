@@ -11,6 +11,9 @@ interface ChatFlashcardProps {
 
 export default function ChatFlashcard({ rawContent }: ChatFlashcardProps) {
   const parts = rawContent.split('|').map(p => p.trim());
+  const [front = '', back = ''] = parts;
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [known, setKnown] = useState(false);
   
   if (parts.length < 2) {
     return (
@@ -19,10 +22,6 @@ export default function ChatFlashcard({ rawContent }: ChatFlashcardProps) {
       </div>
     );
   }
-
-  const [front, back] = parts;
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [known, setKnown] = useState(false);
 
   return (
     <div className="my-4 max-w-sm w-full perspective-1000 select-none">

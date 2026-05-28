@@ -12,6 +12,8 @@ interface ChatQuizProps {
 
 export default function ChatQuizCard({ rawContent, onCorrect }: ChatQuizProps) {
   const parts = rawContent.split('|').map(p => p.trim());
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+  const [submitted, setSubmitted] = useState(false);
   
   if (parts.length < 7) {
     return (
@@ -24,9 +26,6 @@ export default function ChatQuizCard({ rawContent, onCorrect }: ChatQuizProps) {
   const [question, opt1, opt2, opt3, opt4, correctIndexStr, explanation] = parts;
   const options = [opt1, opt2, opt3, opt4];
   const correctIndex = parseInt(correctIndexStr) || 0;
-
-  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
-  const [submitted, setSubmitted] = useState(false);
 
   const handleSelect = (idx: number) => {
     if (submitted) return;

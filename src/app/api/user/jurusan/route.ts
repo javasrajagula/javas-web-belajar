@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { resolveJurusanKode } from '@/lib/data/jurusan';
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,9 +19,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Data jurusanKode dan kelas diperlukan' }, { status: 400 });
     }
 
+    const normalizedKode = resolveJurusanKode(jurusanKode);
+
     // Find the jurusan
     const jurusan = await prisma.jurusan.findUnique({
-      where: { kode: jurusanKode },
+      where: { kode: normalizedKode },
     });
 
     if (!jurusan) {
@@ -58,7 +61,7 @@ export async function POST(req: NextRequest) {
       where: { id: userId },
       data: {
         grade: parseInt(kelas),
-        selectedPathway: jurusanKode,
+        selectedPathway: normalizedKode,
         schoolType: 'smk',
       },
     });
