@@ -164,6 +164,66 @@ ${points.slice(0, 3).join(' ')}
   return { ringkasan, kuis, flashcard, timeline };
 }
 
+function normalizePdfAiData(aiData: any, text: string) {
+  const fallback = generateMockPdfData(text);
+  const fallbackQuizzes = fallback.kuis;
+  const fallbackFlashcards = fallback.flashcard;
+  const fallbackTimeline = fallback.timeline;
+
+  const kuis = Array.isArray(aiData?.kuis) ? aiData.kuis : [];
+  const normalizedKuis = kuis
+    .filter((item: any) => item && typeof item.pertanyaan === 'string')
+    .map((item: any, index: number) => {
+      const fallbackItem = fallbackQuizzes[index] || fallbackQuizzes[0];
+      const rawOptions = Array.isArray(item.pilihan) ? item.pilihan.filter(Boolean).map(String) : [];
+      const pilihan = [...rawOptions, ...fallbackItem.pilihan].slice(0, 5);
+      const jawabanBenar = ['A', 'B', 'C', 'D', 'E'].includes(item.jawabanBenar)
+        ? item.jawabanBenar
+        : fallbackItem.jawabanBenar;
+
+      return {
+        pertanyaan: item.pertanyaan.trim(),
+        pilihan,
+        jawabanBenar,
+        pembahasan: typeof item.pembahasan === 'string' && item.pembahasan.trim()
+          ? item.pembahasan.trim()
+          : fallbackItem.pembahasan,
+      };
+    });
+
+  const flashcard = Array.isArray(aiData?.flashcard) ? aiData.flashcard : [];
+  const normalizedFlashcards = flashcard
+    .filter((item: any) => item && typeof item.depan === 'string' && typeof item.belakang === 'string')
+    .map((item: any) => ({
+      depan: item.depan.trim(),
+      belakang: item.belakang.trim(),
+    }));
+
+  const timeline = Array.isArray(aiData?.timeline) ? aiData.timeline : [];
+  const normalizedTimeline = timeline
+    .filter((item: any) => item && typeof item.title === 'string')
+    .map((item: any, index: number) => ({
+      date: typeof item.date === 'string' && item.date.trim() ? item.date.trim() : `Langkah ${index + 1}`,
+      title: item.title.trim(),
+      description: typeof item.description === 'string' && item.description.trim()
+        ? item.description.trim()
+        : 'Pelajari bagian ini dengan membaca kembali teks sumber PDF.',
+    }));
+
+  return {
+    ringkasan: typeof aiData?.ringkasan === 'string' && aiData.ringkasan.trim()
+      ? aiData.ringkasan.trim()
+      : fallback.ringkasan,
+    kuis: [...normalizedKuis, ...fallbackQuizzes].slice(0, 5),
+    flashcard: [...normalizedFlashcards, ...fallbackFlashcards].slice(0, 7),
+    timeline: [...normalizedTimeline, ...fallbackTimeline].slice(0, 5),
+  };
+}
+
+function extractPartialObjectFromAiError(error: any) {
+  return error?.cause?.value || error?.value || null;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const session = await auth();
@@ -247,19 +307,19 @@ export async function POST(req: NextRequest) {
           ringkasan: z.string().describe('Ringkasan markdown Bahasa Indonesia yang setia pada isi dokumen.'),
           kuis: z.array(z.object({
             pertanyaan: z.string(),
-            pilihan: z.array(z.string()).length(5),
+            pilihan: z.array(z.string()).min(2).max(5),
             jawabanBenar: z.enum(['A', 'B', 'C', 'D', 'E']),
             pembahasan: z.string(),
-          })).length(5),
+          })).min(1).max(5),
           flashcard: z.array(z.object({
             depan: z.string(),
             belakang: z.string(),
-          })).min(3).max(7),
+          })).min(1).max(7),
           timeline: z.array(z.object({
             date: z.string(),
             title: z.string(),
             description: z.string(),
-          })).min(3).max(5),
+          })).min(1).max(5),
         }),
         prompt: `Kamu adalah asisten belajar. Analisis teks PDF berikut dan buat output yang benar-benar berdasarkan isi dokumen.
 
@@ -286,29 +346,37 @@ Format ringkasan markdown:
 TEKS PDF:
 ${text}`,
       });
+      const normalized = normalizePdfAiData(result.object, text);
 
       return NextResponse.json({
-        ringkasan: result.object.ringkasan,
-        kuis: result.object.kuis,
-        flashcard: result.object.flashcard,
-        timeline: result.object.timeline,
+        ringkasan: normalized.ringkasan,
+        kuis: normalized.kuis,
+        flashcard: normalized.flashcard,
+        timeline: normalized.timeline,
         halamanTotal: pageTotal,
         kataTerdeteksi: text.split(/\s+/).length,
       });
     } catch (aiError) {
       console.error("AI PDF summary generation failed:", aiError);
-      if (!canUseDevelopmentFallback()) {
-        return NextResponse.json(
-          { error: 'Provider AI gagal membuat ringkasan. Periksa GEMINI_API_KEY di environment server.' },
-          { status: 502 }
-        );
+      const partialObject = extractPartialObjectFromAiError(aiError);
+      if (partialObject) {
+        const normalized = normalizePdfAiData(partialObject, text);
+        return NextResponse.json({
+          ...normalized,
+          halamanTotal: pageTotal,
+          kataTerdeteksi: text.split(/\s+/).length,
+          isPartialAiResult: true,
+        });
       }
-      const mockData = generateMockPdfData(text);
+
+      const mockData = normalizePdfAiData(generateMockPdfData(text), text);
       return NextResponse.json({
         ...mockData,
         halamanTotal: pageTotal,
         kataTerdeteksi: text.split(/\s+/).length,
-        isMock: true
+        isMock: canUseDevelopmentFallback(),
+        isFallbackSummary: true,
+        warning: 'Provider AI gagal membuat ringkasan penuh, jadi sistem membuat ringkasan cadangan dari teks PDF yang berhasil diekstrak.'
       });
     }
   } catch (error) {
