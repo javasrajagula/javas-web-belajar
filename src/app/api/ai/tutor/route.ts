@@ -3,9 +3,17 @@ import { generateText } from "ai";
 import { auth } from "@/auth";
 import { ratelimiter } from "@/lib/ratelimit";
 import { searchSimilarChunks } from "@/lib/actions/rag";
-import { AI_ENV_ERROR, canUseDevelopmentFallback, getServerAiModel, runAiWithRetry } from "@/lib/ai-provider";
+import { AI_ENV_ERROR, canUseDevelopmentFallback, getServerAiModel, getServerAiProviderStatus, runAiWithRetry } from "@/lib/ai-provider";
 
 export const maxDuration = 45;
+
+export async function GET() {
+  const status = getServerAiProviderStatus();
+  return Response.json({
+    ok: status.hasGeminiApiKey || status.hasAnthropicApiKey,
+    ...status,
+  });
+}
 
 export async function POST(req: NextRequest) {
   try {

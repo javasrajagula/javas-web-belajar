@@ -27,17 +27,26 @@ export function canUseDevelopmentFallback() {
 }
 
 export function getServerAiModel() {
-  if (process.env.ANTHROPIC_API_KEY) {
-    return anthropic('claude-3-5-sonnet-20241022');
-  }
-
   const geminiApiKey = getGeminiApiKey();
   if (geminiApiKey) {
     const google = createGoogleGenerativeAI({ apiKey: geminiApiKey });
     return google(getGeminiModelId());
   }
 
+  if (process.env.ANTHROPIC_API_KEY) {
+    return anthropic('claude-3-5-sonnet-20241022');
+  }
+
   return null;
+}
+
+export function getServerAiProviderStatus() {
+  return {
+    hasGeminiApiKey: Boolean(getGeminiApiKey()),
+    geminiModel: getGeminiModelId(),
+    hasAnthropicApiKey: Boolean(process.env.ANTHROPIC_API_KEY),
+    preferredProvider: getGeminiApiKey() ? 'gemini' : process.env.ANTHROPIC_API_KEY ? 'anthropic' : 'none',
+  };
 }
 
 export async function runAiWithRetry<T>(
