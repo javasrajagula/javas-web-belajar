@@ -540,7 +540,7 @@ export default function AITutorPage() {
           </div>
 
           {/* Input Form */}
-          <form onSubmit={handleSend} className="p-4 border-t-[3px] border-black bg-white flex gap-4 flex-shrink-0 items-center">
+          <form onSubmit={handleSend} className="ai-chat-input-form p-4 border-t-[3px] border-black bg-white flex flex-wrap sm:flex-nowrap gap-3 sm:gap-4 flex-shrink-0 items-center">
             {/* Action buttons (Paperclip & Sigma/Calculator) */}
             <div className="flex gap-2">
               <button
@@ -574,7 +574,7 @@ export default function AITutorPage() {
                   ? `Tanyakan materi: ${selectedSubject}...`
                   : 'Ketik tanggapan atau ajukan pertanyaan Anda di sini...'
               }
-              className="flex-grow h-11 px-4 bg-zinc-50 border-2 border-black rounded-lg text-xs font-bold text-black focus:outline-none placeholder:text-zinc-400 focus:bg-white transition-all shadow-[inset_1.5px_1.5px_3px_rgba(0,0,0,0.15)]"
+              className="min-w-0 flex-grow h-11 px-4 bg-zinc-50 border-2 border-black rounded-lg text-base sm:text-xs font-bold text-black focus:outline-none placeholder:text-zinc-400 focus:bg-white transition-all shadow-[inset_1.5px_1.5px_3px_rgba(0,0,0,0.15)]"
             />
 
             {/* Send button */}

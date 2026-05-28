@@ -208,11 +208,11 @@ export default function MateriDetailPage({
                   <p className="mt-2 text-xs font-semibold text-text-secondary">
                     {structuredResource?.description || structuredResource?.unavailableReason || 'Video eksternal belum tersedia untuk materi ini.'}
                   </p>
-                  {structuredResource?.externalUrl && (
-                    <a href={structuredResource.externalUrl} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex">
+                  {(structuredResource?.youtubeUrl || structuredResource?.externalUrl) && (
+                    <a href={structuredResource.youtubeUrl || structuredResource.externalUrl} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex">
                       <Button size="sm" variant="outline">
                         <ExternalLink className="mr-2 h-4 w-4" />
-                        Buka Referensi Video
+                        {structuredResource?.youtubeVideoId ? 'Buka di YouTube' : 'Cari Video Relevan di YouTube'}
                       </Button>
                     </a>
                   )}

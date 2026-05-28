@@ -41,6 +41,10 @@ export default function SecondBrainPage() {
   
   // Left form toggle: 'pdf' | 'text'
   const [inputMode, setInputMode] = useState<'pdf' | 'text'>('pdf');
+  const [pdfQuestion, setPdfQuestion] = useState('');
+  const [pdfAnswer, setPdfAnswer] = useState('');
+  const [pdfAnswerSources, setPdfAnswerSources] = useState<string[]>([]);
+  const [isAskingPdf, setIsAskingPdf] = useState(false);
   
   // Paste text form states
   const [title, setTitle] = useState('');
@@ -257,6 +261,47 @@ export default function SecondBrainPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       handlePdfUpload(e.target.files[0]);
+    }
+  };
+
+  const handleAskPdfTutor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pdfQuestion.trim()) {
+      toast.error('Pertanyaan dokumen tidak boleh kosong.');
+      return;
+    }
+    if (!materials.length) {
+      toast.error('Belum ada PDF/catatan di Otak Kedua.');
+      return;
+    }
+
+    setIsAskingPdf(true);
+    setPdfAnswer('');
+    setPdfAnswerSources([]);
+    const toastId = toast.loading('Tutor PDF mencari jawaban dari konteks dokumen...');
+
+    try {
+      const notes = materials.map((mat) => ({
+        title: mat.title,
+        content: mat.content,
+        summary: mat.summary,
+      }));
+      const response = await fetch('/api/second-brain', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: pdfQuestion.trim(), notes }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || 'Tutor PDF gagal menjawab dari dokumen.');
+      }
+      setPdfAnswer(result.answer || 'Gemini tidak mengembalikan jawaban.');
+      setPdfAnswerSources(Array.isArray(result.sources) ? result.sources : []);
+      toast.success('Jawaban Tutor PDF selesai dibuat dari konteks dokumen.', { id: toastId });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Tutor PDF gagal menjawab.', { id: toastId });
+    } finally {
+      setIsAskingPdf(false);
     }
   };
 
@@ -547,6 +592,35 @@ export default function SecondBrainPage() {
                   );
                 })}
               </div>
+
+              <form onSubmit={handleAskPdfTutor} className="rounded-lg border border-border bg-bg-tertiary/20 p-3">
+                <label className="text-[10px] font-mono font-bold uppercase text-text-secondary">
+                  Tanya Tutor PDF berdasarkan dokumen tersimpan
+                </label>
+                <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                  <input
+                    value={pdfQuestion}
+                    onChange={(event) => setPdfQuestion(event.target.value)}
+                    placeholder="Contoh: Apa kesimpulan utama dokumen ini?"
+                    className="min-w-0 flex-1 rounded border border-border bg-bg-primary px-3 py-2 text-base text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary sm:text-xs"
+                  />
+                  <Button type="submit" disabled={isAskingPdf || !pdfQuestion.trim()} className="h-10 text-xs">
+                    {isAskingPdf ? 'Mencari...' : 'Tanya'}
+                  </Button>
+                </div>
+                {pdfAnswer && (
+                  <div className="mt-3 rounded border border-border bg-bg-primary p-3">
+                    <div className="prose prose-neutral prose-sm max-w-none text-xs prose-headings:text-text-primary prose-p:text-text-secondary prose-li:text-text-secondary">
+                      <ReactMarkdown>{pdfAnswer}</ReactMarkdown>
+                    </div>
+                    {pdfAnswerSources.length > 0 && (
+                      <p className="mt-2 text-[10px] font-semibold text-text-tertiary">
+                        Sumber konteks: {pdfAnswerSources.join(', ')}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </form>
 
               {/* Scrollable content container */}
               <div className="flex-grow overflow-y-auto max-h-[50vh] lg:max-h-[60vh] pr-1">

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { generateObject } from 'ai';
-import { AI_ENV_ERROR, canUseDevelopmentFallback, getServerAiModel } from '@/lib/ai-provider';
+import { AI_ENV_ERROR, canUseDevelopmentFallback, getGeminiModelId, getServerAiModel, runAiWithRetry } from '@/lib/ai-provider';
 import { z } from 'zod';
 
 export const maxDuration = 45; // Extend timeout for complex generation
@@ -56,7 +56,7 @@ Pastikan:
     const modelInstance = getServerAiModel();
     let modelSource = process.env.ANTHROPIC_API_KEY
       ? 'AI Generated (Claude 3.5 Sonnet)'
-      : 'AI Generated (Gemini 2.0 Flash)';
+      : `AI Generated (Gemini ${getGeminiModelId()})`;
 
     let soalList: Array<{
       pertanyaan: string;
@@ -74,19 +74,22 @@ Pastikan:
       modelSource = 'Development Mock Questions Generator';
     } else {
       try {
-        const result = await generateObject({
-          model: modelInstance,
-          system: systemPrompt,
-          prompt: promptText,
-          schema: z.object({
-            soalList: z.array(z.object({
-              pertanyaan: z.string().describe("Teks pertanyaan lengkap beserta studi kasusnya."),
-              pilihan: z.array(z.string()).length(5).describe("Tepat 5 pilihan jawaban diawali dengan A., B., C., D., E."),
-              jawabanBenar: z.enum(['A', 'B', 'C', 'D', 'E']).describe("Kunci jawaban yang benar (A/B/C/D/E)"),
-              pembahasan: z.string().describe("Penjelasan rinci mengapa opsi tersebut benar."),
-            }))
-          })
-        });
+        const result = await runAiWithRetry(
+          () => generateObject({
+            model: modelInstance,
+            system: systemPrompt,
+            prompt: promptText,
+            schema: z.object({
+              soalList: z.array(z.object({
+                pertanyaan: z.string().describe("Teks pertanyaan lengkap beserta studi kasusnya."),
+                pilihan: z.array(z.string()).length(5).describe("Tepat 5 pilihan jawaban diawali dengan A., B., C., D., E."),
+                jawabanBenar: z.enum(['A', 'B', 'C', 'D', 'E']).describe("Kunci jawaban yang benar (A/B/C/D/E)"),
+                pembahasan: z.string().describe("Penjelasan rinci mengapa opsi tersebut benar."),
+              }))
+            })
+          }),
+          { label: 'Generate Soal AI' }
+        );
         soalList = result.object.soalList;
       } catch (aiError) {
         console.error("AI question generation failed:", aiError);

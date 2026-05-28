@@ -22,7 +22,7 @@ async function main() {
     prisma.mataPelajaran.findMany({ select: { id: true, jurusanId: true } }),
     prisma.bab.findMany({ select: { id: true, mataPelajaranId: true } }),
     prisma.materi.findMany({ select: { id: true, babId: true, judul: true, tipe: true, konten: true } }),
-    prisma.bankSoal.findMany({ select: { id: true, mataPelajaranId: true, pertanyaan: true, tipe: true, pilihan: true, jawabanBenar: true, pembahasan: true } }),
+    prisma.bankSoal.findMany({ select: { id: true, mataPelajaranId: true, pertanyaan: true, tipe: true, pilihan: true, jawabanBenar: true, pembahasan: true, sumber: true } }),
   ]);
 
   const jurusanKode = new Set(jurusan.map((item) => item.kode));
@@ -59,6 +59,14 @@ async function main() {
       assert(Array.isArray(payload.transcript) && payload.transcript.length >= 4, `Video ${item.id} tidak punya naskah panduan jelas`);
       assert(payload.externalUrl || payload.embedUrl, `Video ${item.id} tidak punya link video/referensi yang bisa dibuka`);
       assert(payload.unavailableReason, `Video ${item.id} harus punya fallback jujur jika URL kosong`);
+      if (payload.status === 'youtube_search_reference') {
+        assert(payload.youtubeUrl?.startsWith('https://www.youtube.com/results?search_query='), `Video ${item.id} harus memakai URL pencarian YouTube yang valid`);
+        assert(payload.sourceVerified === false, `Video ${item.id} pencarian YouTube tidak boleh ditandai terverifikasi`);
+        assert(!payload.youtubeVideoId, `Video ${item.id} tidak boleh punya youtubeVideoId jika belum diverifikasi`);
+      }
+      if (payload.sourceVerified) {
+        assert(Boolean(payload.youtubeVideoId || payload.embedUrl), `Video ${item.id} terverifikasi harus punya videoId atau embedUrl`);
+      }
     }
     if (item.tipe === 'pdf') {
       const payload = parseJson(item.konten, `Modul ${item.id}`);
@@ -79,6 +87,7 @@ async function main() {
     assert(!item.pertanyaan.includes('Soal Latihan Kejuruan'), `Soal ${item.id} masih memakai template generik lama`);
     assert(item.jawabanBenar.trim().length > 0, `Soal ${item.id} tidak punya kunci jawaban`);
     assert(item.pembahasan.trim().length > 40, `Soal ${item.id} tidak punya pembahasan jelas`);
+    assert(String(item.sumber || '').trim().length > 0, `Soal ${item.id} belum punya sumber/asal data`);
     if (item.tipe === 'pilihan_ganda') {
       assert(item.pilihan, `Soal PG ${item.id} tidak punya pilihan`);
       const pilihan = parseJson(String(item.pilihan), `Pilihan ${item.id}`);

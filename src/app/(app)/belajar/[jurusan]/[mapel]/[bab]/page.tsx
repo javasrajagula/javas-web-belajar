@@ -416,6 +416,17 @@ export default function BelajarPage({
                           {structuredResource.transcript.map((step: string) => <li key={step}>{step}</li>)}
                         </ol>
                       )}
+                      {(structuredResource?.youtubeUrl || structuredResource?.externalUrl) && (
+                        <a
+                          href={structuredResource.youtubeUrl || structuredResource.externalUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-4 inline-flex items-center gap-1.5 rounded-md border border-border bg-bg-primary px-3 py-2 text-xs font-bold text-primary hover:bg-bg-hover"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          {structuredResource?.youtubeVideoId ? 'Buka di YouTube' : 'Cari Video Relevan di YouTube'}
+                        </a>
+                      )}
                     </div>
                   )}
                   <div className="bg-bg-secondary p-4 rounded-xl border border-border">
@@ -424,7 +435,7 @@ export default function BelajarPage({
                       <span>Transkrip Praktik Industri</span>
                     </h3>
                     <p className="text-xs text-text-secondary leading-relaxed">
-                      [Transkrip]: Video ini mendemonstrasikan panduan langkah demi langkah implementasi praktis {mapel.nama} di lingkungan laboratorium sekolah berbasis standar kerja industri terakreditasi. Ikuti setiap petunjuk keselamatan dan urutan pengerjaan seperti yang ditunjukkan dalam video.
+                      Panduan ini disusun dari materi tertulis dan konteks bab. Jika sekolah belum menautkan video terverifikasi, gunakan daftar langkah di atas sebagai naskah belajar, lalu pilih video YouTube yang relevan secara manual dari tautan pencarian.
                     </p>
                   </div>
                 </div>

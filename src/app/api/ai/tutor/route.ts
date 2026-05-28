@@ -3,7 +3,7 @@ import { generateText } from "ai";
 import { auth } from "@/auth";
 import { ratelimiter } from "@/lib/ratelimit";
 import { searchSimilarChunks } from "@/lib/actions/rag";
-import { AI_ENV_ERROR, canUseDevelopmentFallback, getServerAiModel } from "@/lib/ai-provider";
+import { AI_ENV_ERROR, canUseDevelopmentFallback, getServerAiModel, runAiWithRetry } from "@/lib/ai-provider";
 
 export const maxDuration = 45;
 
@@ -113,15 +113,18 @@ ${context ? `\n## Materi Aktif Terkait:\n- Modul: ${context.lessonTitle || 'Umum
     }
 
     try {
-      const result = await generateText({
-        model: modelInstance,
-        system: systemPrompt,
-        messages: messages.map((m: { role: string; content: string }) => ({
-          role: m.role as "user" | "assistant",
-          content: m.content,
-        })),
-        temperature: 0.35,
-      });
+      const result = await runAiWithRetry(
+        () => generateText({
+          model: modelInstance,
+          system: systemPrompt,
+          messages: messages.map((m: { role: string; content: string }) => ({
+            role: m.role as "user" | "assistant",
+            content: m.content,
+          })),
+          temperature: 0.35,
+        }),
+        { label: 'Tutor AI' }
+      );
 
       if (!result.text.trim()) {
         if (!canUseDevelopmentFallback()) {

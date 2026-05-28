@@ -33,6 +33,11 @@ function parseVideo(konten: string) {
       description: parsed.description || '',
       embedUrl: parsed.embedUrl || '',
       externalUrl: parsed.externalUrl || '',
+      youtubeUrl: parsed.youtubeUrl || parsed.externalUrl || '',
+      youtubeVideoId: parsed.youtubeVideoId || '',
+      sourceVerified: Boolean(parsed.sourceVerified),
+      status: parsed.status || '',
+      lastCheckedAt: parsed.lastCheckedAt || '',
       transcript: Array.isArray(parsed.transcript) ? parsed.transcript : [],
       unavailableReason: parsed.unavailableReason || '',
     };
@@ -42,6 +47,11 @@ function parseVideo(konten: string) {
       description: '',
       embedUrl: konten.startsWith('http') ? konten : '',
       externalUrl: konten.startsWith('http') ? konten : '',
+      youtubeUrl: konten.startsWith('http') ? konten : '',
+      youtubeVideoId: '',
+      sourceVerified: false,
+      status: '',
+      lastCheckedAt: '',
       transcript: [],
       unavailableReason: '',
     };
@@ -153,11 +163,11 @@ export default function VideoPanduanPage() {
                   <div className="mt-4 border-[2px] border-dashed border-border bg-bg-primary p-4">
                     <p className="text-xs font-black text-text-primary">Video eksternal belum tersedia</p>
                     <p className="mt-1 text-xs font-semibold text-text-secondary">{video.unavailableReason || 'Belum ada URL video resmi untuk materi ini.'}</p>
-                    {video.externalUrl && (
-                      <a href={video.externalUrl} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex">
+                    {(video.youtubeUrl || video.externalUrl) && (
+                      <a href={video.youtubeUrl || video.externalUrl} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex">
                         <Button size="sm" variant="outline">
                           <ExternalLink className="mr-2 h-4 w-4" />
-                          Buka Referensi Video
+                          {video.youtubeVideoId ? 'Buka di YouTube' : 'Cari Video Relevan di YouTube'}
                         </Button>
                       </a>
                     )}
@@ -170,7 +180,15 @@ export default function VideoPanduanPage() {
                 )}
 
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-                  <Badge variant={video.embedUrl || video.externalUrl ? 'success' : 'warning'}>{video.embedUrl ? 'Embed tersedia' : video.externalUrl ? 'Link video tersedia' : 'Panduan tertulis'}</Badge>
+                  <Badge variant={video.embedUrl || video.youtubeVideoId ? 'success' : video.youtubeUrl || video.externalUrl ? 'warning' : 'warning'}>
+                    {video.embedUrl
+                      ? 'Embed tersedia'
+                      : video.youtubeVideoId
+                        ? 'YouTube terverifikasi'
+                        : video.youtubeUrl || video.externalUrl
+                          ? 'Pencarian YouTube'
+                          : 'Panduan tertulis'}
+                  </Badge>
                   <Link href={`/materi/${item.id}`}>
                     <Button size="sm">
                       <Play className="mr-2 h-4 w-4" />

@@ -1093,11 +1093,18 @@ function buildVideoPayload(jurusan: any, mapel: any, kelas: number, bab: number,
   const domain = getDomainProfile(jurusan.kode, mapel.nama);
   const references = getLearningReferences(mapel.nama);
   const topic = getTopicBlueprint(mapel.nama, babJudul, domain);
+  const youtubeUrl = buildYoutubeSearchUrl(`${mapel.nama} ${babJudul} ${jurusan.nama}`);
   return {
     title: `Video Panduan: ${babJudul}`,
     description: `Panduan belajar untuk ${mapel.nama} kelas ${kelas}. Link YouTube dibuat dari judul topik dan mata pelajaran agar siswa membuka referensi yang relevan, bukan tombol video kosong.`,
+    status: 'youtube_search_reference',
     embedUrl: '',
-    externalUrl: buildYoutubeSearchUrl(`${mapel.nama} ${babJudul} ${jurusan.nama}`),
+    externalUrl: youtubeUrl,
+    youtubeUrl,
+    youtubeVideoId: null,
+    thumbnailUrl: null,
+    sourceVerified: false,
+    lastCheckedAt: '2026-05-28',
     durationMinutes: 12 + bab,
     category: mapel.nama,
     transcript: [
@@ -1111,7 +1118,7 @@ function buildVideoPayload(jurusan: any, mapel: any, kelas: number, bab: number,
       `Bukti akhir: kumpulkan rangkuman, jawaban latihan, dan ${domain.bukti}.`,
     ],
     references,
-    unavailableReason: 'Embed video internal belum tersedia. Tombol referensi membuka pencarian YouTube sesuai topik materi; guru dapat menggantinya dengan URL video resmi sekolah kapan saja.',
+    unavailableReason: 'Embed video internal dan video YouTube spesifik belum diverifikasi. Tombol referensi membuka pencarian YouTube sesuai topik materi; guru dapat menggantinya dengan URL video resmi sekolah setelah dicek manual.',
   };
 }
 
@@ -1499,7 +1506,7 @@ Materi kejuruan ini dirancang untuk mempersiapkan siswa SMK menguasai kompetensi
               tingkat: tingkats[s % 3] || 'sedang',
               kelas,
               tahunAjaran: '2025/2026',
-              sumber: 'Soal Ujian Kompetensi Kejuruan (UKK)',
+              sumber: `Seed internal berbasis materi: ${mapel.nama} - ${babJudul}`,
               tags: [mapel.nama, 'SMK', `Bab ${b}`]
             });
           }
@@ -1519,7 +1526,7 @@ Materi kejuruan ini dirancang untuk mempersiapkan siswa SMK menguasai kompetensi
               tingkat: question.tingkat,
               kelas,
               tahunAjaran: '2025/2026',
-              sumber: 'Soal Ujian Kompetensi Kejuruan (UKK)',
+              sumber: `Seed internal berbasis materi: ${mapel.nama} - ${babJudul}`,
               tags: [mapel.nama, j.kode, 'SMK', `Bab ${b}`, babJudul],
             };
           }

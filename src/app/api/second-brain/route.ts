@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateText } from 'ai';
 import { auth } from '@/auth';
-import { AI_ENV_ERROR, canUseDevelopmentFallback, getServerAiModel } from '@/lib/ai-provider';
+import { AI_ENV_ERROR, canUseDevelopmentFallback, getServerAiModel, runAiWithRetry } from '@/lib/ai-provider';
 
 export const maxDuration = 45;
 
@@ -64,18 +64,21 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const result = await generateText({
-      model,
-      temperature: 0.2,
-      system: `Kamu adalah asisten Otak Kedua. Jawab hanya berdasarkan konteks yang diberikan.
+    const result = await runAiWithRetry(
+      () => generateText({
+        model,
+        temperature: 0.2,
+        system: `Kamu adalah asisten Otak Kedua. Jawab hanya berdasarkan konteks yang diberikan.
 Jika konteks tidak cukup, katakan "Belum ada konteks yang cukup" dan jangan menambahkan fakta dari luar.
 Selalu tampilkan bagian: Jawaban, Sumber konteks, Batasan.`,
-      prompt: `Pertanyaan user:
+        prompt: `Pertanyaan user:
 ${question}
 
 Konteks Otak Kedua:
 ${context}`,
-    });
+      }),
+      { label: 'Otak Kedua' }
+    );
 
     if (!result.text.trim()) {
       return NextResponse.json({ error: 'Gemini mengembalikan respons kosong.' }, { status: 502 });

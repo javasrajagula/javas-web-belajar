@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateObject } from 'ai';
 import { PDFParse } from 'pdf-parse';
 import { auth } from '@/auth';
-import { AI_ENV_ERROR, canUseDevelopmentFallback, getServerAiModel } from '@/lib/ai-provider';
+import { AI_ENV_ERROR, canUseDevelopmentFallback, getServerAiModel, runAiWithRetry } from '@/lib/ai-provider';
 import { z } from 'zod';
 // @ts-ignore
 import { getPath } from 'pdf-parse/worker';
@@ -301,27 +301,28 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      const result = await generateObject({
-        model,
-        schema: z.object({
-          ringkasan: z.string().describe('Ringkasan markdown Bahasa Indonesia yang setia pada isi dokumen.'),
-          kuis: z.array(z.object({
-            pertanyaan: z.string(),
-            pilihan: z.array(z.string()).min(2).max(5),
-            jawabanBenar: z.enum(['A', 'B', 'C', 'D', 'E']),
-            pembahasan: z.string(),
-          })).min(1).max(5),
-          flashcard: z.array(z.object({
-            depan: z.string(),
-            belakang: z.string(),
-          })).min(1).max(7),
-          timeline: z.array(z.object({
-            date: z.string(),
-            title: z.string(),
-            description: z.string(),
-          })).min(1).max(5),
-        }),
-        prompt: `Kamu adalah asisten belajar. Analisis teks PDF berikut dan buat output yang benar-benar berdasarkan isi dokumen.
+      const result = await runAiWithRetry(
+        () => generateObject({
+          model,
+          schema: z.object({
+            ringkasan: z.string().describe('Ringkasan markdown Bahasa Indonesia yang setia pada isi dokumen.'),
+            kuis: z.array(z.object({
+              pertanyaan: z.string(),
+              pilihan: z.array(z.string()).min(2).max(5),
+              jawabanBenar: z.enum(['A', 'B', 'C', 'D', 'E']),
+              pembahasan: z.string(),
+            })).min(1).max(5),
+            flashcard: z.array(z.object({
+              depan: z.string(),
+              belakang: z.string(),
+            })).min(1).max(7),
+            timeline: z.array(z.object({
+              date: z.string(),
+              title: z.string(),
+              description: z.string(),
+            })).min(1).max(5),
+          }),
+          prompt: `Kamu adalah asisten belajar. Analisis teks PDF berikut dan buat output yang benar-benar berdasarkan isi dokumen.
 
 Aturan:
 - Jangan mengarang topik yang tidak ada di dokumen.
@@ -345,7 +346,9 @@ Format ringkasan markdown:
 
 TEKS PDF:
 ${text}`,
-      });
+        }),
+        { label: 'Ringkasan PDF' }
+      );
       const normalized = normalizePdfAiData(result.object, text);
 
       return NextResponse.json({
