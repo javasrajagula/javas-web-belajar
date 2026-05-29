@@ -107,14 +107,13 @@ export const useTutorStore = create<TutorState>((set, get) => {
         });
 
         if (!response.ok) {
+          const payload = await readErrorPayload(response);
           if (response.status === 429) {
-            const payload = await readErrorPayload(response);
             if (payload.code === 'APP_RATE_LIMIT') {
               throw new Error(`APP_RATE_LIMIT:${payload.message || "Batas laju terlampaui. Maksimal 15 pertanyaan valid per 60 detik."}`);
             }
             throw new Error(`AI_PROVIDER_429:${payload.message || payload.error || "Provider AI sedang membatasi request. Coba lagi beberapa saat."}`);
           }
-          const payload = await readErrorPayload(response);
           if (payload.code === 'AI_PROVIDER_QUOTA') {
             throw new Error(`AI_PROVIDER_QUOTA:${payload.message || payload.error || 'Kuota provider AI sedang habis atau terkena batas provider.'}`);
           }
@@ -156,8 +155,10 @@ export const useTutorStore = create<TutorState>((set, get) => {
       } catch (error: any) {
         console.error('Error generating AI Tutor reply:', error);
         
-        if (error instanceof Error && error.message.startsWith('APP_RATE_LIMIT:')) {
-          const limitMsg = error.message.replace('APP_RATE_LIMIT:', '');
+        const normalizedError = normalizeTutorError(error);
+
+        if (normalizedError.code === 'APP_RATE_LIMIT') {
+          const limitMsg = normalizedError.message;
           set((state) => {
             const updatedMessages = state.session.messages.map((m) => {
               if (m.id === tutorMsgId) {
@@ -175,8 +176,8 @@ export const useTutorStore = create<TutorState>((set, get) => {
           return;
         }
 
-        if (error instanceof Error && error.message.startsWith('AI_PROVIDER_429:')) {
-          const providerMsg = error.message.replace('AI_PROVIDER_429:', '');
+        if (normalizedError.code === 'AI_PROVIDER_429') {
+          const providerMsg = normalizedError.message;
           set((state) => {
             const updatedMessages = state.session.messages.map((m) => {
               if (m.id === tutorMsgId) {
@@ -194,8 +195,8 @@ export const useTutorStore = create<TutorState>((set, get) => {
           return;
         }
 
-        if (error instanceof Error && error.message.startsWith('AI_PROVIDER_QUOTA:')) {
-          const providerMsg = error.message.replace('AI_PROVIDER_QUOTA:', '');
+        if (normalizedError.code === 'AI_PROVIDER_QUOTA') {
+          const providerMsg = normalizedError.message;
           set((state) => {
             const updatedMessages = state.session.messages.map((m) => {
               if (m.id === tutorMsgId) {
@@ -218,7 +219,7 @@ export const useTutorStore = create<TutorState>((set, get) => {
             if (m.id === tutorMsgId) {
               return {
                 ...m,
-                content: `Maaf, Tutor AI belum bisa menjawab sekarang.\n\nAlasan: ${error?.message || 'koneksi atau konfigurasi AI bermasalah'}\n\nSaya tidak membuat jawaban cadangan agar tidak mengada-ada. Pastikan \`GEMINI_API_KEY\` sudah diatur di server/Vercel, lalu coba lagi.`
+                content: `Maaf, Tutor AI belum bisa menjawab sekarang.\n\nAlasan: ${normalizedError.message || 'koneksi atau konfigurasi AI bermasalah'}\n\nSaya tidak membuat jawaban cadangan agar tidak mengada-ada. Pastikan \`GEMINI_API_KEY\` sudah diatur di server/Vercel, lalu coba lagi.`
               };
             }
             return m;
@@ -244,12 +245,47 @@ export const useTutorStore = create<TutorState>((set, get) => {
 });
 
 async function readErrorPayload(response: Response): Promise<{ code?: string; error?: string; message?: string }> {
-  const contentType = response.headers.get('content-type') || '';
-  if (contentType.includes('application/json')) {
-    return response.json().catch(() => ({}));
-  }
   const text = await response.text().catch(() => '');
+  const parsed = parseMaybeJsonPayload(text);
+  if (parsed) return parsed;
   return { message: text };
+}
+
+function normalizeTutorError(error: unknown): { code: string; message: string } {
+  const rawMessage = error instanceof Error ? error.message : String(error || '');
+  const prefixed = rawMessage.match(/^([A-Z_0-9]+):([\s\S]*)$/);
+  if (prefixed) {
+    const parsed = parseMaybeJsonPayload(prefixed[2].trim());
+    return {
+      code: prefixed[1],
+      message: parsed?.message || parsed?.error || prefixed[2].trim(),
+    };
+  }
+
+  const parsed = parseMaybeJsonPayload(rawMessage.trim());
+  if (parsed?.code) {
+    return {
+      code: parsed.code,
+      message: parsed.message || parsed.error || rawMessage,
+    };
+  }
+
+  return { code: 'UNKNOWN', message: rawMessage };
+}
+
+function parseMaybeJsonPayload(text: string): { code?: string; error?: string; message?: string } | null {
+  if (!text || (!text.startsWith('{') && !text.startsWith('['))) return null;
+  try {
+    const value = JSON.parse(text);
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+    return {
+      code: typeof value.code === 'string' ? value.code : undefined,
+      error: typeof value.error === 'string' ? value.error : undefined,
+      message: typeof value.message === 'string' ? value.message : undefined,
+    };
+  } catch {
+    return null;
+  }
 }
 
 function sanitizeTutorSession(session: TutorSession): TutorSession {
