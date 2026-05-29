@@ -34,24 +34,71 @@ export async function POST(req: NextRequest) {
     // Fetch Subject info for context
     const mapel = await prisma.mataPelajaran.findUnique({
       where: { id: mataPelajaranId },
-      include: { jurusan: true },
+      include: {
+        jurusan: true,
+        bab: {
+          include: {
+            materi: {
+              orderBy: { urutan: 'asc' },
+              take: 8,
+            },
+          },
+          orderBy: { nomor: 'asc' },
+          take: 6,
+        },
+        bankSoal: {
+          select: { pertanyaan: true },
+          orderBy: { createdAt: 'desc' },
+          take: 40,
+        },
+      },
     });
 
     if (!mapel) {
       return NextResponse.json({ error: 'Mata pelajaran tidak ditemukan' }, { status: 404 });
     }
 
-    const systemPrompt = `Kamu adalah guru produktif dan ahli kurikulum SMK Indonesia untuk Jurusan ${mapel.jurusan.nama} (${mapel.jurusan.kode}).
-Tugasmu adalah membuat soal ujian yang mendalam, kontekstual, dan sesuai dengan standar Kurikulum Merdeka Belajar.
-Buatlah soal latihan pilihan ganda yang menguji kemampuan analisis siswa (HOTS jika tingkat kesulitan sedang/sukar).
-Gunakan studi kasus riil industri yang relevan dengan topik '${topik}' dan mata pelajaran '${mapel.nama}'.`;
+    const materialContext = mapel.bab
+      .map((bab) => {
+        const materi = bab.materi
+          .filter((item) => item.konten && item.tipe !== 'video')
+          .map((item) => `- ${item.judul}: ${item.konten.replace(/\s+/g, ' ').slice(0, 900)}`)
+          .join('\n');
+        return `BAB ${bab.nomor}: ${bab.judul}\n${bab.deskripsi}\n${materi}`;
+      })
+      .join('\n\n')
+      .slice(0, 9_000);
 
-    const promptText = `Buatlah tepat ${jumlah} soal pilihan ganda tentang topik '${topik}' dengan tingkat kesulitan '${tingkat}' untuk siswa kelas ${kelas} SMK.
-Pastikan:
-1. Pilihan ganda memiliki tepat 5 opsi (A, B, C, D, E).
-2. Jawaban benar harus bernilai salah satu dari "A", "B", "C", "D", "E".
-3. Sertakan pembahasan yang rinci dan akademis mengapa jawaban tersebut benar.
-4. Gunakan istilah-istilah kejuruan yang tepat.`;
+    const existingQuestions = mapel.bankSoal
+      .map((item, index) => `${index + 1}. ${item.pertanyaan.replace(/\s+/g, ' ').slice(0, 180)}`)
+      .join('\n');
+
+    const systemPrompt = `Kamu adalah penyusun soal profesional untuk siswa sekolah Indonesia.
+Buat soal berdasarkan materi yang diberikan saja. Gaya soal harus mirip LKS, ujian sekolah, asesmen kompetensi, dan bank soal berkualitas.
+Jangan membuat soal terlalu generik. Soal harus menguji pemahaman, penerapan, dan analisis, bukan hanya hafalan.`;
+
+    const promptText = `Buat tepat ${jumlah} soal pilihan ganda berkualitas untuk:
+- Jenjang: SMK kelas ${kelas}
+- Jurusan: ${mapel.jurusan.nama} (${mapel.jurusan.kode})
+- Mata pelajaran: ${mapel.nama}
+- Topik fokus: ${topik}
+- Tingkat kesulitan dominan: ${tingkat}
+
+KONTEKS MATERI DATABASE:
+${materialContext || 'Konteks materi detail tidak tersedia. Gunakan hanya nama mata pelajaran dan topik yang diberikan, lalu nyatakan indikator secara spesifik.'}
+
+SOAL YANG SUDAH ADA, JANGAN DIDUPLIKASI:
+${existingQuestions || 'Belum ada soal pembanding.'}
+
+Aturan wajib:
+1. Setiap soal punya 5 opsi A-E dan hanya satu jawaban benar.
+2. Distraktor harus realistis, masuk akal, dan panjangnya relatif seimbang dengan jawaban benar.
+3. Hindari opsi "semua benar" atau "semua salah".
+4. Variasikan level kognitif C1/C2/C3/C4. Untuk tingkat sedang/sukar, prioritaskan C3-C4.
+5. Gunakan variasi bentuk: studi kasus, analisis situasi, penerapan konsep, pernyataan benar-salah terarah, atau interpretasi data sederhana.
+6. Pembahasan harus menjelaskan mengapa jawaban benar dan mengapa setiap opsi lain salah.
+7. Soal tidak boleh ambigu, tidak boleh terlalu eksplisit menyalin satu kalimat dari materi, dan tidak boleh keluar dari konteks materi.
+8. Gunakan Bahasa Indonesia baku yang jelas untuk siswa.`;
 
     const modelInstance = getServerAiModel();
     let modelSource = process.env.ANTHROPIC_API_KEY
@@ -63,6 +110,9 @@ Pastikan:
       pilihan: string[];
       jawabanBenar: 'A' | 'B' | 'C' | 'D' | 'E';
       pembahasan: string;
+      levelKognitif?: string;
+      indikator?: string;
+      alasanOpsiSalah?: string[];
     }> = [];
 
     if (!modelInstance) {
@@ -85,6 +135,9 @@ Pastikan:
                 pilihan: z.array(z.string()).length(5).describe("Tepat 5 pilihan jawaban diawali dengan A., B., C., D., E."),
                 jawabanBenar: z.enum(['A', 'B', 'C', 'D', 'E']).describe("Kunci jawaban yang benar (A/B/C/D/E)"),
                 pembahasan: z.string().describe("Penjelasan rinci mengapa opsi tersebut benar."),
+                alasanOpsiSalah: z.array(z.string()).length(4).describe("Alasan ringkas mengapa empat opsi lain salah."),
+                levelKognitif: z.enum(['C1', 'C2', 'C3', 'C4']),
+                indikator: z.string().describe("Indikator kompetensi yang diukur oleh soal."),
               }))
             })
           }),
@@ -105,9 +158,10 @@ Pastikan:
     }
 
     const createdSoalList = [];
+    const acceptedSoal = sanitizeGeneratedQuestions(soalList, mapel.bankSoal.map((item) => item.pertanyaan));
 
     // Save questions to database
-    for (const s of soalList) {
+    for (const s of acceptedSoal) {
       const created = await prisma.bankSoal.create({
         data: {
           mataPelajaranId,
@@ -115,12 +169,12 @@ Pastikan:
           tipe: 'pilihan_ganda',
           pilihan: s.pilihan,
           jawabanBenar: s.jawabanBenar,
-          pembahasan: s.pembahasan,
+          pembahasan: buildPembahasan(s),
           tingkat,
           kelas,
           tahunAjaran: `${new Date().getFullYear()}/${new Date().getFullYear() + 1}`,
           sumber: modelSource,
-          tags: [mapel.nama, mapel.jurusan.kode, topik, tingkat],
+          tags: [mapel.nama, mapel.jurusan.kode, topik, tingkat, s.levelKognitif || 'C2'].filter(Boolean),
         }
       });
       createdSoalList.push(created);
@@ -213,4 +267,68 @@ function generateMockSoalList(topik: string, jumlah: number, tingkat: string, ke
   }
 
   return { soalList: list };
+}
+
+function sanitizeGeneratedQuestions(
+  soalList: Array<{
+    pertanyaan: string;
+    pilihan: string[];
+    jawabanBenar: 'A' | 'B' | 'C' | 'D' | 'E';
+    pembahasan: string;
+    levelKognitif?: string;
+    indikator?: string;
+    alasanOpsiSalah?: string[];
+  }>,
+  existingQuestions: string[]
+) {
+  const seen = new Set(existingQuestions.map(normalizeQuestionText));
+  const validLevels = new Set(['C1', 'C2', 'C3', 'C4']);
+
+  return soalList.filter((soal) => {
+    if (!soal?.pertanyaan || !Array.isArray(soal.pilihan) || soal.pilihan.length !== 5) return false;
+    if (!['A', 'B', 'C', 'D', 'E'].includes(soal.jawabanBenar)) return false;
+    if (!soal.pembahasan || soal.pembahasan.length < 80) return false;
+    if (new Set(soal.pilihan.map((p) => normalizeQuestionText(String(p)))).size !== 5) return false;
+
+    const normalized = normalizeQuestionText(soal.pertanyaan);
+    if (normalized.length < 30 || seen.has(normalized)) return false;
+    seen.add(normalized);
+
+    soal.pilihan = soal.pilihan.map((option, index) => normalizeOptionLabel(String(option), index));
+    soal.levelKognitif = validLevels.has(String(soal.levelKognitif)) ? soal.levelKognitif : 'C2';
+    soal.indikator = soal.indikator?.trim() || `Mengukur pemahaman siswa terhadap ${soal.pertanyaan.slice(0, 80)}`;
+    soal.alasanOpsiSalah = Array.isArray(soal.alasanOpsiSalah) ? soal.alasanOpsiSalah.slice(0, 4) : [];
+    return true;
+  });
+}
+
+function buildPembahasan(soal: {
+  pembahasan: string;
+  jawabanBenar: string;
+  levelKognitif?: string;
+  indikator?: string;
+  alasanOpsiSalah?: string[];
+}) {
+  const alasanSalah = soal.alasanOpsiSalah?.length
+    ? `\n\nAlasan opsi lain kurang tepat:\n${soal.alasanOpsiSalah.map((alasan, index) => `- ${index + 1}. ${alasan}`).join('\n')}`
+    : '';
+
+  return [
+    `Indikator soal: ${soal.indikator || 'Indikator belum tersedia.'}`,
+    `Level kognitif: ${soal.levelKognitif || 'C2'}`,
+    `Jawaban benar: ${soal.jawabanBenar}`,
+    `Pembahasan: ${soal.pembahasan}`,
+    alasanSalah,
+  ].filter(Boolean).join('\n');
+}
+
+function normalizeQuestionText(input: string) {
+  return input.toLowerCase().replace(/[^a-z0-9\u00C0-\u024F]+/gi, ' ').trim().replace(/\s+/g, ' ');
+}
+
+function normalizeOptionLabel(option: string, index: number) {
+  const label = String.fromCharCode(65 + index);
+  return option.replace(/^[A-E][.)]\s*/i, `${label}. `).startsWith(`${label}. `)
+    ? option.replace(/^[A-E][.)]\s*/i, `${label}. `).trim()
+    : `${label}. ${option.trim()}`;
 }

@@ -16,6 +16,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  let rateLimitKey = '';
+  let rateLimitToken: string | undefined;
   try {
     const body = await req.json();
     const { messages, mode = 'teacher', jurusan = 'TKJ', kelas = 11, context } = body;
@@ -27,30 +29,50 @@ export async function POST(req: NextRequest) {
       return new Response("Pesan tidak boleh kosong.", { status: 400 });
     }
 
+    const safeMessages = normalizeTutorMessages(messages);
+    if (!safeMessages.length) {
+      return new Response("Pesan tidak boleh kosong.", { status: 400 });
+    }
+
     // Authenticate user
     const session = await auth();
-    const userId = session?.user?.id || req.headers.get("x-forwarded-for") || "anonymous";
+    rateLimitKey = getTutorRateLimitKey(req, session?.user?.id, session?.user?.email || undefined);
+    const requestId = crypto.randomUUID();
 
     // Rate Limit Check
     try {
-      const { success, limit, remaining, reset } = await ratelimiter.limit(userId);
+      const { success, limit, remaining, reset, token } = await ratelimiter.limit(rateLimitKey);
+      rateLimitToken = token;
       if (!success) {
         return new Response(
           JSON.stringify({
+            code: "APP_RATE_LIMIT",
             error: "Terlalu banyak permintaan.",
-            message: "Batas laju terlampaui. Maksimal 15 pertanyaan per menit.",
+            message: "Batas laju terlampaui. Maksimal 15 pertanyaan valid per 60 detik.",
             limit,
             remaining,
             reset,
+            requestId,
           }),
           {
             status: 429,
             headers: {
               "Content-Type": "application/json",
+              "X-RateLimit-Limit": String(limit),
+              "X-RateLimit-Remaining": String(remaining),
+              "X-RateLimit-Reset": String(reset),
+              "X-RateLimit-Source": "academy-os-tutor",
+              "X-Request-Id": requestId,
             },
           }
         );
       }
+      console.info('Tutor rate limit accepted', {
+        requestId,
+        remaining,
+        reset,
+        scope: rateLimitKey.startsWith('user:') ? 'user' : 'client',
+      });
     } catch (rateLimitError) {
       console.warn("Rate limiter failed, bypassing:", rateLimitError);
     }
@@ -121,11 +143,6 @@ ${context ? `\n## Materi Aktif Terkait:\n- Modul: ${context.lessonTitle || 'Umum
     }
 
     try {
-      const safeMessages = normalizeTutorMessages(messages);
-      if (!safeMessages.length) {
-        return new Response("Pesan tidak boleh kosong.", { status: 400 });
-      }
-
       const result = await runAiWithRetry(
         () => generateText({
           model: modelInstance,
@@ -146,12 +163,34 @@ ${context ? `\n## Materi Aktif Terkait:\n- Modul: ${context.lessonTitle || 'Umum
       }
 
       return new Response(result.text, {
-        headers: { "Content-Type": "text/plain; charset=utf-8" },
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "X-RateLimit-Source": "academy-os-tutor",
+          "X-Request-Id": requestId,
+        },
       });
     } catch (aiError) {
       console.error("AI Tutor generation failed:", aiError);
+      if (rateLimitKey && rateLimitToken) {
+        await ratelimiter.refund(rateLimitKey, rateLimitToken);
+      }
       if (!canUseDevelopmentFallback()) {
-        return new Response(getAiProviderUserMessage(aiError), { status: isAiQuotaError(aiError) ? 429 : 502 });
+        return new Response(
+          JSON.stringify({
+            code: isAiQuotaError(aiError) ? "AI_PROVIDER_QUOTA" : "AI_PROVIDER_ERROR",
+            error: "Provider AI gagal menjawab.",
+            message: getAiProviderUserMessage(aiError),
+            requestId,
+          }),
+          {
+            status: isAiQuotaError(aiError) ? 429 : 502,
+            headers: {
+              "Content-Type": "application/json",
+              "X-RateLimit-Source": "ai-provider",
+              "X-Request-Id": requestId,
+            },
+          }
+        );
       }
       return generateMockTutorStream(messages, mode, jurusan, kelas);
     }
@@ -199,6 +238,25 @@ function normalizeTutorMessages(messages: Array<{ role?: string; content?: strin
   }
 
   return collapsed;
+}
+
+function getTutorRateLimitKey(req: NextRequest, userId?: string, email?: string) {
+  if (userId) return `user:${userId}`;
+  if (email) return `email:${email.toLowerCase()}`;
+
+  const forwardedFor = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const realIp = req.headers.get("x-real-ip")?.trim();
+  const ip = forwardedFor || realIp || 'anonymous-ip';
+  const userAgent = req.headers.get("user-agent") || 'unknown-agent';
+  return `client:${ip}:${hashForRateLimit(userAgent)}`;
+}
+
+function hashForRateLimit(value: string) {
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
+  }
+  return hash.toString(36);
 }
 
 function generateMockTutorStream(messages: any[], mode: string, jurusan: string, kelas: number) {

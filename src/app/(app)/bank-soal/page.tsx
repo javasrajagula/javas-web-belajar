@@ -178,6 +178,7 @@ export default function BankSoalPage() {
   // Handle AI generate form submit
   const handleGenerateAI = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (generatingAI) return;
     if (!aiTopik.trim()) {
       toast.error('Topik materi harus diisi!');
       return;

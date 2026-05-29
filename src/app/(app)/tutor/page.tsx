@@ -94,6 +94,7 @@ export default function AITutorPage() {
   const chatScrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const submitLockRef = useRef(false);
 
   useEffect(() => {
     setMounted(true);
@@ -144,7 +145,8 @@ export default function AITutorPage() {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isResponding) return;
+    if (!input.trim() || isResponding || submitLockRef.current) return;
+    submitLockRef.current = true;
 
     const currentText = input;
     setInput('');
@@ -167,8 +169,12 @@ export default function AITutorPage() {
       cpStatement: activeSub?.cpStatement || undefined
     };
 
-    await sendMessage(currentText, context);
-    updateQuestProgress('chat', 1);
+    try {
+      await sendMessage(currentText, context);
+      updateQuestProgress('chat', 1);
+    } finally {
+      submitLockRef.current = false;
+    }
   };
 
   const handleQuickPrompt = (prompt: string) => {
@@ -216,7 +222,7 @@ export default function AITutorPage() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-4 md:gap-6 p-3 sm:p-4 md:p-5 bg-[#E4E4E7] min-h-[calc(100dvh-9rem)] md:min-h-[calc(100vh-6rem)] border-[2px] md:border-[4px] border-black rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-black relative max-w-full overflow-x-hidden" style={{ backgroundImage: 'radial-gradient(rgba(0,0,0,0.12) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }}>
+    <div className="flex flex-col lg:flex-row gap-4 md:gap-6 p-3 sm:p-4 md:p-5 bg-[#E4E4E7] min-h-[calc(100dvh-9rem)] md:min-h-[calc(100vh-6rem)] border-[2px] md:border-[4px] border-black rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-black relative max-w-full overflow-x-hidden min-w-0" style={{ backgroundImage: 'radial-gradient(rgba(0,0,0,0.12) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }}>
       
       {/* LEFT PANEL: History, Mode, Curriculum Context */}
       <div className="order-2 lg:order-1 w-full lg:w-80 flex flex-col gap-4 md:gap-5 flex-shrink-0">

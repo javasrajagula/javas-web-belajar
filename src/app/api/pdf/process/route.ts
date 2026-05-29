@@ -23,9 +23,55 @@ function normalizeExtractedText(input: string) {
   return input
     .replace(/\u0000/g, ' ')
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, ' ')
+    .replace(/-\s*\n\s*/g, '')
+    .replace(/[ \t]*\n[ \t]*/g, '\n')
     .replace(/[ \t]+/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
+}
+
+function removeRepeatedPdfNoise(text: string) {
+  const lines = text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const frequency = new Map<string, number>();
+  lines.forEach((line) => {
+    const normalized = line.toLowerCase().replace(/\d+/g, '#').trim();
+    if (normalized.length >= 6 && normalized.length <= 120) {
+      frequency.set(normalized, (frequency.get(normalized) || 0) + 1);
+    }
+  });
+
+  const totalLines = Math.max(lines.length, 1);
+  return lines
+    .filter((line) => {
+      const normalized = line.toLowerCase().replace(/\d+/g, '#').trim();
+      const count = frequency.get(normalized) || 0;
+      const looksLikePageNumber = /^(halaman|page)?\s*\d+\s*(\/\s*\d+)?$/i.test(line);
+      return !looksLikePageNumber && !(count >= 4 && count / totalLines > 0.08);
+    })
+    .join('\n');
+}
+
+function chunkPdfText(text: string, chunkSize = 4_000, overlap = 350) {
+  const chunks: string[] = [];
+  let index = 0;
+  while (index < text.length) {
+    const slice = text.slice(index, index + chunkSize);
+    const boundary = slice.lastIndexOf('\n\n');
+    const chunk = boundary > 1_500 ? slice.slice(0, boundary) : slice;
+    chunks.push(chunk.trim());
+    index += Math.max(1, chunk.length - overlap);
+    if (chunks.length >= 6) break;
+  }
+  return chunks.filter((chunk) => chunk.length > 120);
+}
+
+function buildPdfContext(text: string) {
+  return chunkPdfText(text)
+    .map((chunk, index) => `### POTONGAN ${index + 1}\n${chunk}`)
+    .join('\n\n---\n\n');
 }
 
 function hasEnoughReadableText(text: string) {
@@ -251,7 +297,7 @@ export async function POST(req: NextRequest) {
       if (isPdf) {
         const parser = new PDFParse({ data: buffer });
         const textResult = await parser.getText();
-        text = textResult.text.slice(0, 12000); // limit input to fit token bounds
+        text = textResult.text;
         pageTotal = textResult.total;
       } else {
         const isTextLike =
@@ -261,7 +307,7 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ error: 'File harus berupa PDF atau teks catatan yang valid.' }, { status: 415 });
         }
         // Parse as plain text if it's not a PDF
-        text = buffer.toString('utf-8').slice(0, 12000);
+        text = buffer.toString('utf-8');
         pageTotal = 1;
       }
     } catch (parseError) {
@@ -272,11 +318,11 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
-      text = buffer.toString('utf-8').slice(0, 12000);
+      text = buffer.toString('utf-8');
       pageTotal = 1;
     }
 
-    text = normalizeExtractedText(text);
+    text = normalizeExtractedText(removeRepeatedPdfNoise(normalizeExtractedText(text)));
 
     if (!text.trim() || !hasEnoughReadableText(text)) {
       return NextResponse.json(
@@ -301,9 +347,11 @@ export async function POST(req: NextRequest) {
     }
 
     try {
+      const pdfContext = buildPdfContext(text);
       const result = await runAiWithRetry(
         () => generateObject({
           model,
+          maxRetries: 0,
           schema: z.object({
             ringkasan: z.string().describe('Ringkasan markdown Bahasa Indonesia yang setia pada isi dokumen.'),
             kuis: z.array(z.object({
@@ -322,30 +370,31 @@ export async function POST(req: NextRequest) {
               description: z.string(),
             })).min(1).max(5),
           }),
-          prompt: `Kamu adalah asisten belajar. Analisis teks PDF berikut dan buat output yang benar-benar berdasarkan isi dokumen.
+          prompt: `Kamu adalah tutor pendidikan. Buat ringkasan yang akurat hanya berdasarkan isi PDF yang diberikan. Jangan menambahkan informasi dari luar dokumen. Jika ada bagian yang tidak jelas, tulis "bagian ini tidak terbaca jelas".
 
 Aturan:
-- Jangan mengarang topik yang tidak ada di dokumen.
-- Ringkasan harus spesifik, jelas, rapi, dan tidak generik.
-- Jangan menambahkan informasi dari luar teks PDF.
-- Jika konsep/rumus tidak ada, tulis "Tidak ada rumus eksplisit yang terbaca dari dokumen."
-- Wajib mencakup: judul materi, identitas materi, poin penting, rumus/konsep utama jika ada, contoh singkat dari teks, rangkuman, dan referensi berupa "PDF yang diunggah pengguna".
-- Jika dokumen tidak punya kronologi, timeline harus berupa langkah belajar/logika materi.
-- Soal kuis harus bisa dijawab dari isi dokumen.
-- Jika teks tidak cukup untuk salah satu bagian, tulis keterbatasannya secara jujur.
-- Gunakan Bahasa Indonesia.
+- Gunakan hanya potongan PDF di bawah sebagai sumber.
+- Jangan mengarang topik, contoh, definisi, rumus, atau fakta yang tidak muncul di dokumen.
+- Hindari pengulangan. Gabungkan ide yang sama menjadi satu poin.
+- Susun berdasarkan bab/subbab jika terdeteksi dari dokumen.
+- Istilah penting harus berasal dari teks PDF dan diberi definisi sesuai konteks dokumen.
+- Contoh harus berasal dari dokumen; jika tidak ada contoh, tulis "Dokumen tidak memuat contoh eksplisit."
+- Soal kuis harus bisa dijawab dari isi dokumen, bukan dari pengetahuan luar.
+- Gunakan Bahasa Indonesia yang jelas, ringkas, dan cocok untuk siswa.
 
 Format ringkasan markdown:
-## Judul Materi
-## Identitas Materi
-## Poin Penting
-## Rumus/Konsep Utama
-## Contoh Singkat
-## Rangkuman
-## Referensi
+## 1. Judul/topik utama
+## 2. Tujuan pembelajaran jika tersedia
+## 3. Poin-poin penting
+## 4. Penjelasan konsep utama
+## 5. Istilah penting dan definisi
+## 6. Contoh dari dokumen
+## 7. Kesimpulan
+## 8. Potensi materi yang sering keluar sebagai soal
+## 9. Catatan keterbacaan dokumen
 
-TEKS PDF:
-${text}`,
+POTONGAN PDF:
+${pdfContext}`,
         }),
         { label: 'Ringkasan PDF' }
       );

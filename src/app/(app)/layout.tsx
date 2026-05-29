@@ -36,14 +36,14 @@ export default function AppLayout({
   }, [email, status, loadUser, loadCurriculum]);
 
   return (
-    <div className="contrast-safe flex min-h-screen bg-bg-primary text-text-primary overflow-hidden">
+    <div className="contrast-safe flex min-h-dvh bg-bg-primary text-text-primary overflow-x-hidden md:overflow-hidden">
       {/* Sidebar - Desktop Only */}
       <Sidebar />
 
       {/* Main Body */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto pb-20 md:pb-0 h-screen relative bg-bg-tertiary">
+      <div className="flex-1 flex flex-col min-w-0 overflow-visible md:overflow-y-auto pb-20 md:pb-0 min-h-dvh md:h-screen relative bg-bg-tertiary">
         <TopBar />
-        <main className="flex-grow p-3 sm:p-4 md:p-6 flex flex-col min-w-0">
+        <main className="flex-grow p-3 sm:p-4 md:p-6 flex flex-col min-w-0 min-h-0">
           <PageTransition>{children}</PageTransition>
         </main>
       </div>

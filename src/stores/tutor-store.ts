@@ -34,10 +34,14 @@ export const useTutorStore = create<TutorState>((set, get) => {
     }),
 
     sendMessage: async (content, context) => {
+      if (get().isResponding) return;
+      const trimmedContent = content.trim();
+      if (!trimmedContent) return;
+
       const userMsg: ChatMessage = {
         id: `msg-user-${Date.now()}`,
         sender: 'user',
-        content,
+        content: trimmedContent,
         timestamp: new Date().toISOString()
       };
 
@@ -109,18 +113,14 @@ export const useTutorStore = create<TutorState>((set, get) => {
 
         if (!response.ok) {
           if (response.status === 429) {
-            try {
-              const errorData = await response.json();
-              throw new Error(`RATE_LIMIT:${errorData.message || "Batas laju terlampaui."}`);
-            } catch (jsonErr) {
-              if (jsonErr instanceof Error && jsonErr.message.startsWith("RATE_LIMIT:")) {
-                throw jsonErr;
-              }
-              throw new Error("RATE_LIMIT:Batas laju terlampaui. Maksimal 15 pertanyaan per menit.");
+            const payload = await readErrorPayload(response);
+            if (payload.code === 'APP_RATE_LIMIT') {
+              throw new Error(`APP_RATE_LIMIT:${payload.message || "Batas laju terlampaui. Maksimal 15 pertanyaan valid per 60 detik."}`);
             }
+            throw new Error(`AI_PROVIDER_429:${payload.message || payload.error || "Provider AI sedang membatasi request. Coba lagi beberapa saat."}`);
           }
-          const errorMessage = await response.text().catch(() => '');
-          throw new Error(errorMessage || 'Tutor AI gagal menjawab. Periksa konfigurasi GEMINI_API_KEY di server.');
+          const payload = await readErrorPayload(response);
+          throw new Error(payload.message || payload.error || 'Tutor AI gagal menjawab. Periksa konfigurasi GEMINI_API_KEY di server.');
         }
 
         const reader = response.body?.getReader();
@@ -158,14 +158,33 @@ export const useTutorStore = create<TutorState>((set, get) => {
       } catch (error: any) {
         console.error('Error generating AI Tutor reply:', error);
         
-        if (error instanceof Error && error.message.startsWith('RATE_LIMIT:')) {
-          const limitMsg = error.message.replace('RATE_LIMIT:', '');
+        if (error instanceof Error && error.message.startsWith('APP_RATE_LIMIT:')) {
+          const limitMsg = error.message.replace('APP_RATE_LIMIT:', '');
           set((state) => {
             const updatedMessages = state.session.messages.map((m) => {
               if (m.id === tutorMsgId) {
                 return { 
                   ...m, 
-                  content: `⚠️ **Batas Laju Terlampaui (429)**\n\n${limitMsg}\n\nSilakan tunggu beberapa saat sebelum mengirim pertanyaan baru.` 
+                  content: `**Batas Laju Terlampaui (429)**\n\n${limitMsg}\n\nSilakan tunggu sampai window 60 detik selesai sebelum mengirim pertanyaan berikutnya.` 
+                };
+              }
+              return m;
+            });
+            const updated = { ...state.session, messages: updatedMessages };
+            setStorageItem('academy_os_tutor_session', updated);
+            return { session: updated, isResponding: false };
+          });
+          return;
+        }
+
+        if (error instanceof Error && error.message.startsWith('AI_PROVIDER_429:')) {
+          const providerMsg = error.message.replace('AI_PROVIDER_429:', '');
+          set((state) => {
+            const updatedMessages = state.session.messages.map((m) => {
+              if (m.id === tutorMsgId) {
+                return {
+                  ...m,
+                  content: `**Provider AI sedang membatasi request**\n\n${providerMsg}\n\nIni bukan batas 15 pertanyaan per menit dari aplikasi. Jika memakai Gemini free-tier, tunggu quota reset atau gunakan API key dengan kuota/billing aktif.`
                 };
               }
               return m;
@@ -206,3 +225,13 @@ export const useTutorStore = create<TutorState>((set, get) => {
     })
   };
 });
+
+async function readErrorPayload(response: Response): Promise<{ code?: string; error?: string; message?: string }> {
+  const contentType = response.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    return response.json().catch(() => ({}));
+  }
+  const text = await response.text().catch(() => '');
+  return { message: text };
+}
+

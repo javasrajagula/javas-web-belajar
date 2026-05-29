@@ -86,6 +86,7 @@ export default function SecondBrainPage() {
 
   // PDF processing upload handler
   const handlePdfUpload = async (file: File) => {
+    if (isProcessing) return;
     if (!file) return;
     if (file.type !== 'application/pdf') {
       toast.error('Berkas harus berupa dokumen PDF!');
@@ -266,6 +267,7 @@ export default function SecondBrainPage() {
 
   const handleAskPdfTutor = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isAskingPdf) return;
     if (!pdfQuestion.trim()) {
       toast.error('Pertanyaan dokumen tidak boleh kosong.');
       return;
@@ -610,7 +612,7 @@ export default function SecondBrainPage() {
                 </div>
                 {pdfAnswer && (
                   <div className="mt-3 rounded border border-border bg-bg-primary p-3">
-                    <div className="prose prose-neutral prose-sm max-w-none text-xs prose-headings:text-text-primary prose-p:text-text-secondary prose-li:text-text-secondary">
+                    <div className="pdf-summary-prose prose prose-neutral prose-sm max-w-none text-sm sm:text-xs">
                       <ReactMarkdown>{pdfAnswer}</ReactMarkdown>
                     </div>
                     {pdfAnswerSources.length > 0 && (
@@ -625,7 +627,7 @@ export default function SecondBrainPage() {
               {/* Scrollable content container */}
               <div className="flex-grow overflow-y-auto max-h-[50vh] lg:max-h-[60vh] pr-1">
                 {activeCenterTab === 'ringkasan' && (
-                  <div className="prose prose-invert prose-sm max-w-none text-xs leading-relaxed text-text-secondary prose-headings:text-white prose-a:text-primary">
+                  <div className="pdf-summary-prose prose prose-neutral prose-sm max-w-none text-sm sm:text-xs leading-relaxed">
                     <ReactMarkdown>{selectedMaterial.summary}</ReactMarkdown>
                   </div>
                 )}
