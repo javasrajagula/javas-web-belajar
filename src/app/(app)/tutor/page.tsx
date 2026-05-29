@@ -6,14 +6,13 @@ import { useUserStore } from '@/stores/user-store';
 import { useCurriculumStore } from '@/stores/curriculum-store';
 import { getSubjectsByPathway } from '@/lib/curriculum-data';
 import { resolveSmkPathway } from '@/lib/pathway';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Send, Trash2, Sparkles, BookOpen, GraduationCap, Sword, 
   ShieldAlert, MessageSquare, ChevronDown, Brain, Lightbulb,
   Cpu, Paperclip, Calculator, Volume2, VolumeX, MoreVertical,
-  User, RotateCcw
+  RotateCcw
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import ChatQuizCard from '@/components/chat-quiz';
@@ -222,10 +221,10 @@ export default function AITutorPage() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-4 md:gap-6 p-3 sm:p-4 md:p-5 bg-[#E4E4E7] min-h-[calc(100dvh-9rem)] md:min-h-[calc(100vh-6rem)] border-[2px] md:border-[4px] border-black rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-black relative max-w-full overflow-x-hidden min-w-0" style={{ backgroundImage: 'radial-gradient(rgba(0,0,0,0.12) 1.2px, transparent 1.2px)', backgroundSize: '16px 16px' }}>
+    <div className="flex flex-col lg:flex-row gap-0 lg:gap-6 -m-3 sm:-m-4 md:m-0 p-0 lg:p-5 bg-[#F6F7FB] lg:bg-[#E4E4E7] min-h-[calc(100dvh-8.5rem)] md:min-h-[calc(100vh-6rem)] lg:border-[4px] border-black rounded-none lg:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-black relative max-w-full overflow-x-hidden min-w-0 lg:bg-[radial-gradient(rgba(0,0,0,0.12)_1.2px,transparent_1.2px)] lg:[background-size:16px_16px]">
       
       {/* LEFT PANEL: History, Mode, Curriculum Context */}
-      <div className="order-2 lg:order-1 w-full lg:w-80 flex flex-col gap-4 md:gap-5 flex-shrink-0">
+      <div className="hidden lg:flex order-2 lg:order-1 w-full lg:w-80 flex-col gap-4 md:gap-5 flex-shrink-0">
         
         {/* History Widget */}
         <div className="flex flex-col bg-white border-[3px] md:border-[4px] border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none overflow-hidden flex-1 min-h-[220px] lg:min-h-[300px]">
@@ -371,18 +370,20 @@ export default function AITutorPage() {
       </div>
 
       {/* RIGHT PANEL: Chat Deck (Interactive Connection) */}
-      <div className="order-1 lg:order-2 flex-grow flex flex-col min-h-[calc(100dvh-12rem)] lg:min-h-[500px] min-w-0 max-w-full">
-        <div className="flex-grow flex flex-col bg-white border-[3px] md:border-[4px] border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] md:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-none overflow-hidden min-h-[calc(100dvh-12rem)] lg:min-h-[550px] lg:max-h-[calc(100vh-10rem)] min-w-0 max-w-full">
+      <div className="order-1 lg:order-2 flex-grow flex flex-col h-[calc(100dvh-8.5rem)] lg:h-auto lg:min-h-[500px] min-w-0 max-w-full">
+        <div className="flex-grow flex flex-col bg-white border-y border-zinc-200 lg:border-[4px] lg:border-black lg:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-none overflow-hidden h-full lg:min-h-[550px] lg:max-h-[calc(100vh-10rem)] min-w-0 max-w-full">
           
           {/* Header */}
-          <div className="bg-[#7C3AED] text-white border-b-[3px] border-black px-3 sm:px-5 py-3 sm:py-4 flex items-center justify-between gap-3 flex-shrink-0">
+          <div className="bg-[#5B21B6] lg:bg-[#7C3AED] text-white border-b border-purple-900/40 lg:border-b-[3px] lg:border-black px-3 sm:px-5 py-3 sm:py-4 flex items-center justify-between gap-3 flex-shrink-0">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-white border-2 border-black flex items-center justify-center shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)]">
+              <div className="w-8 h-8 rounded-xl lg:rounded-lg bg-white border border-purple-200 lg:border-2 lg:border-black flex items-center justify-center lg:shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)]">
                 <Brain size={18} className="text-[#7C3AED]" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <h2 className="text-xs sm:text-sm font-extrabold uppercase font-mono tracking-wider">TUTOR AI</h2>
-                <p className="text-[9px] font-bold text-purple-200 uppercase tracking-widest font-mono">ACTIVE CONNECTION</p>
+                <p className="text-[9px] font-bold text-purple-100 uppercase tracking-widest font-mono truncate">
+                  {selectedSubject || 'Belajar umum'} · {modeLabels[session.mode] || session.mode}
+                </p>
               </div>
             </div>
             
@@ -394,7 +395,7 @@ export default function AITutorPage() {
               <button
                 onClick={() => setSoundOn(!soundOn)}
                 title="Toggle Ambient Audio"
-                className={`p-2 rounded-lg border-2 border-black transition-all cursor-pointer shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none ${
+                className={`p-2 rounded-lg border border-purple-200 lg:border-2 lg:border-black transition-all cursor-pointer lg:shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none ${
                   soundOn ? 'bg-[#4ADE80] text-black' : 'bg-white text-black hover:bg-zinc-100'
                 }`}
               >
@@ -409,15 +410,77 @@ export default function AITutorPage() {
                   toast.success('Konteks tutor dibersihkan.');
                 }}
                 title="Bersihkan Konteks Tutor"
-                className="p-2 rounded-lg border-2 border-black bg-white hover:bg-zinc-100 text-black transition-all shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer"
+                className="p-2 rounded-lg border border-purple-200 lg:border-2 lg:border-black bg-white hover:bg-zinc-100 text-black transition-all lg:shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer"
               >
                 <MoreVertical size={13} />
               </button>
             </div>
           </div>
 
+          {/* Mobile controls */}
+          <div className="lg:hidden flex-shrink-0 border-b border-zinc-200 bg-white px-3 py-3 space-y-3">
+            <div className="flex gap-2 overflow-x-auto scrollbar-none pb-0.5">
+              {tutorModes.map((m) => {
+                const active = session.mode === m.id;
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => {
+                      setMode(m.id as any);
+                      toast.success(`Mode diubah ke: ${m.label}`);
+                    }}
+                    className={`flex-shrink-0 inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-[11px] font-bold transition-colors ${
+                      active
+                        ? 'border-[#5B21B6] bg-[#5B21B6] text-white'
+                        : 'border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100'
+                    }`}
+                  >
+                    <m.icon size={13} />
+                    {m.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowSubjects(o => !o)}
+                className="w-full flex items-center justify-between gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-left text-xs font-semibold text-zinc-800"
+              >
+                <span className="truncate">{selectedSubject || 'Belajar Umum'}</span>
+                <ChevronDown size={14} className={`flex-shrink-0 transition-transform ${showSubjects ? 'rotate-180' : ''}`} />
+              </button>
+
+              {showSubjects && (
+                <div className="absolute left-0 right-0 top-full mt-1 z-30 max-h-52 overflow-y-auto rounded-xl border border-zinc-200 bg-white shadow-lg">
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedSubject(''); setShowSubjects(false); }}
+                    className="w-full border-b border-zinc-100 px-3 py-3 text-left text-xs font-semibold text-zinc-500 hover:bg-zinc-50"
+                  >
+                    Belajar Umum
+                  </button>
+                  {curriculumSubjects.map(sub => (
+                    <button
+                      key={sub.id}
+                      type="button"
+                      onClick={() => { setSelectedSubject(sub.title); setShowSubjects(false); }}
+                      className={`w-full border-b border-zinc-100 px-3 py-3 text-left text-xs font-semibold last:border-0 hover:bg-zinc-50 ${
+                        selectedSubject === sub.title ? 'text-[#5B21B6] bg-purple-50' : 'text-zinc-800'
+                      }`}
+                    >
+                      {sub.title}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Chat Messages */}
-          <div ref={chatScrollRef} className="ai-chat-scroll flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 space-y-4 sm:space-y-6 bg-zinc-50/50 min-w-0" style={{ backgroundImage: 'radial-gradient(rgba(0,0,0,0.05) 1.2px, transparent 1.2px)', backgroundSize: '12px 12px' }}>
+          <div ref={chatScrollRef} className="ai-chat-scroll flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-3 sm:p-5 space-y-4 sm:space-y-6 bg-[#F8FAFC] lg:bg-zinc-50/50 min-w-0 lg:bg-[radial-gradient(rgba(0,0,0,0.05)_1.2px,transparent_1.2px)] lg:[background-size:12px_12px]">
             
             {displayMessages.length === 0 && activeSessionId === 'session-default' && (
               <div className="text-center py-12 space-y-4 max-w-md mx-auto">
@@ -440,10 +503,10 @@ export default function AITutorPage() {
                   
                   <div className={`flex ${isTutor ? 'justify-start' : 'justify-end'} w-full min-w-0`}>
                     <div
-                      className={`ai-message-bubble w-fit max-w-[96%] sm:max-w-[85%] border-[2px] sm:border-[3px] border-black rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-[2px_2px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_rgba(0,0,0,1)] relative transition-all duration-200 ${
+                      className={`ai-message-bubble w-fit max-w-[92%] sm:max-w-[85%] border lg:border-[3px] lg:border-black rounded-2xl sm:rounded-xl p-3 sm:p-4 shadow-sm lg:shadow-[4px_4px_0px_rgba(0,0,0,1)] relative transition-all duration-200 ${
                         isTutor
-                          ? 'bg-[#7C3AED] text-white'
-                          : 'bg-[#4ADE80] text-black'
+                          ? 'border-purple-200 bg-white text-zinc-900 lg:bg-[#7C3AED] lg:text-white'
+                          : 'border-emerald-200 bg-[#DCFCE7] text-zinc-950 lg:bg-[#4ADE80] lg:text-black'
                       }`}
                     >
                       {isTutor ? (
@@ -451,23 +514,23 @@ export default function AITutorPage() {
                           const { cleanContent, quizzes, flashcards } = parseMessageContent(msg.content);
                           return (
                             <div className="space-y-4 min-w-0 max-w-full">
-                              <div className="ai-message-content font-sans text-[13px] sm:text-xs leading-relaxed font-semibold">
+                              <div className="ai-message-content font-sans text-[13px] sm:text-xs leading-relaxed font-medium lg:font-semibold">
                                 <ReactMarkdown
                                   components={{
-                                    p: ({children}) => <p className="mb-3 last:mb-0 text-white font-semibold">{children}</p>,
-                                    h1: ({children}) => <h1 className="text-[13px] font-extrabold text-white mt-4 mb-2 uppercase tracking-wider border-b border-white/20 pb-0.5">{children}</h1>,
-                                    h2: ({children}) => <h2 className="text-xs font-extrabold text-white mt-3 mb-1 uppercase">{children}</h2>,
-                                    ul: ({children}) => <ul className="list-disc pl-4 space-y-1 mb-3 text-white">{children}</ul>,
-                                    ol: ({children}) => <ol className="list-decimal pl-4 space-y-1 mb-3 text-white">{children}</ol>,
-                                    li: ({children}) => <li className="text-[11px] text-white/90">{children}</li>,
-                                    a: ({children, href}) => <a href={href} target="_blank" rel="noreferrer" className="text-yellow-200 underline decoration-yellow-200/60 break-all">{children}</a>,
+                                    p: ({children}) => <p className="mb-3 last:mb-0 text-zinc-800 lg:text-white font-medium lg:font-semibold">{children}</p>,
+                                    h1: ({children}) => <h1 className="text-[13px] font-extrabold text-zinc-950 lg:text-white mt-4 mb-2 uppercase tracking-wider border-b border-zinc-200 lg:border-white/20 pb-0.5">{children}</h1>,
+                                    h2: ({children}) => <h2 className="text-xs font-extrabold text-zinc-950 lg:text-white mt-3 mb-1 uppercase">{children}</h2>,
+                                    ul: ({children}) => <ul className="list-disc pl-4 space-y-1 mb-3 text-zinc-800 lg:text-white">{children}</ul>,
+                                    ol: ({children}) => <ol className="list-decimal pl-4 space-y-1 mb-3 text-zinc-800 lg:text-white">{children}</ol>,
+                                    li: ({children}) => <li className="text-[12px] lg:text-[11px] text-zinc-800 lg:text-white/90">{children}</li>,
+                                    a: ({children, href}) => <a href={href} target="_blank" rel="noreferrer" className="text-[#5B21B6] lg:text-yellow-200 underline decoration-purple-300 lg:decoration-yellow-200/60 break-all">{children}</a>,
                                     code: ({node, className, children, ...props}) => (
-                                      <code className="bg-black/40 text-yellow-300 px-1 py-0.5 rounded font-mono text-[10px]" {...props}>
+                                      <code className="bg-zinc-100 lg:bg-black/40 text-[#5B21B6] lg:text-yellow-300 px-1 py-0.5 rounded font-mono text-[10px]" {...props}>
                                         {children}
                                       </code>
                                     ),
                                     pre: ({children}) => (
-                                      <pre className="max-w-full bg-black/60 border border-black/40 p-3 rounded-lg font-mono text-[10px] text-green-400 overflow-x-auto my-3 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]">
+                                      <pre className="max-w-full bg-zinc-950 border border-zinc-900 p-3 rounded-lg font-mono text-[10px] text-green-300 overflow-x-auto my-3 lg:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]">
                                         {children}
                                       </pre>
                                     )
@@ -531,13 +594,13 @@ export default function AITutorPage() {
           </div>
 
           {/* Quick Prompts */}
-          <div className="px-3 sm:px-5 py-3 border-t-2 border-black bg-zinc-50 flex-shrink-0">
+          <div className="px-3 sm:px-5 py-2.5 lg:py-3 border-t border-zinc-200 lg:border-t-2 lg:border-black bg-white lg:bg-zinc-50 flex-shrink-0">
             <div className="flex gap-2 overflow-x-auto scrollbar-none pb-0.5">
               {QUICK_PROMPTS.map((prompt, i) => (
                 <button
                   key={i}
                   onClick={() => handleQuickPrompt(prompt)}
-                  className="flex-shrink-0 px-3.5 py-1.5 rounded-full border-2 border-black bg-white hover:bg-zinc-100 text-[10px] font-bold shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer whitespace-nowrap"
+                  className="flex-shrink-0 px-3 py-1.5 rounded-full border border-zinc-200 lg:border-2 lg:border-black bg-zinc-50 lg:bg-white hover:bg-zinc-100 text-[10px] font-bold lg:shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer whitespace-nowrap"
                 >
                   {prompt}
                 </button>
@@ -546,13 +609,13 @@ export default function AITutorPage() {
           </div>
 
           {/* Input Form */}
-          <form onSubmit={handleSend} className="ai-chat-input-form p-3 sm:p-4 border-t-[3px] border-black bg-white grid grid-cols-[auto_1fr] sm:flex sm:flex-nowrap gap-3 sm:gap-4 flex-shrink-0 items-center">
+          <form onSubmit={handleSend} className="ai-chat-input-form p-3 sm:p-4 border-t border-zinc-200 lg:border-t-[3px] lg:border-black bg-white flex flex-wrap sm:flex-nowrap gap-2.5 sm:gap-4 flex-shrink-0 items-center">
             {/* Action buttons (Paperclip & Sigma/Calculator) */}
-            <div className="flex gap-2 order-2 sm:order-1">
+            <div className="flex gap-2 order-2 sm:order-1 flex-shrink-0">
               <button
                 type="button"
                 onClick={() => router.push('/brain')}
-                className="p-2.5 border-2 border-black rounded-lg bg-zinc-50 hover:bg-zinc-100 text-black shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
+                className="h-11 w-11 grid place-items-center border border-zinc-200 lg:border-2 lg:border-black rounded-xl lg:rounded-lg bg-zinc-50 hover:bg-zinc-100 text-black lg:shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
                 title="Unggah dokumen di Otak Kedua"
               >
                 <Paperclip size={14} />
@@ -561,7 +624,7 @@ export default function AITutorPage() {
               <button
                 type="button"
                 onClick={() => setInput(prev => prev + ' $$ f(x) = ... $$ ')}
-                className="p-2.5 border-2 border-black rounded-lg bg-zinc-50 hover:bg-zinc-100 text-black shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
+                className="h-11 w-11 grid place-items-center border border-zinc-200 lg:border-2 lg:border-black rounded-xl lg:rounded-lg bg-zinc-50 hover:bg-zinc-100 text-black lg:shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
                 title="Sisipkan Rumus Matematika"
               >
                 <Calculator size={14} />
@@ -580,14 +643,14 @@ export default function AITutorPage() {
                   ? `Tanyakan materi: ${selectedSubject}...`
                   : 'Ketik tanggapan atau ajukan pertanyaan Anda di sini...'
               }
-              className="col-span-2 sm:col-span-1 order-1 sm:order-2 min-w-0 w-full flex-grow h-12 sm:h-11 px-4 bg-zinc-50 border-2 border-black rounded-lg text-base sm:text-xs font-bold text-black focus:outline-none placeholder:text-zinc-500 focus:bg-white transition-all shadow-[inset_1.5px_1.5px_3px_rgba(0,0,0,0.15)]"
+              className="order-1 sm:order-2 min-w-0 w-full sm:w-auto flex-grow basis-full sm:basis-auto h-12 sm:h-11 px-4 bg-zinc-50 border border-zinc-300 lg:border-2 lg:border-black rounded-xl lg:rounded-lg text-base sm:text-xs font-semibold lg:font-bold text-black focus:outline-none focus:ring-2 focus:ring-purple-200 placeholder:text-zinc-500 focus:bg-white transition-all lg:shadow-[inset_1.5px_1.5px_3px_rgba(0,0,0,0.15)]"
             />
 
             {/* Send button */}
             <button 
               type="submit" 
               disabled={isResponding || !input.trim()} 
-              className="order-3 sm:order-3 h-11 px-5 sm:px-6 flex-shrink-0 bg-[#FBBF24] hover:bg-[#F59E0B] text-black border-2 border-black rounded-lg font-bold text-xs shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+              className="order-3 sm:order-3 h-11 flex-1 sm:flex-none px-5 sm:px-6 bg-[#FBBF24] hover:bg-[#F59E0B] text-black border border-amber-500 lg:border-2 lg:border-black rounded-xl lg:rounded-lg font-bold text-xs lg:shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
             >
               SEND <Send size={12} className="stroke-[2.5]" />
             </button>
