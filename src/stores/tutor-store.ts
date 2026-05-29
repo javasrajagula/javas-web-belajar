@@ -21,7 +21,9 @@ interface TutorState {
 }
 
 export const useTutorStore = create<TutorState>((set, get) => {
-  const initialSession = getStorageItem<TutorSession>('academy_os_tutor_session', DEFAULT_SESSION);
+  const initialSession = sanitizeTutorSession(
+    getStorageItem<TutorSession>('academy_os_tutor_session', DEFAULT_SESSION)
+  );
 
   return {
     session: initialSession,
@@ -78,14 +80,7 @@ export const useTutorStore = create<TutorState>((set, get) => {
           .filter((m) => {
             const content = m.content.trim();
             if (!content) return false;
-            if (
-              m.sender === 'tutor' &&
-              (
-                content.startsWith('Halo! Saya adalah Tutor AI Academy OS') ||
-                content.startsWith('Maaf, Tutor AI belum bisa menjawab sekarang') ||
-                content.startsWith('Respons AI kosong atau gagal diproses')
-              )
-            ) {
+            if (m.sender === 'tutor' && isNonUserTutorSystemMessage(content)) {
               return false;
             }
             return true;
@@ -120,6 +115,9 @@ export const useTutorStore = create<TutorState>((set, get) => {
             throw new Error(`AI_PROVIDER_429:${payload.message || payload.error || "Provider AI sedang membatasi request. Coba lagi beberapa saat."}`);
           }
           const payload = await readErrorPayload(response);
+          if (payload.code === 'AI_PROVIDER_QUOTA') {
+            throw new Error(`AI_PROVIDER_QUOTA:${payload.message || payload.error || 'Kuota provider AI sedang habis atau terkena batas provider.'}`);
+          }
           throw new Error(payload.message || payload.error || 'Tutor AI gagal menjawab. Periksa konfigurasi GEMINI_API_KEY di server.');
         }
 
@@ -165,7 +163,7 @@ export const useTutorStore = create<TutorState>((set, get) => {
               if (m.id === tutorMsgId) {
                 return { 
                   ...m, 
-                  content: `**Batas Laju Terlampaui (429)**\n\n${limitMsg}\n\nSilakan tunggu sampai window 60 detik selesai sebelum mengirim pertanyaan berikutnya.` 
+                  content: `**Batas penggunaan Tutor AI tercapai**\n\n${limitMsg}\n\nIni hanya menghitung pertanyaan valid dari pengguna. Tunggu sampai window 60 detik selesai sebelum mengirim pertanyaan berikutnya.` 
                 };
               }
               return m;
@@ -185,6 +183,25 @@ export const useTutorStore = create<TutorState>((set, get) => {
                 return {
                   ...m,
                   content: `**Provider AI sedang membatasi request**\n\n${providerMsg}\n\nIni bukan batas 15 pertanyaan per menit dari aplikasi. Jika memakai Gemini free-tier, tunggu quota reset atau gunakan API key dengan kuota/billing aktif.`
+                };
+              }
+              return m;
+            });
+            const updated = { ...state.session, messages: updatedMessages };
+            setStorageItem('academy_os_tutor_session', updated);
+            return { session: updated, isResponding: false };
+          });
+          return;
+        }
+
+        if (error instanceof Error && error.message.startsWith('AI_PROVIDER_QUOTA:')) {
+          const providerMsg = error.message.replace('AI_PROVIDER_QUOTA:', '');
+          set((state) => {
+            const updatedMessages = state.session.messages.map((m) => {
+              if (m.id === tutorMsgId) {
+                return {
+                  ...m,
+                  content: `**Kuota provider AI sedang terbatas**\n\n${providerMsg}\n\nAPI key sudah dipanggil dari server, tetapi Gemini/provider menolak request karena kuota atau rate limit provider. Ini bukan batas 15 pertanyaan per menit dari aplikasi.`
                 };
               }
               return m;
@@ -233,5 +250,50 @@ async function readErrorPayload(response: Response): Promise<{ code?: string; er
   }
   const text = await response.text().catch(() => '');
   return { message: text };
+}
+
+function sanitizeTutorSession(session: TutorSession): TutorSession {
+  const cleanedMessages = session.messages.filter((message) => {
+    if (message.sender !== 'tutor') return true;
+    return !isNonUserTutorSystemMessage(message.content.trim());
+  });
+
+  if (cleanedMessages.length === 0) {
+    const resetSession = {
+      ...session,
+      messages: [
+        {
+          id: `m-init-${Date.now()}`,
+          sender: 'tutor' as const,
+          content: 'Sesi Tutor AI siap. Ajukan pertanyaan belajar, dan saya akan membedakan batas aplikasi dari batas provider AI dengan jelas.',
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    };
+    setStorageItem('academy_os_tutor_session', resetSession);
+    return resetSession;
+  }
+
+  if (cleanedMessages.length !== session.messages.length) {
+    const cleanedSession = { ...session, messages: cleanedMessages };
+    setStorageItem('academy_os_tutor_session', cleanedSession);
+    return cleanedSession;
+  }
+
+  return session;
+}
+
+function isNonUserTutorSystemMessage(content: string) {
+  return (
+    content.startsWith('Halo! Saya adalah Tutor AI Academy OS') ||
+    content.startsWith('Maaf, Tutor AI belum bisa menjawab sekarang') ||
+    content.startsWith('Respons AI kosong atau gagal diproses') ||
+    content.includes('Batas Laju Terlampaui') ||
+    content.includes('Batas laju terlampaui') ||
+    content.includes('Batas penggunaan Tutor AI tercapai') ||
+    content.includes('Provider AI sedang membatasi request') ||
+    content.includes('Kuota provider AI sedang terbatas') ||
+    content.includes('Kuota Gemini untuk server sedang habis')
+  );
 }
 

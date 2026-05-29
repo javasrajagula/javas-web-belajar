@@ -174,16 +174,17 @@ ${context ? `\n## Materi Aktif Terkait:\n- Modul: ${context.lessonTitle || 'Umum
       if (rateLimitKey && rateLimitToken) {
         await ratelimiter.refund(rateLimitKey, rateLimitToken);
       }
+      const providerQuotaError = isAiQuotaError(aiError);
       if (!canUseDevelopmentFallback()) {
         return new Response(
           JSON.stringify({
-            code: isAiQuotaError(aiError) ? "AI_PROVIDER_QUOTA" : "AI_PROVIDER_ERROR",
+            code: providerQuotaError ? "AI_PROVIDER_QUOTA" : "AI_PROVIDER_ERROR",
             error: "Provider AI gagal menjawab.",
             message: getAiProviderUserMessage(aiError),
             requestId,
           }),
           {
-            status: isAiQuotaError(aiError) ? 429 : 502,
+            status: providerQuotaError ? 503 : 502,
             headers: {
               "Content-Type": "application/json",
               "X-RateLimit-Source": "ai-provider",
@@ -208,14 +209,7 @@ function normalizeTutorMessages(messages: Array<{ role?: string; content?: strin
     }))
     .filter((m) => {
       if (!m.content) return false;
-      if (
-        m.role === 'assistant' &&
-        (
-          m.content.startsWith('Halo! Saya adalah Tutor AI Academy OS') ||
-          m.content.startsWith('Maaf, Tutor AI belum bisa menjawab sekarang') ||
-          m.content.startsWith('Respons AI kosong atau gagal diproses')
-        )
-      ) {
+      if (m.role === 'assistant' && isNonUserTutorSystemMessage(m.content)) {
         return false;
       }
       return true;
@@ -238,6 +232,20 @@ function normalizeTutorMessages(messages: Array<{ role?: string; content?: strin
   }
 
   return collapsed;
+}
+
+function isNonUserTutorSystemMessage(content: string) {
+  return (
+    content.startsWith('Halo! Saya adalah Tutor AI Academy OS') ||
+    content.startsWith('Maaf, Tutor AI belum bisa menjawab sekarang') ||
+    content.startsWith('Respons AI kosong atau gagal diproses') ||
+    content.includes('Batas Laju Terlampaui') ||
+    content.includes('Batas laju terlampaui') ||
+    content.includes('Batas penggunaan Tutor AI tercapai') ||
+    content.includes('Provider AI sedang membatasi request') ||
+    content.includes('Kuota provider AI sedang terbatas') ||
+    content.includes('Kuota Gemini untuk server sedang habis')
+  );
 }
 
 function getTutorRateLimitKey(req: NextRequest, userId?: string, email?: string) {
