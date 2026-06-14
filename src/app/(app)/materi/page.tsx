@@ -258,7 +258,17 @@ export default function MateriPage() {
                       </div>
 
                       <p className="mt-3 line-clamp-3 flex-1 text-xs font-medium leading-relaxed text-text-secondary">
-                        {makeExcerpt(materi.konten) || 'Materi ini berisi konten pembelajaran yang bisa dibuka di halaman detail.'}
+                        {(() => {
+                          if (materi.tipe === 'video' || materi.tipe === 'pdf') {
+                            try {
+                              const parsed = JSON.parse(materi.konten);
+                              return parsed.description || parsed.summary || 'Materi panduan belajar.';
+                            } catch {
+                              return makeExcerpt(materi.konten);
+                            }
+                          }
+                          return makeExcerpt(materi.konten);
+                        })() || 'Materi ini berisi konten pembelajaran yang bisa dibuka di halaman detail.'}
                       </p>
 
                       <div className="mt-4 flex items-center justify-between gap-2 border-t border-border pt-3">

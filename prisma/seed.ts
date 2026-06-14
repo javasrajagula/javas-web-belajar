@@ -1585,8 +1585,10 @@ Penerapan konsep ${lesson.title} memerlukan pemahaman detail teori serta disipli
 - [Web Belajar Center](https://github.com/javasrajagula/javas-web-belajar)
 `;
 
-              const isTeksTitle = isCommon || isGeneralTrack ? 'Materi Utama & Contoh Pembelajaran' : 'Teori Dasar & Kompetensi Kejuruan';
-              const isVideoTitle = isCommon || isGeneralTrack ? 'Video Panduan Belajar' : 'Video Panduan Praktik Kejuruan';
+              const isTeksTitle = isCommon || isGeneralTrack ? `Materi Utama: ${lesson.title}` : `Teori Dasar: ${lesson.title}`;
+              const isVideoTitle = isCommon || isGeneralTrack ? `Video Panduan: ${lesson.title}` : `Video Praktik: ${lesson.title}`;
+              const isPdfTitle = `Buku Modul & LKS: ${lesson.title}`;
+              const isRingkasanTitle = `Ringkasan & Glosarium: ${lesson.title}`;
 
               materisDb.push({
                 id: `materi-${materiCounter++}`,
@@ -1607,7 +1609,7 @@ Penerapan konsep ${lesson.title} memerlukan pemahaman detail teori serta disipli
               materisDb.push({
                 id: `materi-${materiCounter++}`,
                 babId: babId,
-                judul: 'Buku Modul Belajar & LKS (PDF)',
+                judul: isPdfTitle,
                 tipe: 'pdf',
                 konten: JSON.stringify(pdfPayload),
                 urutan: lessonIndex * 4 + 3
@@ -1615,7 +1617,7 @@ Penerapan konsep ${lesson.title} memerlukan pemahaman detail teori serta disipli
               materisDb.push({
                 id: `materi-${materiCounter++}`,
                 babId: babId,
-                judul: 'Ringkasan & Glosarium Penting',
+                judul: isRingkasanTitle,
                 tipe: 'ringkasan',
                 konten: ringkasanKonten,
                 urutan: lessonIndex * 4 + 4
@@ -1692,22 +1694,22 @@ Penerapan konsep ${lesson.title} memerlukan pemahaman detail teori serta disipli
 
             const activeMateriTemplates = [
               {
-                judul: isCommon || isGeneralTrack ? 'Materi Utama & Contoh Pembelajaran' : 'Teori Dasar & Kompetensi Kejuruan',
+                judul: isCommon || isGeneralTrack ? `Materi Utama: ${babJudul}` : `Teori Dasar: ${babJudul}`,
                 tipe: 'teks',
                 konten: buildTheoryContent(j, mapel, kelas, b, babJudul),
               },
               {
-                judul: isCommon || isGeneralTrack ? 'Video Panduan Belajar' : 'Video Panduan Praktik Kejuruan',
+                judul: isCommon || isGeneralTrack ? `Video Panduan: ${babJudul}` : `Video Praktik: ${babJudul}`,
                 tipe: 'video',
                 konten: JSON.stringify(buildVideoPayload(j, mapel, kelas, b, babJudul)),
               },
               {
-                judul: 'Buku Modul Belajar & LKS (PDF)',
+                judul: `Buku Modul & LKS: ${babJudul}`,
                 tipe: 'pdf',
                 konten: JSON.stringify(buildModulePayload(j, mapel, kelas, b, babJudul)),
               },
               {
-                judul: 'Ringkasan & Glosarium Penting',
+                judul: `Ringkasan & Glosarium: ${babJudul}`,
                 tipe: 'ringkasan',
                 konten: buildSummaryContent(j, mapel, kelas, b, babJudul),
               },

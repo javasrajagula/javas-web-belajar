@@ -98,7 +98,22 @@ export default function MateriDetailPage({
     return () => controller.abort();
   }, [id]);
 
-  const keyTerms = useMemo(() => extractTerms(materi?.konten || ''), [materi?.konten]);
+  const keyTerms = useMemo(() => {
+    if (!materi) return [];
+    let textToExtract = materi.konten;
+    if (materi.tipe === 'video' || materi.tipe === 'pdf') {
+      try {
+        const parsed = JSON.parse(materi.konten);
+        if (Array.isArray(parsed.keyConcepts) && parsed.keyConcepts.length > 0) {
+          return parsed.keyConcepts.slice(0, 6);
+        }
+        textToExtract = parsed.completeMaterial || parsed.description || parsed.title || '';
+      } catch {
+        // fallback to raw extraction
+      }
+    }
+    return extractTerms(textToExtract);
+  }, [materi]);
 
   async function markCompleted() {
     if (!materi || materi.selesai) return;
