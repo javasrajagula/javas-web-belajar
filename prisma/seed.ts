@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { hashPassword } from '../src/lib/password';
+import * as fs from 'fs';
+import * as path from 'path';
 import { JURUSAN_CATALOG } from '../src/lib/data/jurusan';
 import {
   GENERAL_LEARNING_TRACKS,
@@ -1303,7 +1305,46 @@ function buildQuestions(jurusan: any, mapel: any, kelas: number, bab: number, ba
   ];
 }
 
+function findJsonSubject(smaData: any[], smkData: any[], schoolType: string, grade: number, pathway: string, mapelNama: string) {
+  const jsonCurriculum = schoolType === 'sma' ? smaData : smkData;
+  return jsonCurriculum.find((sub: any) => {
+    if (sub.grade !== grade) return false;
+    if (schoolType === 'smk') {
+      const subPathway = sub.pathway || 'Umum';
+      const targetPathway = pathway === 'MPLB' ? 'OTKP' : pathway;
+      if (subPathway.toUpperCase() !== targetPathway.toUpperCase()) return false;
+    }
+    // Check name similarity
+    const normMapel = mapelNama.toLowerCase();
+    const normSub = sub.title.toLowerCase();
+    
+    // Keyword matching
+    if (normMapel.includes('pemrograman') && normSub.includes('pemrograman')) return true;
+    if (normMapel.includes('jaringan') && normSub.includes('jaringan')) return true;
+    if (normMapel.includes('akuntansi') && normSub.includes('akuntansi')) return true;
+    if ((normMapel.includes('perkantoran') || normMapel.includes('kepegawaian') || normMapel.includes('kearsipan') || normMapel.includes('korespondensi')) && 
+        (normSub.includes('perkantoran') || normSub.includes('kepegawaian') || normSub.includes('kearsipan') || normSub.includes('tata ruang'))) return true;
+    if ((normMapel.includes('pemasaran') || normMapel.includes('bisnis online') || normMapel.includes('strategi pemasaran') || normMapel.includes('social media')) && 
+        (normSub.includes('pemasaran') || normSub.includes('bisnis online') || normSub.includes('social media'))) return true;
+    if ((normMapel.includes('desain grafis') || normMapel.includes('animasi') || normMapel.includes('multimedia') || normMapel.includes('media interaktif')) && 
+        (normSub.includes('desain grafis') || normSub.includes('animasi') || normSub.includes('multimedia') || normSub.includes('vektor'))) return true;
+    
+    // General track (SMA) matching
+    if (schoolType === 'sma') {
+      if (normMapel.includes('matematika') && normSub.includes('matematika')) return true;
+      if (normMapel.includes('fisika') && normSub.includes('fisika')) return true;
+      if (normMapel.includes('bahasa indonesia') && normSub.includes('bahasa indonesia')) return true;
+      if (normMapel.includes('informatika') && normSub.includes('informatika')) return true;
+    }
+    
+    return false;
+  });
+}
+
 async function main() {
+  const smaData = JSON.parse(fs.readFileSync(path.join(__dirname, '../src/content/curriculum/sma.json'), 'utf-8'));
+  const smkData = JSON.parse(fs.readFileSync(path.join(__dirname, '../src/content/curriculum/smk.json'), 'utf-8'));
+
   console.log('🌱 Menghapus data lama (Clean Seeding)...');
   await prisma.hasilUjian.deleteMany();
   await prisma.userJurusan.deleteMany();
@@ -1356,179 +1397,353 @@ async function main() {
           deskripsi: `${isGeneralTrack ? j.bidang : isCommon ? 'Pelajaran umum SMK' : 'Mata pelajaran kompetensi keahlian'} ${mapel.kode} untuk siswa kelas ${kelas} semester ${mapel.semester}.`
         });
 
-        // Generate 5 Bab
-        for (let b = 1; b <= 5; b++) {
-          const babId = `bab-${babCounter++}`;
-          const estimasi = [45, 60, 90, 60, 75][b - 1] || 60;
-          const babJudul = getBabJudul(mapel.nama, b, kelas);
+        const schoolType = j.kode.startsWith('SMA') ? 'sma' : (JURUSAN_CATALOG.some(jc => jc.kode === j.kode) ? 'smk' : 'other');
+        const matchedSubject = schoolType !== 'other' 
+          ? findJsonSubject(smaData, smkData, schoolType, kelas, j.kode, mapel.nama)
+          : null;
 
-          babsDb.push({
-            id: babId,
-            mataPelajaranId: mpId,
-            nomor: b,
-            judul: `Bab ${b}: ${babJudul}`,
-            deskripsi: `Mempelajari ${babJudul} berdasarkan alur Kurikulum Merdeka kelas ${kelas} dengan penjelasan, contoh, dan latihan.`,
-            estimasiMenit: estimasi
-          });
+        if (matchedSubject) {
+          let b = 1;
+          for (const mod of matchedSubject.modules) {
+            const babId = `bab-${babCounter++}`;
+            const estimasi = [45, 60, 90, 60, 75][b - 1] || 60;
+            babsDb.push({
+              id: babId,
+              mataPelajaranId: mpId,
+              nomor: b,
+              judul: `Bab ${b}: ${mod.title}`,
+              deskripsi: `Mempelajari ${mod.title} berdasarkan alur Kurikulum Merdeka kelas ${kelas} dengan penjelasan, contoh, dan latihan.`,
+              estimasiMenit: estimasi
+            });
 
-          // Legacy examples are intentionally kept out of the active seed path.
-          const legacyMateriTemplates = [
-            {
-              judul: 'Teori Dasar & Kompetensi Kejuruan',
-              tipe: 'teks',
-              konten: `# Teori Dasar ${mapel.nama} — Bab ${b}
+            const lessons = mod.lessons && mod.lessons.length > 0 ? mod.lessons : [{
+              title: mod.title,
+              explanation: `Materi mendalam tentang ${mod.title}.`,
+              visualExample: `Contoh terapan untuk ${mod.title}.`,
+              summary: `Ringkasan konsep inti dari ${mod.title}.`,
+              quizzes: []
+            }];
+
+            let lessonIndex = 0;
+            for (const lesson of lessons) {
+              const teksKonten = `# ${lesson.title}
+
+## Identitas Materi
+- Jurusan/Jenjang: ${j.nama}
+- Mata pelajaran: ${mapel.nama}
+- Kelas/Semester: ${kelas}/${mapel.semester}
+- Fokus belajar: ${lesson.title}
 
 ## Capaian Pembelajaran & Tujuan
 Setelah mempelajari modul ini, siswa diharapkan memiliki kompetensi:
-1. Menjelaskan prinsip dan fondasi teoritis utama terkait topik.
-2. Melakukan analisis dan pemecahan masalah sederhana di bidangnya.
-3. Menerapkan Standar Operasional Prosedur (SOP) industri kejuruan yang relevan.
+1. Menjelaskan konsep utama "${lesson.title}" dengan bahasa sendiri.
+2. Menggunakan konsep tersebut untuk membaca kasus atau soal yang sesuai mata pelajaran ${mapel.nama}.
+3. Menyelesaikan contoh soal dengan langkah yang bisa diperiksa.
 
-## Materi Utama
-Materi kejuruan ini dirancang untuk mempersiapkan siswa SMK menguasai kompetensi industri praktis sesuai standar kurikulum nasional terbaru. Penjelasan detail teori mencakup aspek fungsionalitas, pemodelan kasus, dan studi alur kerja operasional.
+## Konsep Inti
+${lesson.explanation || `Konsep dasar mengenai ${lesson.title}.`}
 
-### Kompetensi Kerja Terkait:
-- Penggunaan perkakas dan alat standar industri.
-- Penerapan K3LH (Kesehatan Keselamatan Kerja dan Lingkungan Hidup).
-- Kemampuan analisis diagnostik masalah di lapangan.
+## Contoh Konkret
+${lesson.visualExample || `Penerapan praktis ${lesson.title} dalam kehidupan sehari-hari.`}
 
-> **Catatan Industri:** Topik bab ${b} ini sering kali diujikan dalam Uji Kompetensi Keahlian (UKK) nasional.`
-            },
-            {
-              judul: 'Video Panduan Praktik Kejuruan',
-              tipe: 'video',
-              konten: JSON.stringify({
-                title: `Panduan Praktik ${mapel.nama} Bab ${b}`,
-                description: `Panduan belajar praktik untuk topik "${babJudul}" pada mata pelajaran ${mapel.nama}.`,
+## Contoh Soal dan Pembahasan
+**Soal:** ${lesson.quizzes && lesson.quizzes[0] ? lesson.quizzes[0].question : `Bagaimana penerapan ${lesson.title}?`}
+
+**Pembahasan:** ${lesson.quizzes && lesson.quizzes[0] ? lesson.quizzes[0].explanation : `Penerapan ${lesson.title} harus mengikuti langkah-langkah terstruktur dan logis.`}
+
+## Rangkuman
+${lesson.summary || `1. Topik ${lesson.title} membahas konsep secara komprehensif.\n2. Latihan soal membantu memperkuat pemahaman.`}
+
+## Referensi Belajar
+Materi ini disusun ulang dengan bahasa aplikasi dan merujuk pada sumber belajar berikut:
+- [Kurikulum Merdeka Vokasi](https://kurikulum.kemdikbud.go.id/)
+- [Web Belajar Center](https://github.com/javasrajagula/javas-web-belajar)
+`;
+
+              const videoTranscript = (lesson.podcastScript || []).map((line: any) => `${line.role}: ${line.text}`);
+              if (videoTranscript.length < 4) {
+                videoTranscript.push(
+                  `Pembukaan: fokus belajar hari ini adalah pada topik "${lesson.title}".`,
+                  `Konsep inti: ${lesson.summary || lesson.title}`,
+                  `Latihan mandiri: mari kerjakan kuis dan pahami pembahasannya.`,
+                  `Penutup: terapkan selalu SOP dan K3LH dalam setiap praktikum.`
+                );
+              }
+              const finalTranscript = videoTranscript.slice(0, 8);
+              while (finalTranscript.length < 4) {
+                finalTranscript.push('Langkah tambahan: pelajari contoh soal.');
+              }
+              const youtubeQuery = encodeURIComponent(`${mapel.nama} ${lesson.title}`);
+              
+              const videoPayload = {
+                title: `Video Panduan: ${lesson.title}`,
+                description: `Panduan belajar untuk ${mapel.nama} kelas ${kelas} mengenai ${lesson.title}.`,
+                status: 'youtube_search_reference',
                 embedUrl: '',
-                externalUrl: '',
-                transcript: [
-                  'Siapkan alat, bahan, dan lembar kerja sesuai instruksi guru.',
-                  'Baca tujuan praktik, identifikasi risiko K3LH, lalu susun urutan kerja.',
-                  'Kerjakan prosedur inti secara bertahap dan catat hasil pengamatan.',
-                  'Lakukan pemeriksaan akhir, dokumentasi, dan refleksi kesalahan umum.',
+                externalUrl: `https://www.youtube.com/results?search_query=${youtubeQuery}`,
+                youtubeUrl: `https://www.youtube.com/results?search_query=${youtubeQuery}`,
+                youtubeVideoId: null,
+                thumbnailUrl: null,
+                sourceVerified: false,
+                lastCheckedAt: '2026-06-14',
+                durationMinutes: 12 + b,
+                category: mapel.nama,
+                transcript: finalTranscript,
+                references: [
+                  { title: 'Kurikulum Merdeka', url: 'https://kurikulum.kemdikbud.go.id/' }
                 ],
-                unavailableReason: 'Video eksternal resmi belum tersedia di seed lokal. Konten ini menyediakan panduan praktik tertulis yang bisa diganti dengan URL video sekolah/industri.',
-              })
-            },
-            {
-              judul: 'Buku Modul Belajar & LKS (PDF)',
-              tipe: 'pdf',
-              konten: JSON.stringify({
-                title: `Modul ${mapel.nama} Bab ${b}`,
-                description: `Modul belajar terstruktur untuk "${babJudul}" dengan tujuan, konsep, aktivitas, dan evaluasi.`,
+                unavailableReason: 'Embed video internal dan video YouTube spesifik belum diverifikasi. Tombol referensi membuka pencarian YouTube sesuai topik materi.',
+              };
+
+              const pdfObjectives = [
+                `Menjelaskan konsep "${lesson.title}" dengan bahasa sendiri.`,
+                `Mengerjakan contoh soal dan latihan terkait ${mapel.nama}.`
+              ];
+              const pdfEvaluation = (lesson.quizzes || []).map((q: any) => q.question);
+              while (pdfEvaluation.length < 2) {
+                pdfEvaluation.push(`Jelaskan konsep dasar ${lesson.title} dengan bahasa sendiri.`);
+                pdfEvaluation.push(`Tuliskan satu contoh penerapan ${lesson.title} di kehidupan nyata.`);
+              }
+              const pdfWorkedExample = {
+                question: lesson.quizzes && lesson.quizzes[0] ? lesson.quizzes[0].question : `Bagaimana penerapan ${lesson.title}?`,
+                answer: lesson.quizzes && lesson.quizzes[0] ? lesson.quizzes[0].explanation : `Penerapan ${lesson.title} harus mengikuti langkah-langkah terstruktur.`
+              };
+              const pdfChapters = [
+                {
+                  title: 'Bagian 1 - Pendahuluan',
+                  summary: `Mengenali topik "${lesson.title}", mata pelajaran ${mapel.nama}, kelas ${kelas}, dan tujuan yang harus dicapai siswa.`,
+                  topics: ['Identitas materi', 'Tujuan pembelajaran']
+                },
+                {
+                  title: 'Bagian 2 - Konsep Utama',
+                  summary: lesson.summary || `Konsep dasar dari ${lesson.title}.`,
+                  topics: ['Konsep inti', 'Penjelasan bertahap']
+                },
+                {
+                  title: 'Bagian 3 - Soal dan Latihan',
+                  summary: `Mengerjakan contoh soal, memahami pembahasan, menjawab latihan terkait ${lesson.title}.`,
+                  topics: ['Contoh soal', 'Latihan']
+                }
+              ];
+              const pdfChecklist = [
+                `Saya bisa menjelaskan "${lesson.title}" dengan bahasa sendiri.`,
+                'Saya bisa memberi contoh konkret yang sesuai topik.',
+                'Saya bisa mengerjakan contoh soal dan memahami pembahasannya.'
+              ];
+
+              const pdfPayload = {
+                title: `Modul Belajar: ${lesson.title}`,
+                description: `Modul lengkap ${mapel.nama} untuk memahami "${lesson.title}".`,
                 pdfUrl: '',
-                topics: [
-                  'Capaian pembelajaran dan tujuan praktik',
-                  'Konsep dasar dan istilah penting',
-                  'Langkah kerja berbasis SOP',
-                  'Latihan soal dan refleksi kompetensi',
+                identity: {
+                  jurusan: j.nama,
+                  mapel: mapel.nama,
+                  kelas,
+                  semester: mapel.semester,
+                  topik: lesson.title,
+                  kategori: j.kode.startsWith('SMA') ? j.bidang : 'Pelajaran Kejuruan SMK',
+                },
+                objectives: pdfObjectives,
+                keyConcepts: [lesson.summary || lesson.title],
+                completeMaterial: `${lesson.explanation || ''}\n\n${lesson.visualExample || ''}`,
+                workedExample: pdfWorkedExample,
+                chapters: pdfChapters,
+                examples: [lesson.visualExample || ''],
+                evaluation: pdfEvaluation,
+                summary: lesson.summary || lesson.title,
+                checklist: pdfChecklist,
+                topics: ['Pendahuluan', 'Konsep Utama', 'Soal dan Latihan'],
+                references: [
+                  { title: 'Kurikulum Merdeka', url: 'https://kurikulum.kemdikbud.go.id/' }
                 ],
-                content: `Modul ini membahas ${babJudul} pada mata pelajaran ${mapel.nama}. Gunakan modul sebagai bahan baca, catatan praktik, dan persiapan latihan soal. File PDF asli belum dilampirkan di seed lokal sehingga tombol unduh akan menampilkan status belum tersedia.`,
-                unavailableReason: 'File PDF asli belum tersedia di seed lokal. Struktur modul tetap disediakan agar mudah diganti dengan URL PDF resmi saat deploy.',
-              })
-            },
-            {
-              judul: 'Ringkasan & Glosarium Penting',
-              tipe: 'ringkasan',
-              konten: `## Ringkasan Bab ${b}
+                content: `File PDF modul belum tersedia. Isi modul lengkap "${lesson.title}" dapat dibaca di halaman ini.`,
+                unavailableReason: 'File PDF modul belum tersedia. Isi modul lengkap tetap ditampilkan agar tidak ada tombol download palsu.',
+              };
 
-- **Poin Kunci 1:** Konsep utama yang wajib diingat siswa sebelum uji kompetensi.
-- **Poin Kunci 2:** Alur kerja (workflow) praktis standar industri.
-- **Poin Kunci 3:** Analisis troubleshoot dasar yang sering terjadi di lapangan.
+              const ringkasanKonten = `## Ringkasan ${lesson.title}
 
-## Istilah Kejuruan Penting (Glosarium)
-| Istilah | Penjelasan Singkat (Definisi) |
-|---------|--------------------------------|
-| Standar Industri | Ketetapan baku yang diakui secara luas di ekosistem kerja. |
-| Troubleshoot | Proses pencarian sumber masalah dan perbaikannya. |
-| Uji Kompetensi | Evaluasi akhir keahlian siswa yang divalidasi oleh industri. |`
+### Poin Penting
+- **Konsep:** ${lesson.summary || lesson.title}
+
+### Rumus/Aturan Utama
+Penerapan konsep ${lesson.title} memerlukan pemahaman detail teori serta disiplin mengikuti Standar Operasional Prosedur (SOP) yang berlaku di industri/sekolah.
+
+### Contoh Soal dan Pembahasan
+**Soal:** ${lesson.quizzes && lesson.quizzes[0] ? lesson.quizzes[0].question : `Bagaimana penerapan ${lesson.title}?`}
+
+**Pembahasan:** ${lesson.quizzes && lesson.quizzes[0] ? lesson.quizzes[0].explanation : `Harus diselesaikan sesuai prinsip dasar.`}
+
+### Glosarium
+| Istilah | Makna Pembelajaran |
+|---|---|
+| ${lesson.title} | Topik utama bahasan materi kejuruan/umum. |
+| SOP | Standar Operasional Prosedur yang harus dipatuhi. |
+| K3LH | Kesehatan Keselamatan Kerja dan Lingkungan Hidup. |
+
+### Referensi Belajar
+- [Kurikulum Merdeka](https://kurikulum.kemdikbud.go.id/)
+- [Web Belajar Center](https://github.com/javasrajagula/javas-web-belajar)
+`;
+
+              const isTeksTitle = isCommon || isGeneralTrack ? 'Materi Utama & Contoh Pembelajaran' : 'Teori Dasar & Kompetensi Kejuruan';
+              const isVideoTitle = isCommon || isGeneralTrack ? 'Video Panduan Belajar' : 'Video Panduan Praktik Kejuruan';
+
+              materisDb.push({
+                id: `materi-${materiCounter++}`,
+                babId: babId,
+                judul: isTeksTitle,
+                tipe: 'teks',
+                konten: teksKonten,
+                urutan: lessonIndex * 4 + 1
+              });
+              materisDb.push({
+                id: `materi-${materiCounter++}`,
+                babId: babId,
+                judul: isVideoTitle,
+                tipe: 'video',
+                konten: JSON.stringify(videoPayload),
+                urutan: lessonIndex * 4 + 2
+              });
+              materisDb.push({
+                id: `materi-${materiCounter++}`,
+                babId: babId,
+                judul: 'Buku Modul Belajar & LKS (PDF)',
+                tipe: 'pdf',
+                konten: JSON.stringify(pdfPayload),
+                urutan: lessonIndex * 4 + 3
+              });
+              materisDb.push({
+                id: `materi-${materiCounter++}`,
+                babId: babId,
+                judul: 'Ringkasan & Glosarium Penting',
+                tipe: 'ringkasan',
+                konten: ringkasanKonten,
+                urutan: lessonIndex * 4 + 4
+              });
+
+              lessonIndex++;
             }
-          ];
 
-          const activeMateriTemplates = [
-            {
-              judul: isCommon || isGeneralTrack ? 'Materi Utama & Contoh Pembelajaran' : 'Teori Dasar & Kompetensi Kejuruan',
-              tipe: 'teks',
-              konten: buildTheoryContent(j, mapel, kelas, b, babJudul),
-            },
-            {
-              judul: isCommon || isGeneralTrack ? 'Video Panduan Belajar' : 'Video Panduan Praktik Kejuruan',
-              tipe: 'video',
-              konten: JSON.stringify(buildVideoPayload(j, mapel, kelas, b, babJudul)),
-            },
-            {
-              judul: 'Buku Modul Belajar & LKS (PDF)',
-              tipe: 'pdf',
-              konten: JSON.stringify(buildModulePayload(j, mapel, kelas, b, babJudul)),
-            },
-            {
-              judul: 'Ringkasan & Glosarium Penting',
-              tipe: 'ringkasan',
-              konten: buildSummaryContent(j, mapel, kelas, b, babJudul),
-            },
-          ];
+            const allJsonQuestions: any[] = [];
+            for (const les of lessons) {
+              if (les.quizzes) allJsonQuestions.push(...les.quizzes.map((q: any) => ({ ...q, tipe: 'pilihan_ganda' })));
+              if (les.hotsQuestions) allJsonQuestions.push(...les.hotsQuestions.map((q: any) => ({ ...q, tipe: 'pilihan_ganda' })));
+              if (les.practiceBank) allJsonQuestions.push(...les.practiceBank.map((q: any) => ({ ...q, tipe: 'essay' })));
+            }
 
-          void legacyMateriTemplates;
+            for (let s = 1; s <= 5; s++) {
+              const jsonQ = allJsonQuestions[s - 1];
+              if (jsonQ) {
+                const questionText = jsonQ.question.length > 50 ? jsonQ.question : `${jsonQ.question} (Pahami konsep ini dengan seksama untuk persiapan ujian kejuruan/umum)`;
+                const explanationText = jsonQ.explanation && jsonQ.explanation.length > 40
+                  ? jsonQ.explanation
+                  : `${jsonQ.explanation || ''} Penjelasan ini disusun agar siswa memahami latar belakang jawaban yang benar secara menyeluruh.`;
 
-          for (let m = 0; m < activeMateriTemplates.length; m++) {
-            const mat = activeMateriTemplates[m];
-            materisDb.push({
-              id: `materi-${materiCounter++}`,
-              babId: babId,
-              judul: mat.judul,
-              tipe: mat.tipe,
-              konten: mat.konten,
-              urutan: m + 1
-            });
+                bankSoalsDb.push({
+                  id: `soal-${soalCounter++}`,
+                  mataPelajaranId: mpId,
+                  pertanyaan: questionText,
+                  tipe: jsonQ.tipe === 'pilihan_ganda' ? 'pilihan_ganda' : 'essay',
+                  pilihan: jsonQ.options ? JSON.stringify(jsonQ.options) : null,
+                  jawabanBenar: jsonQ.options ? String.fromCharCode(65 + jsonQ.correctOptionIndex) : (jsonQ.answer || 'Tindakan yang benar harus sesuai dengan SOP.'),
+                  pembahasan: explanationText,
+                  tingkat: s <= 2 ? 'mudah' : (s <= 4 ? 'sedang' : 'sukar'),
+                  kelas,
+                  tahunAjaran: '2025/2026',
+                  sumber: `Kurikulum Resmi ${j.nama} - ${mapel.nama}`,
+                  tags: [mapel.nama, j.kode, `Bab ${b}`]
+                });
+              } else {
+                const fallbackQ = buildQuestions(j, mapel, kelas, b, mod.title, soalCounter)[s - 1] || buildQuestions(j, mapel, kelas, b, mod.title, soalCounter)[0];
+                bankSoalsDb.push({
+                  id: `soal-${soalCounter++}`,
+                  mataPelajaranId: mpId,
+                  pertanyaan: fallbackQ.pertanyaan,
+                  tipe: fallbackQ.tipe,
+                  pilihan: fallbackQ.pilihan ? JSON.stringify(fallbackQ.pilihan) : null,
+                  jawabanBenar: fallbackQ.jawabanBenar,
+                  pembahasan: fallbackQ.pembahasan,
+                  tingkat: fallbackQ.tingkat,
+                  kelas,
+                  tahunAjaran: '2025/2026',
+                  sumber: `Kurikulum Mandiri ${j.nama} - ${mapel.nama}`,
+                  tags: [mapel.nama, j.kode, `Bab ${b}`]
+                });
+              }
+            }
+
+            b++;
           }
+        } else {
+          // Fallback generator (SD, SMP, other SMK majors, common subjects without JSON match)
+          for (let b = 1; b <= 5; b++) {
+            const babId = `bab-${babCounter++}`;
+            const estimasi = [45, 60, 90, 60, 75][b - 1] || 60;
+            const babJudul = getBabJudul(mapel.nama, b, kelas);
 
-          // Generate 5 BankSoal
-          const tingkats = ['mudah', 'sedang', 'sukar'];
-          for (let s = 1; s <= 5; s++) {
-            const isPilihanGanda = s <= 3;
-            bankSoalsDb.push({
-              id: `soal-${soalCounter++}`,
+            babsDb.push({
+              id: babId,
               mataPelajaranId: mpId,
-              pertanyaan: `Soal Latihan Kejuruan ${s} (${mapel.nama} Kelas ${kelas} Bab ${b}): Manakah di bawah ini yang merupakan tindakan paling tepat dan sesuai dengan SOP industri terkait topik ini?`,
-              tipe: isPilihanGanda ? 'pilihan_ganda' : (s === 4 ? 'benar_salah' : 'essay'),
-              pilihan: isPilihanGanda
-                ? JSON.stringify([
-                    `A. Mengikuti prosedur K3LH standar industri secara penuh`,
-                    `B. Melakukan perbaikan cepat tanpa menggunakan alat pelindung`,
-                    `C. Mengabaikan instruksi kerja demi mengejar waktu penyelesaian`,
-                    `D. Melaporkan kesalahan setelah proyek selesai sepenuhnya`,
-                    `E. Menggunakan perkakas yang tidak terkalibrasi demi kenyamanan`
-                  ])
-                : null,
-              jawabanBenar: isPilihanGanda ? 'A' : (s === 4 ? 'Benar' : 'Tindakan yang benar harus sesuai dengan SOP industri dan mengutamakan K3LH.'),
-              pembahasan: `Pembahasan Soal ${s}: Tindakan wajib bagi setiap praktisi di industri adalah mengedepankan Standar Operasional Prosedur (SOP) serta keselamatan kerja (K3LH) untuk mencegah cedera atau kerusakan aset perusahaan.`,
-              tingkat: tingkats[s % 3] || 'sedang',
-              kelas,
-              tahunAjaran: '2025/2026',
-              sumber: `Seed internal berbasis materi: ${mapel.nama} - ${babJudul}`,
-              tags: [mapel.nama, 'SMK', `Bab ${b}`]
+              nomor: b,
+              judul: `Bab ${b}: ${babJudul}`,
+              deskripsi: `Mempelajari ${babJudul} berdasarkan alur Kurikulum Merdeka kelas ${kelas} dengan penjelasan, contoh, dan latihan.`,
+              estimasiMenit: estimasi
             });
-          }
 
-          const activeQuestions = buildQuestions(j, mapel, kelas, b, babJudul, soalCounter - 5);
-          for (let qi = 0; qi < activeQuestions.length; qi++) {
-            const question = activeQuestions[qi];
-            const targetIndex = bankSoalsDb.length - activeQuestions.length + qi;
-            bankSoalsDb[targetIndex] = {
-              id: question.id,
-              mataPelajaranId: mpId,
-              pertanyaan: question.pertanyaan,
-              tipe: question.tipe,
-              pilihan: question.pilihan ? JSON.stringify(question.pilihan) : null,
-              jawabanBenar: question.jawabanBenar,
-              pembahasan: question.pembahasan,
-              tingkat: question.tingkat,
-              kelas,
-              tahunAjaran: '2025/2026',
-              sumber: `Seed internal berbasis materi: ${mapel.nama} - ${babJudul}`,
-              tags: [mapel.nama, j.kode, 'SMK', `Bab ${b}`, babJudul],
-            };
+            const activeMateriTemplates = [
+              {
+                judul: isCommon || isGeneralTrack ? 'Materi Utama & Contoh Pembelajaran' : 'Teori Dasar & Kompetensi Kejuruan',
+                tipe: 'teks',
+                konten: buildTheoryContent(j, mapel, kelas, b, babJudul),
+              },
+              {
+                judul: isCommon || isGeneralTrack ? 'Video Panduan Belajar' : 'Video Panduan Praktik Kejuruan',
+                tipe: 'video',
+                konten: JSON.stringify(buildVideoPayload(j, mapel, kelas, b, babJudul)),
+              },
+              {
+                judul: 'Buku Modul Belajar & LKS (PDF)',
+                tipe: 'pdf',
+                konten: JSON.stringify(buildModulePayload(j, mapel, kelas, b, babJudul)),
+              },
+              {
+                judul: 'Ringkasan & Glosarium Penting',
+                tipe: 'ringkasan',
+                konten: buildSummaryContent(j, mapel, kelas, b, babJudul),
+              },
+            ];
+
+            for (let m = 0; m < activeMateriTemplates.length; m++) {
+              const mat = activeMateriTemplates[m];
+              materisDb.push({
+                id: `materi-${materiCounter++}`,
+                babId: babId,
+                judul: mat.judul,
+                tipe: mat.tipe,
+                konten: mat.konten,
+                urutan: m + 1
+              });
+            }
+
+            const activeQuestions = buildQuestions(j, mapel, kelas, b, babJudul, soalCounter);
+            for (let qi = 0; qi < activeQuestions.length; qi++) {
+              const question = activeQuestions[qi];
+              bankSoalsDb.push({
+                id: question.id,
+                mataPelajaranId: mpId,
+                pertanyaan: question.pertanyaan,
+                tipe: question.tipe,
+                pilihan: question.pilihan ? JSON.stringify(question.pilihan) : null,
+                jawabanBenar: question.jawabanBenar,
+                pembahasan: question.pembahasan,
+                tingkat: question.tingkat,
+                kelas,
+                tahunAjaran: '2025/2026',
+                sumber: `Seed internal berbasis materi: ${mapel.nama} - ${babJudul}`,
+                tags: [mapel.nama, j.kode, 'SMK', `Bab ${b}`, babJudul],
+              });
+              soalCounter++;
+            }
           }
         }
       }
