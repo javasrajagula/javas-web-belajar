@@ -8,7 +8,7 @@ const DEFAULT_SESSION: TutorSession = {
   id: 'session-default',
   mode: 'teacher',
   messages: [
-    { id: 'm-init', sender: 'tutor', content: 'Halo! Saya adalah Tutor AI Academy OS. Pilih mode mengajar di sebelah kiri dan ajukan pertanyaan apa pun untuk memulai sesi belajar kita!', timestamp: new Date().toISOString() }
+    { id: 'm-init', sender: 'tutor', content: 'Halo! Saya adalah Tutor AI Web Belajar. Pilih mode mengajar di sebelah kiri dan ajukan pertanyaan apa pun untuk memulai sesi belajar kita!', timestamp: new Date().toISOString() }
   ]
 };
 
@@ -321,7 +321,7 @@ function sanitizeTutorSession(session: TutorSession): TutorSession {
 
 function isNonUserTutorSystemMessage(content: string) {
   return (
-    content.startsWith('Halo! Saya adalah Tutor AI Academy OS') ||
+    content.startsWith('Halo! Saya adalah Tutor AI Web Belajar') ||
     content.startsWith('Maaf, Tutor AI belum bisa menjawab sekarang') ||
     content.startsWith('Respons AI kosong atau gagal diproses') ||
     content.includes('Batas Laju Terlampaui') ||

@@ -63,7 +63,7 @@
             "podcastScript": [
               {
                 "role": "guru",
-                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Variabel, Tipe Data, dan Percabangan."
+                "text": "Halo kawan vokasi! Selamat datang di sesi Web Belajar untuk materi Variabel, Tipe Data, dan Percabangan."
               },
               {
                 "role": "siswa",
@@ -139,7 +139,7 @@
             "podcastScript": [
               {
                 "role": "guru",
-                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Pilar Enkapsulasi dan Pewarisan."
+                "text": "Halo kawan vokasi! Selamat datang di sesi Web Belajar untuk materi Pilar Enkapsulasi dan Pewarisan."
               },
               {
                 "role": "siswa",
@@ -215,7 +215,7 @@
             "podcastScript": [
               {
                 "role": "guru",
-                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Arsitektur REST API dengan Node.js."
+                "text": "Halo kawan vokasi! Selamat datang di sesi Web Belajar untuk materi Arsitektur REST API dengan Node.js."
               },
               {
                 "role": "siswa",
@@ -291,7 +291,7 @@
             "podcastScript": [
               {
                 "role": "guru",
-                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Pengalamatan IP Jaringan & Subnetting."
+                "text": "Halo kawan vokasi! Selamat datang di sesi Web Belajar untuk materi Pengalamatan IP Jaringan & Subnetting."
               },
               {
                 "role": "siswa",
@@ -367,7 +367,7 @@
             "podcastScript": [
               {
                 "role": "guru",
-                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Konfigurasi Routing Statis."
+                "text": "Halo kawan vokasi! Selamat datang di sesi Web Belajar untuk materi Konfigurasi Routing Statis."
               },
               {
                 "role": "siswa",
@@ -443,7 +443,7 @@
             "podcastScript": [
               {
                 "role": "guru",
-                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Konfigurasi VPN dan Firewall Filter."
+                "text": "Halo kawan vokasi! Selamat datang di sesi Web Belajar untuk materi Konfigurasi VPN dan Firewall Filter."
               },
               {
                 "role": "siswa",
@@ -519,7 +519,7 @@
             "podcastScript": [
               {
                 "role": "guru",
-                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Jurnal Umum dan Persamaan Dasar."
+                "text": "Halo kawan vokasi! Selamat datang di sesi Web Belajar untuk materi Jurnal Umum dan Persamaan Dasar."
               },
               {
                 "role": "siswa",
@@ -595,7 +595,7 @@
             "podcastScript": [
               {
                 "role": "guru",
-                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Metode Penyusutan Garis Lurus."
+                "text": "Halo kawan vokasi! Selamat datang di sesi Web Belajar untuk materi Metode Penyusutan Garis Lurus."
               },
               {
                 "role": "siswa",
@@ -671,7 +671,7 @@
             "podcastScript": [
               {
                 "role": "guru",
-                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Setup Chart of Accounts di MYOB."
+                "text": "Halo kawan vokasi! Selamat datang di sesi Web Belajar untuk materi Setup Chart of Accounts di MYOB."
               },
               {
                 "role": "siswa",
@@ -747,7 +747,7 @@
             "podcastScript": [
               {
                 "role": "guru",
-                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Prosedur Surat Masuk & Keluar."
+                "text": "Halo kawan vokasi! Selamat datang di sesi Web Belajar untuk materi Prosedur Surat Masuk & Keluar."
               },
               {
                 "role": "siswa",
@@ -823,7 +823,7 @@
             "podcastScript": [
               {
                 "role": "guru",
-                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Pengelolaan SOP Cuti Karyawan."
+                "text": "Halo kawan vokasi! Selamat datang di sesi Web Belajar untuk materi Pengelolaan SOP Cuti Karyawan."
               },
               {
                 "role": "siswa",
@@ -899,7 +899,7 @@
             "podcastScript": [
               {
                 "role": "guru",
-                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Pengindeksan Arsip Elektronik."
+                "text": "Halo kawan vokasi! Selamat datang di sesi Web Belajar untuk materi Pengindeksan Arsip Elektronik."
               },
               {
                 "role": "siswa",
@@ -975,7 +975,7 @@
             "podcastScript": [
               {
                 "role": "guru",
-                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Analisis Target Pasar & Persona."
+                "text": "Halo kawan vokasi! Selamat datang di sesi Web Belajar untuk materi Analisis Target Pasar & Persona."
               },
               {
                 "role": "siswa",
@@ -1051,7 +1051,7 @@
             "podcastScript": [
               {
                 "role": "guru",
-                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Riset Kata Kunci SEO Marketplace."
+                "text": "Halo kawan vokasi! Selamat datang di sesi Web Belajar untuk materi Riset Kata Kunci SEO Marketplace."
               },
               {
                 "role": "siswa",
@@ -1127,7 +1127,7 @@
             "podcastScript": [
               {
                 "role": "guru",
-                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Setup Custom Audience di Meta Ads."
+                "text": "Halo kawan vokasi! Selamat datang di sesi Web Belajar untuk materi Setup Custom Audience di Meta Ads."
               },
               {
                 "role": "siswa",
@@ -1203,7 +1203,7 @@
             "podcastScript": [
               {
                 "role": "guru",
-                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Prinsip Hierarki Visual Tipografi."
+                "text": "Halo kawan vokasi! Selamat datang di sesi Web Belajar untuk materi Prinsip Hierarki Visual Tipografi."
               },
               {
                 "role": "siswa",
@@ -1279,7 +1279,7 @@
             "podcastScript": [
               {
                 "role": "guru",
-                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Menggunakan Pen Tool untuk Tracing."
+                "text": "Halo kawan vokasi! Selamat datang di sesi Web Belajar untuk materi Menggunakan Pen Tool untuk Tracing."
               },
               {
                 "role": "siswa",
@@ -1355,7 +1355,7 @@
             "podcastScript": [
               {
                 "role": "guru",
-                "text": "Halo kawan vokasi! Selamat datang di sesi BelajarKU untuk materi Teknik Pemodelan Low Poly 3D."
+                "text": "Halo kawan vokasi! Selamat datang di sesi Web Belajar untuk materi Teknik Pemodelan Low Poly 3D."
               },
               {
                 "role": "siswa",

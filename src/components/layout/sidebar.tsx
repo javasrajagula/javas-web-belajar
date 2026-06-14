@@ -127,7 +127,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
             </div>
             <div className="flex flex-col">
               <span className="font-black text-text-primary text-sm tracking-tight group-hover:text-primary transition-colors uppercase">
-                Academy OS
+                Web Belajar
               </span>
               <span className="text-[9px] font-mono text-text-tertiary uppercase tracking-wider font-bold">
                 SMK Edition
@@ -152,7 +152,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         <div className="flex items-center gap-3 w-full">
           <div className="relative flex-shrink-0">
             <Image
-              src={displayProfile.avatar || 'https://api.dicebear.com/7.x/bottts/svg?seed=belajarku'}
+              src={displayProfile.avatar || 'https://api.dicebear.com/7.x/bottts/svg?seed=webbelajar'}
               alt={displayProfile.name}
               width={48}
               height={48}

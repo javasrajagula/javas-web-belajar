@@ -556,7 +556,7 @@ export default function BankSoalPage() {
                         {soal.sumber && (
                           <div className="text-[10px] text-text-tertiary flex items-center justify-between">
                             <span>Sumber: <span className="text-text-secondary font-mono">{soal.sumber}</span></span>
-                            <span>Sistem Asesmen BelajarKU</span>
+                            <span>Sistem Asesmen Web Belajar</span>
                           </div>
                         )}
                       </div>

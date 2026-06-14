@@ -1,4 +1,4 @@
-// Academy OS Ω TypeScript Type Definitions
+// Web Belajar TypeScript Type Definitions
 
 export type UserRole = 'student' | 'teacher' | 'parent' | 'admin' | 'school';
 export type SchoolType = 'sma' | 'smk';

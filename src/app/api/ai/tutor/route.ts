@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     };
 
     // Build pedagogical system prompt based on Vocational major (Jurusan) and Class
-    const systemPrompt = `Kamu adalah **Tutor AI BelajarKU**, asisten belajar khusus siswa SMK Indonesia jurusan **${jurusan}** kelas **${kelas}**.
+    const systemPrompt = `Kamu adalah **Tutor AI Web Belajar**, asisten belajar khusus siswa SMK Indonesia jurusan **${jurusan}** kelas **${kelas}**.
 Kamu memahami Kurikulum Merdeka SMK secara mendalam (Fase ${kelas <= 10 ? "E" : "F"}).
 
 ## Gaya Bahasa & Komunikasi
@@ -236,7 +236,7 @@ function normalizeTutorMessages(messages: Array<{ role?: string; content?: strin
 
 function isNonUserTutorSystemMessage(content: string) {
   return (
-    content.startsWith('Halo! Saya adalah Tutor AI Academy OS') ||
+    content.startsWith('Halo! Saya adalah Tutor AI Web Belajar') ||
     content.startsWith('Maaf, Tutor AI belum bisa menjawab sekarang') ||
     content.startsWith('Respons AI kosong atau gagal diproses') ||
     content.includes('Batas Laju Terlampaui') ||
@@ -271,7 +271,7 @@ function generateMockTutorStream(messages: any[], mode: string, jurusan: string,
   const lastMessage = messages[messages.length - 1]?.content || "";
   
   // Make the response sound like a tutor answering the user's specific text
-  let response = `Halo! Saya adalah **Tutor AI BelajarKU** (Mode Offline). 
+  let response = `Halo! Saya adalah **Tutor AI Web Belajar** (Mode Offline). 
 
 Saat ini, platform sedang berjalan dalam mode offline/simulasi karena API key belum terkonfigurasi atau bermasalah. Namun, saya siap membantu Anda mensimulasikan materi pembelajaran jurusan **${jurusan}** (Kelas **${kelas}**).
 

@@ -7,8 +7,8 @@ import { Toaster } from 'sonner';
 import Script from 'next/script';
 
 export const metadata: Metadata = {
-  title: 'BelajarKU — Personal Learning Operating System',
-  description: 'An adaptive learning environment for students to organize notes, practice quizzes, tutor with Claude AI, track Study RPG levels, and plan milestones.',
+  title: 'Web Belajar — Platform Belajar Online',
+  description: 'Platform belajar online bertenaga AI untuk siswa SMA & SMK Indonesia, selaras dengan Kurikulum Merdeka.',
 };
 
 export default function RootLayout({

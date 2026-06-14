@@ -1,6 +1,6 @@
 import { UserRole } from '@/types';
 
-// Role-Based Access Control (RBAC) mapping for Academy OS Ω
+// Role-Based Access Control (RBAC) mapping for Web Belajar
 export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   student: [
     '/dashboard',

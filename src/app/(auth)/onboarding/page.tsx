@@ -246,7 +246,7 @@ export default function OnboardingPage() {
       });
 
       toast.dismiss(loadingToast);
-      toast.success(`Selamat datang di BelajarKU, ${name}! 🎉`);
+      toast.success(`Selamat datang di Web Belajar, ${name}! 🎉`);
       
       // Delay redirect slightly to ensure session tokens are updated
       setTimeout(() => {
@@ -296,7 +296,7 @@ export default function OnboardingPage() {
             <span className="text-[10px] font-mono font-bold bg-primary-subtle text-primary border border-primary/20 px-2.5 py-1 rounded-md uppercase tracking-wider">
               Langkah {step} dari 4
             </span>
-            <h2 className="text-sm font-bold text-white tracking-tight">Setup Profil BelajarKU</h2>
+            <h2 className="text-sm font-bold text-white tracking-tight">Setup Profil Web Belajar</h2>
           </div>
           {/* Top dots progress indicator */}
           <div className="flex gap-1.5">

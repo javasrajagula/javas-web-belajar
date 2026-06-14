@@ -1,75 +1,66 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { 
-  ArrowRight, BookOpen, Brain, Shield, Sparkles, Terminal, 
-  Zap, Trophy, Cpu, Network, BarChart3, GraduationCap,
-  ChevronDown, Star, Users, Globe
+import {
+  ArrowRight, BookOpen, Brain, Sparkles,
+  Zap, Trophy, Cpu, Network, GraduationCap,
+  Star, Rocket, Gamepad2, PenTool, Bot
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 const FEATURES = [
   {
     icon: Brain,
     title: 'Otak Kedua AI',
-    desc: 'Upload catatan → AI ekstrak ringkasan, buat kuis adaptif, peta galaksi pengetahuan secara otomatis.',
-    color: 'from-violet-500/20 to-indigo-500/20',
-    border: 'border-violet-500/30',
-    iconColor: 'text-violet-400',
+    desc: 'Upload catatan → AI rangkum, buat kuis adaptif, dan peta galaksi pengetahuan otomatis.',
+    color: 'bg-[#a388ee]',
+    shadow: '6px 6px 0 #1a1c1c',
   },
   {
     icon: Sparkles,
     title: 'Tutor AI 5 Mode',
-    desc: 'Mode Metafora, Guru, Profesor, Penguji Sokrates, atau Debater. Konteks kurikulum Merdeka terintegrasi.',
-    color: 'from-cyan-500/20 to-sky-500/20',
-    border: 'border-cyan-500/30',
-    iconColor: 'text-cyan-400',
+    desc: 'Mode Metafora, Guru, Profesor, Penguji Sokrates, atau Debater. Kurikulum Merdeka terintegrasi.',
+    color: 'bg-[#88d8f8]',
+    shadow: '6px 6px 0 #1a1c1c',
   },
   {
     icon: Trophy,
     title: 'Sistem RPG Belajar',
-    desc: 'XP, level, skill tree Fokus/Logika/Kreativitas, misi harian, achievement badge. Belajar jadi game.',
-    color: 'from-amber-500/20 to-orange-500/20',
-    border: 'border-amber-500/30',
-    iconColor: 'text-amber-400',
+    desc: 'XP, level, skill tree, misi harian, achievement badge. Belajar jadi game seru!',
+    color: 'bg-[#fde047]',
+    shadow: '6px 6px 0 #1a1c1c',
   },
   {
     icon: Network,
     title: 'Galaksi Pengetahuan',
-    desc: 'Visualisasi koneksi antar konsep dalam peta galaksi interaktif. Temukan blind spot belajar Anda.',
-    color: 'from-emerald-500/20 to-teal-500/20',
-    border: 'border-emerald-500/30',
-    iconColor: 'text-emerald-400',
+    desc: 'Visualisasi koneksi antar konsep dalam peta galaksi interaktif. Temukan blind spot Anda.',
+    color: 'bg-[#86efac]',
+    shadow: '6px 6px 0 #1a1c1c',
   },
   {
     icon: Cpu,
     title: 'Kembaran Digital AI',
-    desc: 'AI menganalisis pola belajar Anda, prediksi kesiapan ujian, dan rekomendasikan jadwal optimal.',
-    color: 'from-pink-500/20 to-rose-500/20',
-    border: 'border-pink-500/30',
-    iconColor: 'text-pink-400',
+    desc: 'AI analisis pola belajar, prediksi kesiapan ujian, dan jadwal optimal personal.',
+    color: 'bg-[#fca5a5]',
+    shadow: '6px 6px 0 #1a1c1c',
   },
   {
     icon: GraduationCap,
     title: 'Kurikulum Merdeka',
-    desc: 'Peta pelajaran SMA/SMK Fase E & F dengan Capaian Pembelajaran, Deep Learning, dan HOTS terintegrasi.',
-    color: 'from-blue-500/20 to-indigo-500/20',
-    border: 'border-blue-500/30',
-    iconColor: 'text-blue-400',
+    desc: 'Peta pelajaran SMA/SMK Fase E & F dengan Capaian Pembelajaran dan HOTS terintegrasi.',
+    color: 'bg-[#fdba74]',
+    shadow: '6px 6px 0 #1a1c1c',
   },
 ];
 
 const STATS = [
-  { label: 'Mata Pelajaran', value: '24+', icon: BookOpen },
-  { label: 'Bank Soal Nasional', value: '500+', icon: Shield },
-  { label: 'Mode Belajar AI', value: '7', icon: Sparkles },
-  { label: 'Capaian Kurikulum', value: '100%', icon: Star },
+  { label: 'Mata Pelajaran', value: '24+', icon: BookOpen, color: 'bg-[#a388ee]' },
+  { label: 'Bank Soal', value: '500+', icon: Star, color: 'bg-[#fde047]' },
+  { label: 'Mode Belajar AI', value: '7', icon: Bot, color: 'bg-[#88d8f8]' },
+  { label: 'Kurikulum Merdeka', value: '100%', icon: GraduationCap, color: 'bg-[#86efac]' },
 ];
 
 export default function LandingPage() {
-  const containerRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = React.useState(false);
 
   useEffect(() => {
@@ -77,275 +68,226 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-[#080810] text-white flex flex-col relative overflow-hidden">
-      
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Glow orbs */}
-        <div className="absolute top-[-20%] left-[10%] w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[120px]" />
-        <div className="absolute top-[20%] right-[-10%] w-[500px] h-[500px] bg-cyan-600/15 rounded-full blur-[100px]" />
-        <div className="absolute bottom-[-10%] left-[30%] w-[700px] h-[400px] bg-violet-600/10 rounded-full blur-[120px]" />
-        
-        {/* Grid pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(79,70,229,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(79,70,229,0.03)_1px,transparent_1px)] bg-[size:60px_60px]" />
-        
-        {/* Floating particles */}
-        {mounted && Array.from({ length: 20 }).map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 rounded-full bg-indigo-400/40"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -30, 0],
-              opacity: [0.2, 0.8, 0.2],
-            }}
-            transition={{
-              duration: 3 + Math.random() * 4,
-              repeat: Infinity,
-              delay: Math.random() * 3,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Header */}
-      <header className="flex items-center justify-between px-6 md:px-16 h-20 border-b border-white/5 backdrop-blur-xl sticky top-0 z-50 bg-[#080810]/80">
+    <div className="min-h-screen bg-[#f9f9f9] text-[#1a1c1c] flex flex-col relative overflow-hidden select-none"
+      style={{ backgroundImage: 'radial-gradient(rgba(26,28,28,0.08) 1px, transparent 1px)', backgroundSize: '20px 20px' }}
+    >
+      {/* ──────── HEADER ──────── */}
+      <header className="flex items-center justify-between px-6 md:px-12 h-20 border-b-[3px] border-[#1a1c1c] bg-white sticky top-0 z-50">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-lg flex items-center justify-center text-white font-mono font-bold text-lg shadow-lg shadow-indigo-500/30">
+          <div className="w-11 h-11 bg-[#fde047] border-[3px] border-[#1a1c1c] flex items-center justify-center font-mono font-black text-xl"
+            style={{ boxShadow: '3px 3px 0 #1a1c1c' }}>
             Ω
           </div>
           <div>
-            <span className="font-black text-white text-base tracking-wider">ACADEMY OS</span>
-            <span className="block text-[9px] font-mono text-indigo-400/80 tracking-widest uppercase">Learning Operating System</span>
+            <span className="font-black text-base tracking-wider uppercase">Web Belajar</span>
+            <span className="block text-[9px] font-mono text-[#8127cf] tracking-widest uppercase font-bold">Platform Belajar Online</span>
           </div>
         </div>
-        <nav className="hidden md:flex items-center gap-8 text-xs text-white/60">
-          <a href="#features" className="hover:text-white transition-colors">Fitur</a>
-          <a href="#curriculum" className="hover:text-white transition-colors">Kurikulum</a>
-          <a href="#stats" className="hover:text-white transition-colors">Platform</a>
+        <nav className="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-wide">
+          <a href="#features" className="hover:text-[#8127cf] transition-colors">Fitur</a>
+          <a href="#curriculum" className="hover:text-[#8127cf] transition-colors">Kurikulum</a>
+          <a href="#stats" className="hover:text-[#8127cf] transition-colors">Platform</a>
         </nav>
         <div className="flex items-center gap-3">
           <Link href="/login">
-            <button className="h-9 px-4 text-xs font-semibold text-white/70 hover:text-white transition-colors border border-white/10 rounded-lg hover:border-white/20 hover:bg-white/5">
+            <button className="h-10 px-5 text-xs font-black uppercase border-[3px] border-[#1a1c1c] bg-white hover:bg-[#f3f3f4] transition-colors cursor-pointer"
+              style={{ boxShadow: '3px 3px 0 #1a1c1c' }}>
               Masuk
             </button>
           </Link>
           <Link href="/register">
-            <button className="h-9 px-5 text-xs font-bold bg-gradient-to-r from-indigo-600 to-cyan-600 rounded-lg text-white hover:from-indigo-500 hover:to-cyan-500 transition-all shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50">
+            <button className="h-10 px-5 text-xs font-black uppercase border-[3px] border-[#1a1c1c] bg-[#fde047] hover:bg-[#e2c62d] transition-colors cursor-pointer"
+              style={{ boxShadow: '3px 3px 0 #1a1c1c' }}>
               Mulai Gratis →
             </button>
           </Link>
         </div>
       </header>
 
-      {/* Hero Section */}
       <main className="flex-1 relative z-10">
-        <section className="flex flex-col items-center justify-center text-center px-4 pt-24 pb-20 max-w-6xl mx-auto">
+        {/* ──────── HERO SECTION ──────── */}
+        <section className="flex flex-col items-center justify-center text-center px-4 pt-16 pb-12 max-w-5xl mx-auto">
           
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-mono mb-8"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-            Disesuaikan dengan Kurikulum Merdeka SMA & SMK Indonesia 2025
-          </motion.div>
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 border-[3px] border-[#1a1c1c] bg-[#a388ee] text-xs font-bold uppercase tracking-wide mb-8"
+            style={{ boxShadow: '4px 4px 0 #1a1c1c' }}>
+            <span className="w-2 h-2 bg-[#1a1c1c] animate-pulse" />
+            Kurikulum Merdeka SMA & SMK 2025
+          </div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight leading-[1.05] mb-6"
-          >
-            <span className="text-white">Belajar dengan</span>
+          {/* Main Heading */}
+          <h1 className="text-5xl sm:text-7xl md:text-[5.5rem] font-black tracking-tight leading-[1.05] mb-6 uppercase">
+            <span>Belajar dengan</span>
             <br />
-            <span className="bg-gradient-to-r from-indigo-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">
-              Presisi Mutlak.
+            <span className="relative inline-block">
+              <span className="relative z-10">Presisi Mutlak.</span>
+              <span className="absolute bottom-1 left-0 right-0 h-5 bg-[#fde047] -z-0 -skew-x-2" />
             </span>
-          </motion.h1>
+          </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-base sm:text-lg text-white/50 max-w-2xl leading-relaxed mb-10"
-          >
-            Platform belajar bertenaga AI pertama di Indonesia yang sepenuhnya selaras dengan 
-            <strong className="text-white/70"> Kurikulum Merdeka</strong>. Upload materi → AI rangkum, buat kuis, 
-            susun jadwal optimal, dan prediksi kesiapan ujian Anda.
-          </motion.p>
+          {/* Subheading */}
+          <p className="text-base sm:text-lg text-[#4b4734] max-w-2xl leading-relaxed mb-10">
+            Platform belajar bertenaga AI pertama di Indonesia yang sepenuhnya selaras dengan
+            <strong className="text-[#1a1c1c]"> Kurikulum Merdeka</strong>. Upload materi → AI rangkum, buat kuis,
+            susun jadwal, dan prediksi kesiapan ujian.
+          </p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex flex-col sm:flex-row gap-4"
-          >
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/register">
-              <button className="group h-13 px-8 py-3.5 text-sm font-bold bg-gradient-to-r from-indigo-600 to-cyan-600 rounded-xl text-white hover:from-indigo-500 hover:to-cyan-500 transition-all shadow-xl shadow-indigo-600/40 hover:shadow-indigo-600/60 flex items-center gap-2">
-                <Zap size={16} className="group-hover:rotate-12 transition-transform" />
+              <button className="group h-14 px-8 text-sm font-black uppercase border-[3px] border-[#1a1c1c] bg-[#8127cf] text-white hover:bg-[#6900b3] transition-all flex items-center gap-2 cursor-pointer"
+                style={{ boxShadow: '6px 6px 0 #1a1c1c' }}>
+                <Zap size={18} className="group-hover:rotate-12 transition-transform" />
                 Aktifkan Ruang Belajar
-                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </button>
             </Link>
-            <Link href="/dashboard">
-              <button className="h-13 px-8 py-3.5 text-sm font-semibold text-white/70 border border-white/10 rounded-xl hover:border-white/20 hover:bg-white/5 hover:text-white transition-all flex items-center gap-2">
-                <Globe size={16} />
+            <Link href="/login">
+              <button className="h-14 px-8 text-sm font-black uppercase border-[3px] border-[#1a1c1c] bg-white hover:bg-[#f3f3f4] transition-all flex items-center gap-2 cursor-pointer"
+                style={{ boxShadow: '6px 6px 0 #1a1c1c' }}>
+                <Gamepad2 size={18} />
                 Demo Langsung
               </button>
             </Link>
-          </motion.div>
+          </div>
 
-          {/* Stats row */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            id="stats"
-            className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 w-full max-w-3xl"
-          >
+          {/* Stats Row */}
+          <div id="stats" className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 w-full max-w-3xl">
             {STATS.map((stat, i) => (
-              <div key={i} className="text-center">
-                <div className="text-3xl font-black text-white mb-1">{stat.value}</div>
-                <div className="text-xs text-white/40 font-medium">{stat.label}</div>
+              <div key={i} className={`${stat.color} border-[3px] border-[#1a1c1c] p-4 text-center`}
+                style={{ boxShadow: '4px 4px 0 #1a1c1c' }}>
+                <stat.icon size={20} className="mx-auto mb-1" />
+                <div className="text-2xl font-black font-mono">{stat.value}</div>
+                <div className="text-[10px] font-bold uppercase tracking-wide mt-0.5">{stat.label}</div>
               </div>
             ))}
-          </motion.div>
+          </div>
         </section>
 
-        {/* OS Preview / App Window Mockup */}
-        <section className="px-4 max-w-6xl mx-auto mb-24">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.4 }}
-            className="relative rounded-2xl border border-white/10 overflow-hidden bg-[#0d0d18] shadow-2xl shadow-black/60"
-          >
-            {/* Window chrome */}
-            <div className="flex items-center gap-2 px-4 h-10 bg-white/5 border-b border-white/5">
-              <div className="w-3 h-3 rounded-full bg-red-500/60" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
-              <div className="w-3 h-3 rounded-full bg-green-500/60" />
-              <span className="ml-4 text-[10px] font-mono text-white/30">academy-os.vercel.app/dashboard</span>
+        {/* ──────── APP PREVIEW MOCKUP ──────── */}
+        <section className="px-4 max-w-5xl mx-auto mb-16">
+          <div className="border-[3px] border-[#1a1c1c] bg-white overflow-hidden"
+            style={{ boxShadow: '8px 8px 0 #1a1c1c' }}>
+            {/* Window Chrome */}
+            <div className="flex items-center gap-2 px-4 h-10 bg-[#f3f3f4] border-b-[3px] border-[#1a1c1c]">
+              <div className="w-3 h-3 bg-[#ef4444] border-2 border-[#1a1c1c]" />
+              <div className="w-3 h-3 bg-[#fde047] border-2 border-[#1a1c1c]" />
+              <div className="w-3 h-3 bg-[#22c55e] border-2 border-[#1a1c1c]" />
+              <span className="ml-4 text-[10px] font-mono font-bold text-[#7d7761]">academy-os.app/dashboard</span>
             </div>
 
-            {/* App content mockup */}
-            <div className="grid grid-cols-[200px_1fr] h-80">
-              {/* Sidebar */}
-              <div className="bg-[#0a0a14] border-r border-white/5 p-4 space-y-1">
-                {['Dashboard', 'Kurikulum', 'AI Tutor', 'Galaksi', 'RPG System', 'Planner'].map((item, i) => (
-                  <div key={i} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs ${i === 0 ? 'bg-indigo-500/20 text-indigo-300' : 'text-white/30'}`}>
-                    <div className={`w-1.5 h-1.5 rounded-full ${i === 0 ? 'bg-indigo-400' : 'bg-white/20'}`} />
+            {/* App Content */}
+            <div className="grid grid-cols-[180px_1fr] min-h-[300px]">
+              {/* Mini Sidebar */}
+              <div className="bg-white border-r-[3px] border-[#1a1c1c] p-3 space-y-1">
+                {['Dashboard', 'Kurikulum', 'AI Tutor', 'Galaksi', 'RPG', 'Planner'].map((item, i) => (
+                  <div key={i} className={`flex items-center gap-2 px-3 py-2 text-[11px] font-bold border-[2px] border-[#1a1c1c] ${i === 0 ? 'bg-[#fde047]' : 'bg-white hover:bg-[#f3f3f4]'}`}
+                    style={i === 0 ? { boxShadow: '2px 2px 0 #1a1c1c' } : {}}>
+                    <div className={`w-2 h-2 ${i === 0 ? 'bg-[#1a1c1c]' : 'bg-[#cec6ad]'}`} />
                     {item}
                   </div>
                 ))}
               </div>
-              
-              {/* Main content area */}
-              <div className="p-6 space-y-4 overflow-hidden">
+
+              {/* Main Content Area */}
+              <div className="p-5 space-y-4 bg-[#f9f9f9]">
                 <div className="flex gap-3">
-                  {[['24', 'Pelajaran Aktif', 'indigo'], ['87%', 'Prediksi Ujian', 'cyan'], ['12 Hari', 'Streak Belajar', 'amber']].map(([val, label, color], i) => (
-                    <div key={i} className="flex-1 p-3 rounded-lg bg-white/5 border border-white/5">
-                      <div className={`text-lg font-black text-${color}-400`}>{val}</div>
-                      <div className="text-[9px] text-white/30 mt-0.5">{label}</div>
+                  {[
+                    { val: '24', label: 'Pelajaran Aktif', bg: 'bg-[#a388ee]' },
+                    { val: '87%', label: 'Prediksi Ujian', bg: 'bg-[#88d8f8]' },
+                    { val: '12 Hari', label: 'Streak Belajar', bg: 'bg-[#fde047]' }
+                  ].map((card, i) => (
+                    <div key={i} className={`flex-1 p-3 ${card.bg} border-[2px] border-[#1a1c1c]`}
+                      style={{ boxShadow: '3px 3px 0 #1a1c1c' }}>
+                      <div className="text-lg font-black font-mono">{card.val}</div>
+                      <div className="text-[9px] font-bold uppercase mt-0.5">{card.label}</div>
                     </div>
                   ))}
                 </div>
-                <div className="p-4 rounded-lg bg-indigo-500/5 border border-indigo-500/20">
-                  <div className="text-[10px] text-indigo-400 font-mono mb-2">📚 KURIKULUM MERDEKA — MATEMATIKA FASE F</div>
-                  <div className="space-y-1.5">
-                    {['Turunan & Integral Fungsi', 'Statistika & Peluang', 'Trigonometri Lanjut'].map((lesson, i) => (
+                <div className="p-4 bg-white border-[2px] border-[#1a1c1c]" style={{ boxShadow: '3px 3px 0 #1a1c1c' }}>
+                  <div className="text-[10px] font-mono font-black text-[#8127cf] mb-2">📚 KURIKULUM MERDEKA — MATEMATIKA FASE F</div>
+                  <div className="space-y-2">
+                    {[
+                      { name: 'Turunan & Integral Fungsi', pct: 75 },
+                      { name: 'Statistika & Peluang', pct: 42 },
+                      { name: 'Trigonometri Lanjut', pct: 20 }
+                    ].map((lesson, i) => (
                       <div key={i} className="flex items-center justify-between text-xs">
-                        <span className="text-white/50">{lesson}</span>
-                        <div className="w-16 h-1 bg-white/10 rounded-full overflow-hidden">
-                          <div className="h-full bg-gradient-to-r from-indigo-500 to-cyan-500" style={{ width: `${[75, 42, 20][i]}%` }} />
+                        <span className="font-bold">{lesson.name}</span>
+                        <div className="w-20 h-3 bg-[#f3f3f4] border-[2px] border-[#1a1c1c] overflow-hidden">
+                          <div className="h-full bg-[#8127cf]" style={{ width: `${lesson.pct}%` }} />
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
                 <div className="flex gap-3">
-                  <div className="flex-1 p-3 rounded-lg bg-cyan-500/5 border border-cyan-500/10 text-xs text-cyan-400/80">
-                    <span className="font-mono text-[9px] block mb-1">AI TUTOR</span>
-                    &quot;Berdasarkan pola belajar Anda, saya rekomendasikan fokus di Integral Tertentu malam ini...&quot;
+                  <div className="flex-1 p-3 bg-[#88d8f8] border-[2px] border-[#1a1c1c] text-[11px] font-bold" style={{ boxShadow: '3px 3px 0 #1a1c1c' }}>
+                    <span className="font-mono text-[9px] font-black block mb-1">🤖 AI TUTOR</span>
+                    &quot;Fokus di Integral Tertentu malam ini berdasarkan pola belajar Anda...&quot;
                   </div>
-                  <div className="flex-1 p-3 rounded-lg bg-amber-500/5 border border-amber-500/10 text-xs text-amber-400/80">
-                    <span className="font-mono text-[9px] block mb-1">MISI RPG</span>
-                    🏆 Selesaikan 2 latihan soal HOTS untuk naik ke Level 7!
+                  <div className="flex-1 p-3 bg-[#fde047] border-[2px] border-[#1a1c1c] text-[11px] font-bold" style={{ boxShadow: '3px 3px 0 #1a1c1c' }}>
+                    <span className="font-mono text-[9px] font-black block mb-1">🏆 MISI RPG</span>
+                    Selesaikan 2 latihan HOTS untuk naik ke Level 7!
                   </div>
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
         </section>
 
-        {/* Features Grid */}
-        <section id="features" className="px-4 max-w-6xl mx-auto mb-24">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="text-center mb-12"
-          >
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/50 text-xs font-mono mb-4">
-              <Cpu size={11} /> Sistem Terintegrasi Penuh
+        {/* ──────── FEATURES GRID ──────── */}
+        <section id="features" className="px-4 max-w-5xl mx-auto mb-16">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-4 py-2 border-[3px] border-[#1a1c1c] bg-[#fde047] text-xs font-black uppercase tracking-wide mb-4"
+              style={{ boxShadow: '4px 4px 0 #1a1c1c' }}>
+              <Rocket size={14} /> Sistem Terintegrasi Penuh
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">Bukan Sekadar Platform Belajar.</h2>
-            <p className="text-white/40 mt-3 max-w-xl mx-auto text-sm">
-              Academy OS adalah sistem operasi belajar lengkap — setiap modul terhubung, beradaptasi, dan berevolusi bersama Anda.
+            <h2 className="text-3xl sm:text-4xl font-black uppercase">Bukan Sekadar Platform Belajar.</h2>
+            <p className="text-[#4b4734] mt-3 max-w-xl mx-auto text-sm font-medium">
+              Web Belajar adalah platform belajar online lengkap — setiap modul terhubung, beradaptasi, dan berevolusi bersama Anda.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {FEATURES.map((feat, i) => (
-              <motion.div
+              <div
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.07 }}
-                className={`p-6 rounded-xl border ${feat.border} bg-gradient-to-br ${feat.color} hover:scale-[1.02] transition-transform duration-200 cursor-default`}
+                className={`${feat.color} border-[3px] border-[#1a1c1c] p-6 hover:-translate-y-1 transition-transform duration-200 cursor-default`}
+                style={{ boxShadow: feat.shadow }}
               >
-                <div className={`w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center ${feat.iconColor} mb-4`}>
-                  <feat.icon size={18} />
+                <div className="w-12 h-12 bg-white border-[3px] border-[#1a1c1c] flex items-center justify-center mb-4"
+                  style={{ boxShadow: '3px 3px 0 #1a1c1c' }}>
+                  <feat.icon size={20} />
                 </div>
-                <h3 className="text-sm font-bold text-white mb-2">{feat.title}</h3>
-                <p className="text-xs text-white/50 leading-relaxed">{feat.desc}</p>
-              </motion.div>
+                <h3 className="text-sm font-black uppercase mb-2">{feat.title}</h3>
+                <p className="text-xs font-medium leading-relaxed">{feat.desc}</p>
+              </div>
             ))}
           </div>
         </section>
 
-        {/* Curriculum Highlight */}
-        <section id="curriculum" className="px-4 max-w-6xl mx-auto mb-24">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="p-8 md:p-12 rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-indigo-500/5 to-cyan-500/5 relative overflow-hidden"
-          >
-            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-[60px]" />
-            <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        {/* ──────── CURRICULUM SECTION ──────── */}
+        <section id="curriculum" className="px-4 max-w-5xl mx-auto mb-16">
+          <div className="border-[3px] border-[#1a1c1c] bg-white p-8 md:p-10"
+            style={{ boxShadow: '8px 8px 0 #1a1c1c' }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-mono mb-4">
-                  <GraduationCap size={11} /> Kurikulum Merdeka 2025
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 border-[3px] border-[#1a1c1c] bg-[#86efac] text-[11px] font-black uppercase tracking-wide mb-4"
+                  style={{ boxShadow: '3px 3px 0 #1a1c1c' }}>
+                  <GraduationCap size={13} /> Kurikulum Merdeka 2025
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-white mb-4">
+                <h2 className="text-2xl sm:text-3xl font-black uppercase mb-4">
                   Dibangun di atas Fondasi Kurikulum Nasional
                 </h2>
-                <p className="text-sm text-white/50 leading-relaxed mb-6">
-                  Setiap pelajaran, kuis, dan capaian dikurasi selaras dengan <strong className="text-white/80">Fase E & F</strong>, 
-                  mendukung jalur SMA (Umum, IPA, IPS, Bahasa) dan SMK (Teknologi, Bisnis, Seni) 
-                  dengan pendekatan <strong className="text-white/80">Deep Learning</strong> dan <strong className="text-white/80">Profil Pelajar Pancasila</strong>.
+                <p className="text-sm text-[#4b4734] leading-relaxed mb-6">
+                  Setiap pelajaran, kuis, dan capaian dikurasi selaras dengan <strong>Fase E & F</strong>,
+                  mendukung jalur SMA dan SMK dengan pendekatan <strong>Deep Learning</strong> dan <strong>Profil Pelajar Pancasila</strong>.
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {['Fase E (Kelas 10)', 'Fase F (Kelas 11-12)', 'SMA Umum', 'SMK Kejuruan', 'Capaian Pembelajaran', 'HOTS'].map((tag) => (
-                    <span key={tag} className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-white/50 text-[10px] font-mono">
+                  {['Fase E (Kelas 10)', 'Fase F (Kelas 11-12)', 'SMA Umum', 'SMK Kejuruan', 'HOTS', 'Deep Learning'].map((tag) => (
+                    <span key={tag} className="px-3 py-1.5 border-[2px] border-[#1a1c1c] bg-[#f3f3f4] text-[10px] font-black uppercase"
+                      style={{ boxShadow: '2px 2px 0 #1a1c1c' }}>
                       {tag}
                     </span>
                   ))}
@@ -353,67 +295,75 @@ export default function LandingPage() {
               </div>
               <div className="space-y-3">
                 {[
-                  { subject: 'Matematika', lessons: 18, phase: 'Fase E & F' },
-                  { subject: 'Fisika', lessons: 14, phase: 'Fase F (IPA)' },
-                  { subject: 'Informatika', lessons: 12, phase: 'Fase E & F' },
-                  { subject: 'Bahasa Indonesia', lessons: 16, phase: 'Fase E & F' },
-                  { subject: 'SMK: Pemrograman', lessons: 20, phase: 'SMK Teknologi' },
+                  { subject: 'Matematika', lessons: 18, phase: 'Fase E & F', bg: 'bg-[#a388ee]' },
+                  { subject: 'Fisika', lessons: 14, phase: 'Fase F (IPA)', bg: 'bg-[#88d8f8]' },
+                  { subject: 'Informatika', lessons: 12, phase: 'Fase E & F', bg: 'bg-[#fde047]' },
+                  { subject: 'Bahasa Indonesia', lessons: 16, phase: 'Fase E & F', bg: 'bg-[#fdba74]' },
+                  { subject: 'SMK: Pemrograman', lessons: 20, phase: 'SMK Teknologi', bg: 'bg-[#86efac]' },
                 ].map((sub, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
+                  <div key={i} className={`flex items-center justify-between p-3 border-[2px] border-[#1a1c1c] ${sub.bg}`}
+                    style={{ boxShadow: '3px 3px 0 #1a1c1c' }}>
                     <div>
-                      <div className="text-xs font-bold text-white">{sub.subject}</div>
-                      <div className="text-[10px] text-white/30 font-mono">{sub.phase}</div>
+                      <div className="text-xs font-black uppercase">{sub.subject}</div>
+                      <div className="text-[10px] font-mono font-bold">{sub.phase}</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm font-black text-indigo-400">{sub.lessons}</div>
-                      <div className="text-[9px] text-white/30">modul</div>
+                      <div className="text-lg font-black font-mono">{sub.lessons}</div>
+                      <div className="text-[9px] font-bold uppercase">modul</div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-          </motion.div>
+          </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="px-4 max-w-4xl mx-auto mb-24 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="p-12 rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent relative overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(79,70,229,0.15),transparent_70%)]" />
-            <div className="relative z-10">
-              <h2 className="text-3xl sm:text-5xl font-black text-white mb-4">
-                Siap Naik Level?
-              </h2>
-              <p className="text-white/40 max-w-lg mx-auto mb-8 text-sm">
-                Bergabung dan mulai belajar dengan sistem yang dirancang untuk memaksimalkan setiap menit sesi belajar Anda.
-              </p>
-              <Link href="/register">
-                <button className="group h-14 px-10 text-base font-black bg-gradient-to-r from-indigo-600 via-violet-600 to-cyan-600 rounded-xl text-white hover:opacity-90 transition-all shadow-2xl shadow-indigo-600/40 flex items-center gap-3 mx-auto">
-                  <Zap size={18} className="group-hover:rotate-12 transition-transform" />
-                  Aktifkan Academy OS Anda
-                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                </button>
-              </Link>
+        {/* ──────── CTA SECTION ──────── */}
+        <section className="px-4 max-w-4xl mx-auto mb-16 text-center">
+          <div className="border-[3px] border-[#1a1c1c] bg-[#fde047] p-12 relative"
+            style={{ boxShadow: '8px 8px 0 #1a1c1c' }}>
+            {/* Decorative stickers */}
+            <div className="absolute top-4 right-4 w-16 h-16 bg-[#a388ee] border-[3px] border-[#1a1c1c] flex items-center justify-center rotate-12"
+              style={{ boxShadow: '3px 3px 0 #1a1c1c' }}>
+              <Star size={28} />
             </div>
-          </motion.div>
+            <div className="absolute bottom-4 left-4 w-12 h-12 bg-[#88d8f8] border-[3px] border-[#1a1c1c] flex items-center justify-center -rotate-6"
+              style={{ boxShadow: '3px 3px 0 #1a1c1c' }}>
+              <Zap size={22} />
+            </div>
+
+            <h2 className="text-3xl sm:text-5xl font-black uppercase mb-4">
+              Siap Naik Level?
+            </h2>
+            <p className="text-[#4b4734] max-w-lg mx-auto mb-8 text-sm font-medium">
+              Bergabung dan mulai belajar dengan sistem yang dirancang untuk memaksimalkan setiap menit sesi belajar Anda.
+            </p>
+            <Link href="/register">
+              <button className="group h-14 px-10 text-base font-black uppercase border-[3px] border-[#1a1c1c] bg-[#8127cf] text-white hover:bg-[#6900b3] transition-all flex items-center gap-3 mx-auto cursor-pointer"
+                style={{ boxShadow: '6px 6px 0 #1a1c1c' }}>
+                <Rocket size={20} className="group-hover:rotate-12 transition-transform" />
+                Aktifkan Web Belajar
+                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              </button>
+            </Link>
+          </div>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-white/5 px-6 md:px-16 py-8">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      {/* ──────── FOOTER ──────── */}
+      <footer className="border-t-[3px] border-[#1a1c1c] bg-white px-6 md:px-12 py-6">
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded flex items-center justify-center text-white font-mono font-bold text-xs">Ω</div>
-            <span className="text-xs font-bold text-white/40 tracking-wider">ACADEMY OS — OMEGA v2.0</span>
+            <div className="w-7 h-7 bg-[#fde047] border-[2px] border-[#1a1c1c] flex items-center justify-center font-mono font-black text-sm"
+              style={{ boxShadow: '2px 2px 0 #1a1c1c' }}>
+              Ω
+            </div>
+            <span className="text-xs font-black uppercase tracking-wider">Web Belajar — v2.0</span>
           </div>
-          <div className="flex items-center gap-6 text-[10px] text-white/20 font-mono">
-            <span>KURIKULUM MERDEKA 2025</span>
-            <span>SMA & SMK TERINTEGRASI</span>
-            <span>FASE E + F</span>
+          <div className="flex items-center gap-6 text-[10px] font-mono font-bold uppercase text-[#7d7761]">
+            <span>Kurikulum Merdeka 2025</span>
+            <span>SMA & SMK</span>
+            <span>Fase E + F</span>
           </div>
         </div>
       </footer>

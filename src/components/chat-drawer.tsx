@@ -38,7 +38,7 @@ export default function ChatDrawer({
       setMessages([
         {
           role: 'assistant',
-          content: `Halo! Saya adalah **Tutor AI BelajarKU** khusus jurusan **${jurusan}**. Saya siap membantu Anda mendiskusikan materi **"${materiTitle}"**. Ada bagian dari teori atau praktik kejuruan ini yang ingin Anda tanyakan?`,
+          content: `Halo! Saya adalah **Tutor AI Web Belajar** khusus jurusan **${jurusan}**. Saya siap membantu Anda mendiskusikan materi **"${materiTitle}"**. Ada bagian dari teori atau praktik kejuruan ini yang ingin Anda tanyakan?`,
         },
       ]);
     }

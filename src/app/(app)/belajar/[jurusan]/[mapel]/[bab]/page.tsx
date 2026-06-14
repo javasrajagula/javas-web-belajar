@@ -593,7 +593,7 @@ export default function BelajarPage({
               <span>Ada Pertanyaan?</span>
             </h3>
             <p className="text-[11px] text-text-secondary mt-1.5 leading-relaxed">
-              Diskusikan bagian materi yang belum Anda pahami secara langsung dengan Tutor AI BelajarKU.
+              Diskusikan bagian materi yang belum Anda pahami secara langsung dengan Tutor AI Web Belajar.
             </p>
           </div>
           <button

@@ -97,7 +97,7 @@ export const TopBar: React.FC = () => {
         {/* Left Side: Route Title */}
         <div className="flex items-center gap-2 min-w-0">
           <h2 className="text-sm sm:text-base md:text-lg font-black text-text-primary tracking-tight uppercase truncate">
-            <span className="hidden sm:inline">Academy OS / </span>{getPageTitle()}
+            <span className="hidden sm:inline">Web Belajar / </span>{getPageTitle()}
           </h2>
         </div>
 

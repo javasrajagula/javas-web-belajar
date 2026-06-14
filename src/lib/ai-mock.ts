@@ -1,6 +1,6 @@
 import { QuizQuestion, Flashcard, MindMapNode, TimelineEvent } from '@/types';
 
-// Mock AI Engine for Academy OS Ω (Indonesian Localization)
+// Mock AI Engine for Web Belajar (Indonesian Localization)
 
 interface AIPipelineResult {
   summary: string;

@@ -4,9 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/stores/user-store';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Lock, Mail, ArrowLeft, Chrome, Github } from 'lucide-react';
+import { Lock, Mail, ArrowLeft, Chrome, Github, Zap, BookOpen, Brain, Sparkles } from 'lucide-react';
 import { signIn } from 'next-auth/react';
 
 export default function LoginPage() {
@@ -35,7 +33,6 @@ export default function LoginPage() {
         setError('Alamat email tidak terdaftar atau sandi salah. Demo: alex@academy.os / academy123');
         setIsLoading(false);
       } else {
-        // Load the profile from DB into Zustand store
         await loadFromDb(email);
         setIsLoading(false);
         router.push('/dashboard');
@@ -54,96 +51,134 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col justify-center items-center px-4 relative select-none">
-      <Link href="/" className="absolute top-6 left-6 text-text-secondary hover:text-text-primary flex items-center gap-1.5 text-xs font-mono">
+    <div className="min-h-screen bg-[#f9f9f9] text-[#1a1c1c] flex flex-col justify-center items-center px-4 relative select-none"
+      style={{ backgroundImage: 'radial-gradient(rgba(26,28,28,0.08) 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
+      
+      {/* Floating decorative elements */}
+      <div className="absolute top-12 left-12 w-16 h-16 bg-[#fde047] border-[3px] border-[#1a1c1c] rotate-12 hidden md:flex items-center justify-center"
+        style={{ boxShadow: '4px 4px 0 #1a1c1c' }}>
+        <Zap size={28} />
+      </div>
+      <div className="absolute top-32 right-16 w-14 h-14 bg-[#86efac] border-[3px] border-[#1a1c1c] -rotate-6 hidden md:flex items-center justify-center"
+        style={{ boxShadow: '4px 4px 0 #1a1c1c' }}>
+        <BookOpen size={24} />
+      </div>
+      <div className="absolute bottom-20 left-20 w-12 h-12 bg-[#88d8f8] border-[3px] border-[#1a1c1c] rotate-6 hidden md:flex items-center justify-center"
+        style={{ boxShadow: '3px 3px 0 #1a1c1c' }}>
+        <Brain size={22} />
+      </div>
+      <div className="absolute bottom-32 right-24 w-14 h-14 bg-[#a388ee] border-[3px] border-[#1a1c1c] -rotate-12 hidden md:flex items-center justify-center"
+        style={{ boxShadow: '4px 4px 0 #1a1c1c' }}>
+        <Sparkles size={24} />
+      </div>
+      
+      {/* Back button */}
+      <Link href="/" className="absolute top-6 left-6 flex items-center gap-1.5 text-xs font-black uppercase border-[2px] border-[#1a1c1c] bg-white px-3 py-2 hover:bg-[#f3f3f4] transition-colors"
+        style={{ boxShadow: '2px 2px 0 #1a1c1c' }}>
         <ArrowLeft size={14} /> Kembali
       </Link>
 
-      <Card className="max-w-md w-full p-8 border border-border bg-bg-secondary shadow-md space-y-6">
+      {/* Login Card */}
+      <div className="max-w-md w-full bg-white border-[3px] border-[#1a1c1c] p-8 space-y-6"
+        style={{ boxShadow: '8px 8px 0 #1a1c1c' }}>
+        
+        {/* Header */}
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-10 h-10 rounded bg-primary text-white font-mono font-bold text-xl mb-3">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-[#fde047] border-[3px] border-[#1a1c1c] font-mono font-black text-2xl mb-4"
+            style={{ boxShadow: '4px 4px 0 #1a1c1c' }}>
             Ω
           </div>
-          <h2 className="text-xl font-bold tracking-tight">Masuk ke Academy OS</h2>
-          <p className="text-xs text-text-secondary mt-1">Verifikasi kredensial untuk memuat profil belajar</p>
+          <h2 className="text-xl font-black uppercase tracking-tight">Masuk ke Web Belajar</h2>
+          <p className="text-xs font-bold text-[#7d7761] mt-1 uppercase tracking-wide">Verifikasi kredensial profil belajar</p>
         </div>
 
+        {/* Error Message */}
         {error && (
-          <div className="p-3 bg-danger-subtle/10 border border-danger/20 text-danger rounded text-[11px] leading-relaxed">
-            {error}
+          <div className="p-3 bg-[#fca5a5] border-[3px] border-[#1a1c1c] text-[11px] font-bold leading-relaxed"
+            style={{ boxShadow: '3px 3px 0 #1a1c1c' }}>
+            ⚠️ {error}
           </div>
         )}
 
+        {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-text-secondary">Alamat Email</label>
+            <label className="text-[11px] font-black uppercase tracking-wide">Alamat Email</label>
             <div className="relative">
-              <Mail className="absolute left-3 top-3 text-text-tertiary" size={16} />
+              <Mail className="absolute left-3 top-3 text-[#7d7761]" size={16} />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="alex@academy.os"
-                className="w-full h-10 pl-10 pr-4 bg-bg-tertiary border border-border rounded text-sm text-text-primary focus:outline-none focus:border-primary transition-colors"
+                className="w-full h-11 pl-10 pr-4 bg-[#f3f3f4] border-[3px] border-[#1a1c1c] text-sm font-bold text-[#1a1c1c] focus:outline-none focus:bg-[#fde047]/20 transition-colors placeholder:text-[#7d7761] placeholder:font-normal"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-text-secondary">Kata Sandi</label>
+            <label className="text-[11px] font-black uppercase tracking-wide">Kata Sandi</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-3 text-text-tertiary" size={16} />
+              <Lock className="absolute left-3 top-3 text-[#7d7761]" size={16} />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full h-10 pl-10 pr-4 bg-bg-tertiary border border-border rounded text-sm text-text-primary focus:outline-none focus:border-primary transition-colors"
+                className="w-full h-11 pl-10 pr-4 bg-[#f3f3f4] border-[3px] border-[#1a1c1c] text-sm font-bold text-[#1a1c1c] focus:outline-none focus:bg-[#fde047]/20 transition-colors placeholder:text-[#7d7761] placeholder:font-normal"
               />
             </div>
           </div>
 
-          <Button type="submit" disabled={isLoading} className="w-full h-11 mt-4">
-            {isLoading ? 'Membuka Kunci Profil Aman...' : 'Masuk ke Ruang Kerja'}
-          </Button>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full h-12 mt-2 text-sm font-black uppercase bg-[#8127cf] text-white border-[3px] border-[#1a1c1c] hover:bg-[#6900b3] disabled:opacity-50 transition-colors cursor-pointer"
+            style={{ boxShadow: '4px 4px 0 #1a1c1c' }}
+          >
+            {isLoading ? '⏳ Membuka Kunci Profil...' : '🔓 Masuk ke Ruang Kerja'}
+          </button>
         </form>
 
+        {/* Divider */}
         <div className="relative flex py-2 items-center">
-          <div className="flex-grow border-t border-border"></div>
-          <span className="flex-shrink mx-4 text-[10px] text-text-tertiary font-mono uppercase">Atau masuk dengan</span>
-          <div className="flex-grow border-t border-border"></div>
+          <div className="flex-grow border-t-[2px] border-[#1a1c1c]" />
+          <span className="flex-shrink mx-4 text-[10px] font-black uppercase tracking-widest bg-white px-2">Atau</span>
+          <div className="flex-grow border-t-[2px] border-[#1a1c1c]" />
         </div>
 
+        {/* OAuth Buttons */}
         <div className="grid grid-cols-2 gap-3">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => handleOAuthLogin('google')} 
+          <button
+            type="button"
+            onClick={() => handleOAuthLogin('google')}
             disabled={isLoading}
-            className="h-10 text-xs flex items-center justify-center gap-2 border border-border hover:bg-bg-tertiary"
+            className="h-11 text-xs font-black uppercase flex items-center justify-center gap-2 border-[3px] border-[#1a1c1c] bg-[#fca5a5] hover:bg-[#f87171] transition-colors cursor-pointer disabled:opacity-50"
+            style={{ boxShadow: '3px 3px 0 #1a1c1c' }}
           >
-            <Chrome size={14} className="text-danger" /> Google
-          </Button>
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => handleOAuthLogin('github')} 
+            <Chrome size={14} /> Google
+          </button>
+          <button
+            type="button"
+            onClick={() => handleOAuthLogin('github')}
             disabled={isLoading}
-            className="h-10 text-xs flex items-center justify-center gap-2 border border-border hover:bg-bg-tertiary"
+            className="h-11 text-xs font-black uppercase flex items-center justify-center gap-2 border-[3px] border-[#1a1c1c] bg-[#f3f3f4] hover:bg-[#e2e2e2] transition-colors cursor-pointer disabled:opacity-50"
+            style={{ boxShadow: '3px 3px 0 #1a1c1c' }}
           >
             <Github size={14} /> GitHub
-          </Button>
+          </button>
         </div>
 
-        <div className="text-center text-xs text-text-secondary">
-          Belum memiliki profil?{' '}
-          <Link href="/register" className="text-primary hover:text-primary-hover font-semibold">
-            Inisialisasi Profil Baru
+        {/* Register Link */}
+        <div className="text-center text-xs font-bold">
+          Belum punya profil?{' '}
+          <Link href="/register" className="text-[#8127cf] hover:underline font-black uppercase">
+            Daftar Sekarang →
           </Link>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
