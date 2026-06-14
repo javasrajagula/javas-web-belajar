@@ -22,6 +22,13 @@ const eslintConfig = [
     ],
   },
   ...compat.extends("next/core-web-vitals"),
+  {
+    rules: {
+      // This rule targets Pages Router _document.js; in App Router, loading fonts
+      // in layout.tsx is valid since it wraps all pages.
+      "@next/next/no-page-custom-font": "off",
+    },
+  },
 ];
 
 export default eslintConfig;

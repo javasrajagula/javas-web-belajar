@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useUserStore } from '@/stores/user-store';
 import { 
@@ -150,10 +151,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
       <div className={clsx('p-4 border-b-[3px] border-border flex flex-col gap-3 bg-white', isCollapsed && 'items-center justify-center')}>
         <div className="flex items-center gap-3 w-full">
           <div className="relative flex-shrink-0">
-            <img
+            <Image
               src={displayProfile.avatar || 'https://api.dicebear.com/7.x/bottts/svg?seed=belajarku'}
               alt={displayProfile.name}
+              width={48}
+              height={48}
               className="w-12 h-12 rounded-none border-[3px] border-border bg-accent object-cover shadow-xs"
+              unoptimized
             />
             <div className="absolute -bottom-1 -right-1 bg-primary text-[9px] text-white font-mono font-bold w-5 h-5 rounded-none flex items-center justify-center border-[2px] border-border">
               {displayProfile.level}

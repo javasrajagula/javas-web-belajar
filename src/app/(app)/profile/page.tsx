@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useUserStore } from '@/stores/user-store';
 import { useCurriculumStore } from '@/stores/curriculum-store';
 import { Card } from '@/components/ui/card';
@@ -158,7 +159,7 @@ export default function ProfilePage() {
           </div>
 
           <div className="relative mt-4">
-            <img src={profile.avatar} alt={profile.name} className="w-16 h-16 rounded-full border-2 border-primary" />
+            <Image src={profile.avatar} alt={profile.name} width={64} height={64} className="w-16 h-16 rounded-full border-2 border-primary" unoptimized />
             <div className="absolute -bottom-2 -right-2 bg-primary text-white font-mono font-bold text-xs w-6 h-6 rounded-full flex items-center justify-center border-2 border-bg-secondary">
               {profile.level}
             </div>

@@ -72,45 +72,60 @@ export default function BelajarPage({
   const { addXp, profile } = useUserStore();
   const contentAreaRef = useRef<HTMLDivElement>(null);
 
-  // Load Mapel details
-  const fetchMapelData = async () => {
-    try {
-      const response = await fetch(`/api/jurusan/${jurusanKode}/mapel/${mapelId}`);
-      if (!response.ok) throw new Error('Failed to fetch data');
-      const data: MapelDetail = await response.json();
-      setMapel(data);
-
-      // Expand current bab by default
-      setExpandedBabs((prev) => ({
-        ...prev,
-        [babId]: true,
-      }));
-
-      // Find current bab and set first materi
-      const currentBab = data.bab.find((b) => b.id === babId);
-      if (currentBab && currentBab.materi.length > 0) {
-        setActiveMateri(currentBab.materi[0]);
-      }
-
-      // Map progress state
-      const progressMap: Record<string, boolean> = {};
-      data.bab.forEach((b) => {
-        b.materi.forEach((m) => {
-          progressMap[m.id] = !!m.selesai;
-        });
-      });
-      setMateriProgress(progressMap);
-    } catch (err) {
-      console.error(err);
-      toast.error('Gagal memuat materi pembelajaran.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Load Mapel details when mapelId or jurusanKode changes
   useEffect(() => {
-    fetchMapelData();
-  }, [jurusanKode, mapelId, babId]);
+    let active = true;
+    async function loadMapelData() {
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/jurusan/${jurusanKode}/mapel/${mapelId}`);
+        if (!response.ok) throw new Error('Failed to fetch data');
+        const data: MapelDetail = await response.json();
+        if (!active) return;
+        setMapel(data);
+
+        // Map progress state
+        const progressMap: Record<string, boolean> = {};
+        data.bab.forEach((b) => {
+          b.materi.forEach((m) => {
+            progressMap[m.id] = !!m.selesai;
+          });
+        });
+        setMateriProgress(progressMap);
+      } catch (err) {
+        console.error(err);
+        toast.error('Gagal memuat materi pembelajaran.');
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+    loadMapelData();
+    return () => {
+      active = false;
+    };
+  }, [jurusanKode, mapelId]);
+
+  // Set active materi when babId or mapel changes
+  useEffect(() => {
+    if (!mapel) return;
+
+    // Expand current bab by default
+    setExpandedBabs((prev) => ({
+      ...prev,
+      [babId]: true,
+    }));
+
+    // If activeMateri is already set and belongs to this bab, don't reset it
+    if (activeMateri && activeMateri.babId === babId) {
+      return;
+    }
+
+    // Find current bab and set first materi
+    const currentBab = mapel.bab.find((b) => b.id === babId);
+    if (currentBab && currentBab.materi.length > 0) {
+      setActiveMateri(currentBab.materi[0]);
+    }
+  }, [babId, mapel, activeMateri]);
 
   // Flattened materi list for navigation
   const flatMateriList = React.useMemo(() => {
@@ -126,7 +141,7 @@ export default function BelajarPage({
 
   const activeIndex = flatMateriList.findIndex((item) => item.materi.id === activeMateri?.id);
 
-  const goToNextMateri = () => {
+  const goToNextMateri = React.useCallback(() => {
     if (activeIndex !== -1 && activeIndex < flatMateriList.length - 1) {
       const nextItem = flatMateriList[activeIndex + 1];
       setActiveMateri(nextItem.materi);
@@ -137,9 +152,9 @@ export default function BelajarPage({
       }
       contentAreaRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  };
+  }, [activeIndex, flatMateriList, babId, jurusanKode, mapelId, router]);
 
-  const goToPrevMateri = () => {
+  const goToPrevMateri = React.useCallback(() => {
     if (activeIndex > 0) {
       const prevItem = flatMateriList[activeIndex - 1];
       setActiveMateri(prevItem.materi);
@@ -150,7 +165,7 @@ export default function BelajarPage({
       }
       contentAreaRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  };
+  }, [activeIndex, flatMateriList, babId, jurusanKode, mapelId, router]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -174,7 +189,7 @@ export default function BelajarPage({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeIndex, flatMateriList, babId]);
+  }, [goToNextMateri, goToPrevMateri]);
 
   // Mark Materi as completed
   const handleMarkCompleted = async (materiId: string) => {

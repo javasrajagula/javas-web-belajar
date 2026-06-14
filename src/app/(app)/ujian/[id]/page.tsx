@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, use, useMemo, useRef } from 'react';
+import React, { useState, useEffect, use, useMemo, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useUserStore } from '@/stores/user-store';
 import { Card } from '@/components/ui/card';
@@ -174,82 +174,26 @@ export default function UjianClientPage({ params }: { params: Promise<{ id: stri
     window.localStorage.setItem(storageKey, JSON.stringify(draft));
   }, [answers, currentIndex, flaggedRagu, isSubmitting, questions, storageKey, timeLeft]);
 
-  // Timer Tick Logic
-  useEffect(() => {
-    if (timeLeft === null) return;
-    if (timeLeft <= 0) {
-      toast.warning('Waktu ujian telah habis! Mengumpulkan otomatis...');
-      handleSubmitExam();
-      return;
-    }
-
-    timerIntervalRef.current = setTimeout(() => {
-      setTimeLeft(prev => (prev !== null ? prev - 1 : null));
-    }, 1000);
-
-    return () => {
-      if (timerIntervalRef.current) clearTimeout(timerIntervalRef.current);
-    };
-  }, [timeLeft]);
-
-  // Keyboard navigation & inputs
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if typing in inputs
-      if (e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLInputElement) return;
-
-      if (e.key === 'ArrowLeft') handlePrev();
-      if (e.key === 'ArrowRight') handleNext();
-      
-      // Options A-E selection
-      if (['a', 'b', 'c', 'd', 'e', 'A', 'B', 'C', 'D', 'E'].includes(e.key)) {
-        const optionIdx = e.key.toLowerCase().charCodeAt(0) - 97;
-        const activeSoal = questions[currentIndex];
-        if (activeSoal && activeSoal.tipe === 'pilihan_ganda' && activeSoal.pilihan && activeSoal.pilihan[optionIdx]) {
-          handleAnswer(String.fromCharCode(65 + optionIdx));
-        }
-      }
-      
-      // Toggle flag
-      if (e.key === 'f' || e.key === 'F') {
-        toggleFlagRagu();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex, questions]);
-
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     setCurrentIndex(prev => Math.max(0, prev - 1));
-  };
+  }, []);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     setCurrentIndex(prev => Math.min(questions.length - 1, prev + 1));
-  };
+  }, [questions.length]);
 
-  const handleAnswer = (val: string) => {
+  const handleAnswer = useCallback((val: string) => {
     const qId = questions[currentIndex].id;
     setAnswers(prev => ({ ...prev, [qId]: val }));
-  };
+  }, [questions, currentIndex]);
 
-  const toggleFlagRagu = () => {
+  const toggleFlagRagu = useCallback(() => {
     const qId = questions[currentIndex].id;
     setFlaggedRagu(prev => ({ ...prev, [qId]: !prev[qId] }));
-  };
-
-  // Latihan santai check answer logic
-  const handleLatihanSantaiCheck = () => {
-    const qId = questions[currentIndex].id;
-    if (!answers[qId]) {
-      toast.warning('Pilih jawaban terlebih dahulu!');
-      return;
-    }
-    setLatihanSantaiChecked(prev => ({ ...prev, [qId]: true }));
-  };
+  }, [questions, currentIndex]);
 
   // Submit and save exam results
-  const handleSubmitExam = async () => {
+  const handleSubmitExam = useCallback(async () => {
     if (isSubmitting) return;
 
     // Check for unanswered questions
@@ -307,6 +251,62 @@ export default function UjianClientPage({ params }: { params: Promise<{ id: stri
       toast.error('Gagal mengumpulkan lembar jawaban.', { id: toastId });
       setIsSubmitting(false);
     }
+  }, [isSubmitting, answers, questions, timeLeft, mapelId, examMode, mapelInfo, storageKey, router]);
+
+  // Timer Tick Logic
+  useEffect(() => {
+    if (timeLeft === null) return;
+    if (timeLeft <= 0) {
+      toast.warning('Waktu ujian telah habis! Mengumpulkan otomatis...');
+      handleSubmitExam();
+      return;
+    }
+
+    timerIntervalRef.current = setTimeout(() => {
+      setTimeLeft(prev => (prev !== null ? prev - 1 : null));
+    }, 1000);
+
+    return () => {
+      if (timerIntervalRef.current) clearTimeout(timerIntervalRef.current);
+    };
+  }, [timeLeft, handleSubmitExam]);
+
+  // Keyboard navigation & inputs
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if typing in inputs
+      if (e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLInputElement) return;
+
+      if (e.key === 'ArrowLeft') handlePrev();
+      if (e.key === 'ArrowRight') handleNext();
+      
+      // Options A-E selection
+      if (['a', 'b', 'c', 'd', 'e', 'A', 'B', 'C', 'D', 'E'].includes(e.key)) {
+        const optionIdx = e.key.toLowerCase().charCodeAt(0) - 97;
+        const activeSoal = questions[currentIndex];
+        if (activeSoal && activeSoal.tipe === 'pilihan_ganda' && activeSoal.pilihan && activeSoal.pilihan[optionIdx]) {
+          handleAnswer(String.fromCharCode(65 + optionIdx));
+        }
+      }
+      
+      // Toggle flag
+      if (e.key === 'f' || e.key === 'F') {
+        toggleFlagRagu();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentIndex, questions, handleAnswer, handleNext, handlePrev, toggleFlagRagu]);
+
+  // Latihan santai check answer logic
+  const handleLatihanSantaiCheck = () => {
+    const qId = questions[currentIndex].id;
+    if (!answers[qId]) {
+      toast.warning('Pilih jawaban terlebih dahulu!');
+      return;
+    }
+    setLatihanSantaiChecked(prev => ({ ...prev, [qId]: true }));
   };
 
   // Formatting seconds into MM:SS

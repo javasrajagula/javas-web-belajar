@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -131,25 +131,7 @@ export default function ExamEnginePage() {
     setShowResults(false);
   };
 
-  useEffect(() => {
-    if (activeSession && !showResults && timeLeft > 0) {
-      timerRef.current = setTimeout(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) { handleSubmitExam(); return 0; }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => clearTimeout(timerRef.current);
-  }, [activeSession, timeLeft, showResults]);
-
-  const handleSelectOption = (idx: number) => {
-    if (!activeSession) return;
-    const qId = activeSession.questions[currentIdx].id;
-    setActiveSession(prev => prev ? { ...prev, answers: { ...prev.answers, [qId]: idx } } : null);
-  };
-
-  const handleSubmitExam = () => {
+  const handleSubmitExam = useCallback(() => {
     if (!activeSession) return;
     clearTimeout(timerRef.current);
 
@@ -174,6 +156,24 @@ export default function ExamEnginePage() {
     const xpReward = correctCount * 50;
     addXp(xpReward);
     upgradeSkill('logic', Math.round(correctCount * 2));
+  }, [activeSession, difficulty, timeLeft, addXp, upgradeSkill]);
+
+  useEffect(() => {
+    if (activeSession && !showResults && timeLeft > 0) {
+      timerRef.current = setTimeout(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) { handleSubmitExam(); return 0; }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearTimeout(timerRef.current);
+  }, [activeSession, timeLeft, showResults, handleSubmitExam]);
+
+  const handleSelectOption = (idx: number) => {
+    if (!activeSession) return;
+    const qId = activeSession.questions[currentIdx].id;
+    setActiveSession(prev => prev ? { ...prev, answers: { ...prev.answers, [qId]: idx } } : null);
   };
 
   const handleReset = () => {

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useUserStore } from '@/stores/user-store';
 import { useCurriculumStore } from '@/stores/curriculum-store';
 import { Card } from '@/components/ui/card';
@@ -177,7 +178,7 @@ export default function StudyRPGPage() {
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-accent/20 to-transparent rounded-bl-full" />
             <div className="relative z-10 flex flex-col items-center text-center p-6">
               <div className="relative mt-2">
-                <img src={profile.avatar} alt={profile.name} className="w-20 h-20 rounded-full border-2 border-accent shadow-lg shadow-accent/30" />
+                <Image src={profile.avatar} alt={profile.name} width={80} height={80} className="w-20 h-20 rounded-full border-2 border-accent shadow-lg shadow-accent/30" unoptimized />
                 <div className="absolute -bottom-2 -right-2 bg-accent text-white font-mono font-black text-sm w-8 h-8 rounded-full flex items-center justify-center border-2 border-bg-secondary shadow-md">
                   {profile.level}
                 </div>

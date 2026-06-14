@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -364,10 +365,13 @@ export default function TeacherPortal() {
                   filteredStudents.map((student) => (
                     <tr key={student.id} className="hover:bg-bg-tertiary/20 transition-colors">
                       <td className="py-3 flex items-center gap-3">
-                        <img 
+                        <Image 
                           src={student.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'} 
                           alt={student.name}
+                          width={32}
+                          height={32}
                           className="w-8 h-8 rounded-full border border-border"
+                          unoptimized
                         />
                         <div>
                           <p className="font-semibold text-text-primary">{student.name}</p>
@@ -636,10 +640,13 @@ export default function TeacherPortal() {
             {/* Modal Header */}
             <div className="flex justify-between items-start border-b border-border pb-4 mb-5">
               <div className="flex items-center gap-3">
-                <img 
+                <Image 
                   src={selectedStudent.avatar} 
                   alt={selectedStudent.name}
+                  width={48}
+                  height={48}
                   className="w-12 h-12 rounded-full border-2 border-primary"
+                  unoptimized
                 />
                 <div>
                   <h2 className="text-base font-bold text-text-primary">{selectedStudent.name}</h2>
